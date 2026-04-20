@@ -1,0 +1,21 @@
+{
+  "_note": "DhanHQ requires securityId (not ticker) for order placement. Populate this map as tickets are traded. Lookup sources: Dhan scrip master CSV (https://images.dhan.co/api-data/api-scrip-master.csv) or /v2/securities/search. Keep in git as cache.",
+  "NSE_EQ": {
+    "RELIANCE":    { "securityId": "2885",  "lotSize": 1 },
+    "HDFCBANK":    { "securityId": "1333",  "lotSize": 1 },
+    "ICICIBANK":   { "securityId": "4963",  "lotSize": 1 },
+    "INFY":        { "securityId": "1594",  "lotSize": 1 },
+    "TCS":         { "securityId": "11536", "lotSize": 1 },
+    "SBIN":        { "securityId": "3045",  "lotSize": 1 },
+    "LT":          { "securityId": "11483", "lotSize": 1 },
+    "ITC":         { "securityId": "1660",  "lotSize": 1 },
+    "AXISBANK":    { "securityId": "5900",  "lotSize": 1 },
+    "KOTAKBANK":   { "securityId": "1922",  "lotSize": 1 }
+  },
+  "NSE_INDEX": {
+    "NIFTY":       { "securityId": "13",    "note": "Nifty 50 index" },
+    "BANKNIFTY":   { "securityId": "25",    "note": "Bank Nifty" },
+    "INDIA_VIX":   { "securityId": "26017", "note": "India VIX" }
+  },
+  "_todo": "Before first live trade, RUN `python3 scripts/build_scrip_cache.py` (to be added) to populate Tier 1 + Tier 2 mappings from Dhan's scrip master CSV. Verify securityId of any ticker by quoting it with `bash scripts/dhan.sh quote SYM NSE_EQ` first."
+}

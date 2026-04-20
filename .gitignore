@@ -1,0 +1,25 @@
+# Credentials (NEVER commit)
+.env
+.env.*
+!.env.template
+
+# Runtime fallback logs
+*.local.log
+notify_fallback.log
+
+# Node (if any tooling)
+node_modules/
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Temp
+*.tmp
+*.bak
+*.swp
