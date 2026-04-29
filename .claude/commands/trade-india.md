@@ -44,51 +44,64 @@ And stop.
 
 ## Proposal
 
-If gate_check passed, compute sizing deterministically:
+If gate_check passed, compute sizing deterministically — three shell calls then one Python call:
 
+```bash
+SYM="<chosen ticker>"
+
+# 1 — live entry price
+ENTRY=$(bash scripts/dhan.sh quote "$SYM" NSE_EQ \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); \
+    print(list((d.get('data',{}).get('NSE_EQ') or d).values())[0].get('last_price','NA'))")
+
+# 2 — ATR(14) from 20 daily bars
+ATR=$(bash scripts/dhan.sh atr "$SYM")
+if [ "$ATR" = "NA" ] || [ -z "$ATR" ]; then
+  bash scripts/notify.sh "❌ TRADE-INDIA BLOCKED — $SYM: ATR unavailable. Add to nse_securities.json."
+  exit 1
+fi
+
+# 3 — available margin
+MARGIN=$(bash scripts/dhan.sh funds \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); data=d.get('data',d); \
+    print(data.get('availabelBalance') or data.get('availableBalance') or 0)")
+
+# 4 — tier (set based on setup quality; 2 is the safe default):
+#   Tier 3 — A+ setup: breakout + volume ≥1.5× avg + sector confirmation
+#   Tier 2 — standard: momentum + catalyst confirmed           (DEFAULT)
+#   Tier 1 — speculative: thin catalyst or testing a new setup
+TIER=2
+
+# 5 — size (exits code 2 if stop too tight or heat > 6%)
+SIZING=$(python3 scripts/size_calc.py \
+    --market india \
+    --entry "$ENTRY" --atr "$ATR" \
+    --capital 20000 --margin "$MARGIN" \
+    --tier "$TIER" \
+    --size-multiplier <from gate_check output>)
+
+if [ $? -ne 0 ]; then
+  REASON=$(echo "$SIZING" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('error','size_calc rejected'))")
+  bash scripts/notify.sh "❌ TRADE-INDIA BLOCKED — $SYM: $REASON"
+  exit 1
+fi
 ```
-python3 scripts/size_calc.py --market india \
-  --entry <ltp-from-quote> \
-  --capital 50000 \
-  --margin <from pulse.sh INDIA_AVAILABLE_BALANCE> \
-  --position-pct-max 20 \
-  --size-multiplier <from gate_check output>
-```
 
-This returns `qty`, `cost`, `stop_price`, `target1`, `target2`, `R_value`. Use these numbers VERBATIM in the proposal. Do NOT recalculate.
+Extract `qty`, `stop_price`, `target1`, `target2`, `R_actual`, `stop_pct_from_entry`, `heat_pct_of_capital` from the JSON. Use VERBATIM — do NOT recalculate.
 
-**If size_calc exits with code 2**, the stop-tight guard tripped (stop < 0.3% from entry). Do NOT write a proposal. Post to Telegram:
-```
-❌ TRADE-INDIA BLOCKED — <SYM>
-Reason: stop would be within 0.3% of entry (noise zone).
-Action: no proposal. Wait for a setup with wider technical stop.
-```
-And stop.
-
-Quick reminder of what size_calc returns (capital-based R, NOT price-percent):
-
-- Let `CAPITAL = 50000` (cash capital).
-- Let `R = CAPITAL * 0.015 = ₹750` (max acceptable loss per trade).
-- Entry: LTP from `bash scripts/dhan.sh quote SYM NSE_EQ`.
-- Quantity: such that `qty * entry <= 0.20 * available_margin` AND `qty * entry <= 5 * CAPITAL` (MIS 5x cap).
-- **Stop loss**: `stop = entry - (R / qty)`. If this stop is too far from a technical level, reduce qty instead of widening the stop. If the stop is tighter than 0.3% from entry, reject the setup (noise will take it out).
-- Target 1: `entry + 1.5 * (R / qty)` (risk-based, matches R-multiple framework).
-- Target 2: `entry + 2.5 * (R / qty)`.
-
-Do NOT use "-1.5% from entry" as the stop. That formula is only equivalent to the strategy rule when a trade uses 100% of capital, which is not allowed. At 20% position size, price-percent stops are 5× too tight and cause constant stop-outs on noise.
-
-Post to Telegram (`bash scripts/notify.sh ...`):
+Post to Telegram:
 ```
 🇮🇳 PROPOSED ENTRY — <SYM>
 Catalyst: <one line>
-Entry: ₹<x>   SL: ₹<x>  (risk ₹<R_value> = 1R)
-T1: ₹<x>  (+1.5R)   T2: ₹<x>  (+2.5R)
-Qty: <n>   Cost: ₹<x>  (<%> of margin)
-Order type: LIMIT @ ₹<entry+0.1%>  (slippage cap 0.5%)
+Entry: ₹<ENTRY>   SL: ₹<stop_price> (<stop_pct>% | 2.5×ATR)
+T1: ₹<target1> (+1.5R)   T2: ₹<target2> (+2.5R)
+Qty: <qty>   Cost: ₹<cost> (<cost_pct_of_margin>% margin)
+Tier <TIER> | R=₹<R_actual> | Heat: <heat_pct>% of capital
+LIMIT order. Slippage cap 0.5%.
 
 Reply YES to execute, NO to skip.
 ```
 
-Then STOP. Do not place the order. A human must run `/unlock-trading <SYM>` or explicitly reply to place it.
+Then STOP. A human must run `/unlock-trading india <SYM>` to place the order.
 
-Log the proposal to `memory/india/RESEARCH-LOG.md` regardless.
+Log the proposal (entry, stop, targets, tier, ATR, heat, reasoning) to `memory/india/RESEARCH-LOG.md`.

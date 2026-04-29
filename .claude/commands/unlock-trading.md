@@ -28,9 +28,10 @@ If gates still pass:
 ### India — LIMIT only. Never market.
 
 1. Re-fetch LTP: `bash scripts/dhan.sh quote SYM NSE_EQ`. Call this `ltp`.
-2. Compute `limit_price = round(ltp * 1.001, 2)` (LTP + 0.1% for buys; for sells use `ltp * 0.999`). Reject if |limit_price - spec_entry| / spec_entry > 0.005 (0.5% slippage cap) — post `❌ UNLOCK REFUSED — price drifted > 0.5% since proposal.` and stop.
-3. Recompute qty + stop using the CAPITAL-BASED formula from `trade-india.md`:
-   `R=750; qty=<from proposal>; stop = round(limit_price - (R/qty), 2)`.
+2. Compute `limit_price = round(ltp * 1.001, 2)` (LTP + 0.1% for buys). Reject if |limit_price - spec_entry| / spec_entry > 0.005 (0.5% slippage cap) — post `❌ UNLOCK REFUSED — price drifted > 0.5% since proposal.` and stop.
+3. Read `qty` and `stop_price` directly from the PENDING proposal in RESEARCH-LOG.md.
+   The stop is ATR-based and was set at proposal time — do NOT recompute it from the new LTP.
+   Only adjust if the new limit_price is meaningfully different: `stop = proposal_stop + (limit_price - spec_entry)` (shift stop by same delta as entry drift, keeping stop_dist constant).
 4. Build order JSON:
    ```json
    {

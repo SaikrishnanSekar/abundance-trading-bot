@@ -42,9 +42,27 @@ All other actions require a proposal + human YES.
    5. On confirmed cancel of ALL prior SLs: place one new SL via `bash scripts/dhan.sh order '<new SL JSON>'` (use `orderType: "SL_M"` — see `/unlock-trading` for JSON shape). Capture the new `orderId`.
    6. Log the cancel(s) and the new SL to `memory/india/TRADE-LOG.md` under the position's block: `sl_tightened: <ts> · cancelled=[<orderIds>] → new=<orderId> @ ₹<new_stop>`.
 5. **Thesis-break flag** (autonomous, no exit): if the catalyst source from RESEARCH-LOG has a contradicting item in latest news (`bash scripts/news.sh symbol SYM`), write `watch-only: <SYM> · <reason>` to `memory/india/LIVE-PULSE.md`. Do NOT exit without human YES.
-6. **Day-halt trigger** (autonomous): if day P&L ≤ -1.5% of capital (-₹750 on ₹50k), write `memory/india/DAY-HALT-<date>.md` with timestamp + P&L. Block further entries in subsequent routines this session. This does NOT flatten existing positions.
-7. Update `memory/india/LIVE-PULSE.md` snapshot.
-8. Commit + push only if LIVE-PULSE.md, a new SL order was placed, or DAY-HALT changed.
+6. **Day-halt trigger** (autonomous): if day P&L ≤ -1.5% of capital (-₹300 on ₹20k), write `memory/india/DAY-HALT-<date>.md` with timestamp + P&L. Block further entries in subsequent routines this session. This does NOT flatten existing positions.
+7. **Kill-switch trigger — -15% equity drawdown** (autonomous):
+   ```bash
+   FUNDS=$(bash scripts/dhan.sh funds)
+   CURRENT_EQUITY=$(echo "$FUNDS" | python3 -c "
+   import json,sys; d=json.load(sys.stdin); data=d.get('data',d)
+   print(data.get('availabelBalance') or data.get('availableBalance') or 0)")
+   ```
+   Read `peak_equity` from `memory/india/LIVE-PULSE.md` (field `peak_equity:`).
+   If `peak_equity` field is absent or blank, set `peak_equity = CURRENT_EQUITY` and write it — first run initialises the baseline.
+   ```
+   drawdown_pct = (peak_equity - CURRENT_EQUITY) / peak_equity * 100
+   ```
+   If `drawdown_pct ≥ 15`:
+   - Write `memory/KILL_SWITCH.md` with timestamp + drawdown_pct.
+   - Flatten every open MIS position: `bash scripts/dhan.sh close <SYM>` for each position returned by `pulse.sh india`.
+   - Post Telegram: `⛔ INDIA KILL SWITCH — drawdown <x>%. All positions closed. No entries until human lifts.`
+   - Stop the routine immediately.
+   If `CURRENT_EQUITY > peak_equity`, update `peak_equity` in LIVE-PULSE.md (equity high-water mark).
+8. Update `memory/india/LIVE-PULSE.md` snapshot (include `peak_equity:` field every write).
+9. Commit + push only if LIVE-PULSE.md, a new SL order was placed, DAY-HALT, or KILL_SWITCH changed.
 
 ## Output
 

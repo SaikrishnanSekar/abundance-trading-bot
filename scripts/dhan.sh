@@ -10,6 +10,7 @@
 #   cancel ORDER_ID             Cancel order
 #   close SYMBOL                Market-exit an open position (best effort)
 #   vix                         India VIX latest
+#   atr SYMBOL [DAYS]           Wilder ATR(14) from daily OHLC. Returns single float.
 # Reads DHAN_CLIENT_ID, DHAN_ACCESS_TOKEN, DHAN_BASE_URL from env or .env.
 
 set -u
@@ -103,12 +104,15 @@ case "$cmd" in
     ;;
   close)
     SYM="${1:?symbol required}"
-    # Lookup position, compute opposite side market order
+    # Lookup position, compute opposite-side market order.
+    # FIX P0-1: env var must be PREFIX-assigned to python3, not suffix arg.
     pos=$(_curl GET "/v2/positions")
-    JSON=$(echo "$pos" | python3 -c "
-import json,sys,os
+    JSON=$(SYM="$SYM" python3 -c "
+import json, sys, os
 positions = json.load(sys.stdin)
 sym = os.environ['SYM']
+if isinstance(positions, dict):
+    positions = positions.get('data') or []
 for p in positions:
     if p.get('tradingSymbol') == sym and int(p.get('netQty', 0)) != 0:
         qty = abs(int(p['netQty']))
@@ -127,7 +131,7 @@ for p in positions:
         break
 else:
     print('')
-" SYM="$SYM")
+" <<< "$pos")
     if [ -z "$JSON" ]; then
       echo "dhan.sh: no open position for $SYM" >&2
       exit 4
@@ -138,8 +142,86 @@ else:
     # India VIX lookup via marketfeed (securityId 26017 on NSE INDICES)
     _curl POST "/v2/marketfeed/ltp" -d '{"NSE_INDEX":["26017"]}'
     ;;
+  atr)
+    # atr SYMBOL [DAYS]  — Wilder ATR(14) from daily historical OHLC.
+    # Looks up securityId in data/nse_securities.json, fetches /v2/charts/historical,
+    # computes ATR using Wilder's smoothing. Returns a single float on stdout.
+    SYM="${1:?symbol required}"
+    DAYS="${2:-20}"   # need ≥15 bars for ATR(14); 20 gives headroom
+    SECID=$(python3 -c "
+import json, sys
+try:
+    d = json.load(open('data/nse_securities.json'))
+    nse = d.get('NSE_EQ', {})
+    sym = '${SYM}'.upper()
+    entry = nse.get(sym)
+    if entry:
+        print(entry['securityId'])
+    else:
+        # Prefix match fallback
+        for k, v in nse.items():
+            if k.startswith(sym):
+                print(v['securityId'])
+                break
+except Exception:
+    pass
+" 2>/dev/null)
+    if [ -z "$SECID" ]; then
+      echo "dhan.sh atr: securityId not found for ${SYM} — add to data/nse_securities.json" >&2
+      exit 5
+    fi
+    FROM=$(python3 -c "
+from datetime import date, timedelta
+print((date.today() - timedelta(days=int('${DAYS}'))).strftime('%Y-%m-%d'))
+")
+    TO=$(python3 -c "from datetime import date; print(date.today().strftime('%Y-%m-%d'))")
+    RESP=$(_curl POST "/v2/charts/historical" -d "{
+      \"securityId\": \"${SECID}\",
+      \"exchangeSegment\": \"NSE_EQ\",
+      \"instrument\": \"EQUITY\",
+      \"expiryCode\": 0,
+      \"oi_data\": false,
+      \"from_date\": \"${FROM}\",
+      \"to_date\": \"${TO}\",
+      \"interval\": \"1\"
+    }")
+    echo "$RESP" | python3 -c "
+import json, sys
+
+def wilder_atr(high, low, close, period=14):
+    trs = []
+    for i in range(1, len(close)):
+        tr = max(high[i] - low[i],
+                 abs(high[i] - close[i-1]),
+                 abs(low[i] - close[i-1]))
+        trs.append(tr)
+    if len(trs) < period:
+        return None
+    # Seed with simple average of first period bars
+    atr = sum(trs[:period]) / period
+    for tr in trs[period:]:
+        atr = (atr * (period - 1) + tr) / period
+    return round(atr, 4)
+
+try:
+    r = json.load(sys.stdin)
+    data = r.get('data') or r
+    # Dhan historical response: {open:[...], high:[...], low:[...], close:[...]}
+    h = [float(x) for x in (data.get('high') or [])]
+    l = [float(x) for x in (data.get('low') or [])]
+    c = [float(x) for x in (data.get('close') or [])]
+    if len(c) < 15:
+        print('NA')
+        sys.exit(5)
+    val = wilder_atr(h, l, c)
+    print(val if val is not None else 'NA')
+except Exception as e:
+    print(f'dhan.sh atr: parse error: {e}', file=sys.stderr)
+    sys.exit(5)
+"
+    ;;
   "")
-    echo "Usage: dhan.sh {funds|positions|holdings|orders|quote|order|cancel|close|vix} ..." >&2
+    echo "Usage: dhan.sh {funds|positions|holdings|orders|quote|order|cancel|close|vix|atr} ..." >&2
     exit 1
     ;;
   *)
