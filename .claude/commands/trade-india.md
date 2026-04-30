@@ -49,15 +49,13 @@ If gate_check passed, compute sizing deterministically — three shell calls the
 ```bash
 SYM="<chosen ticker>"
 
-# 1 — live entry price
-ENTRY=$(bash scripts/dhan.sh quote "$SYM" NSE_EQ \
-  | python3 -c "import json,sys; d=json.load(sys.stdin); \
-    print(list((d.get('data',{}).get('NSE_EQ') or d).values())[0].get('last_price','NA'))")
+# 1 — live entry price (NSE public API — no Dhan subscription needed)
+ENTRY=$(bash scripts/nse.sh quote "$SYM")
 
 # 2 — ATR(14) from 20 daily bars
 ATR=$(bash scripts/dhan.sh atr "$SYM")
 if [ "$ATR" = "NA" ] || [ -z "$ATR" ]; then
-  bash scripts/notify.sh "❌ TRADE-INDIA BLOCKED — $SYM: ATR unavailable. Add to nse_securities.json."
+  bash scripts/notify.sh "❌ TRADE-INDIA BLOCKED — $SYM: ATR unavailable. Check NSE symbol name."
   exit 1
 fi
 

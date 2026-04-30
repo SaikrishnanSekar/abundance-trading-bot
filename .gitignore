@@ -23,3 +23,6 @@ Thumbs.db
 *.tmp
 *.bak
 *.swp
+
+# Bhavcopy cache (downloaded at runtime, not committed)
+data/bhavcopy/

@@ -27,7 +27,7 @@ If gates still pass:
 
 ### India — LIMIT only. Never market.
 
-1. Re-fetch LTP: `bash scripts/dhan.sh quote SYM NSE_EQ`. Call this `ltp`.
+1. Re-fetch LTP: `bash scripts/nse.sh quote SYM`. Call this `ltp`.
 2. Compute `limit_price = round(ltp * 1.001, 2)` (LTP + 0.1% for buys). Reject if |limit_price - spec_entry| / spec_entry > 0.005 (0.5% slippage cap) — post `❌ UNLOCK REFUSED — price drifted > 0.5% since proposal.` and stop.
 3. Read `qty` and `stop_price` directly from the PENDING proposal in RESEARCH-LOG.md.
    The stop is ATR-based and was set at proposal time — do NOT recompute it from the new LTP.
