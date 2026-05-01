@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Trading Dashboard</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #1c2128;
+    --border: #30363d; --text: #e6edf3; --muted: #7d8590;
+    --green: #3fb950; --red: #f85149; --yellow: #d29922;
+    --blue: #58a6ff; --purple: #bc8cff; --orange: #ffa657;
+    --green-dim: #1a3a24; --red-dim: #3a1a1a; --yellow-dim: #3a2e00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.6; }
+  a { color: var(--blue); text-decoration: none; }
+
+  /* Layout */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 18px; font-weight: 600; }
+  .header .subtitle { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .load-btn { background: var(--blue); color: #0d1117; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .load-btn:hover { opacity: 0.85; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .card-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .card-title .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); }
+
+  /* Stat boxes */
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 700; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .green { color: var(--green); }
+  .red { color: var(--red); }
+  .yellow { color: var(--yellow); }
+  .blue { color: var(--blue); }
+  .purple { color: var(--purple); }
+  .muted { color: var(--muted); }
+
+  /* Section headings */
+  .section-title { font-size: 16px; font-weight: 600; margin: 28px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .badge-green { background: var(--green-dim); color: var(--green); }
+  .badge-red { background: var(--red-dim); color: var(--red); }
+  .badge-yellow { background: var(--yellow-dim); color: var(--yellow); }
+  .badge-blue { background: #0d2a4a; color: var(--blue); }
+
+  /* Gate checklist */
+  .gate-list { display: flex; flex-direction: column; gap: 8px; }
+  .gate-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); }
+  .gate-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .gate-icon.pass { background: var(--green-dim); color: var(--green); }
+  .gate-icon.warn { background: var(--yellow-dim); color: var(--yellow); }
+  .gate-icon.hard { background: var(--red-dim); color: var(--red); }
+  .gate-text strong { display: block; font-size: 13px; margin-bottom: 2px; }
+  .gate-text span { font-size: 12px; color: var(--muted); }
+  .gate-measure { font-size: 11px; color: var(--blue); margin-top: 4px; font-style: italic; }
+
+  /* Tier table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .tier-1 { color: var(--muted); }
+  .tier-2 { color: var(--yellow); }
+  .tier-3 { color: var(--green); }
+
+  /* Timeline / phases */
+  .phase-row { display: flex; gap: 0; margin: 16px 0; }
+  .phase { flex: 1; text-align: center; padding: 10px 6px; font-size: 12px; font-weight: 600; cursor: default; }
+  .phase:first-child { border-radius: 6px 0 0 6px; }
+  .phase:last-child { border-radius: 0 6px 6px 0; }
+  .phase.premarket { background: #0d2a4a; color: var(--blue); }
+  .phase.entry { background: var(--green-dim); color: var(--green); }
+  .phase.manage { background: #2a1d3a; color: var(--purple); }
+  .phase.exit { background: var(--red-dim); color: var(--red); }
+  .phase.postmarket { background: var(--surface2); color: var(--muted); }
+
+  /* Stop mechanic visual */
+  .stop-levels { position: relative; height: 120px; margin: 10px 0; }
+  .price-axis { position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .level { position: absolute; left: 10px; right: 0; height: 2px; }
+  .level-label { position: absolute; right: 0; font-size: 11px; transform: translateY(-8px); }
+  .level-target2 { top: 5%; background: var(--green); }
+  .level-target1 { top: 28%; background: var(--green); opacity: 0.6; }
+  .level-t15r { top: 42%; background: var(--purple); border-style: dashed; }
+  .level-t08r { top: 54%; background: var(--blue); border-style: dashed; }
+  .level-entry { top: 64%; background: var(--yellow); }
+  .level-stop { top: 85%; background: var(--red); }
+
+  /* Canvas charts */
+  canvas { display: block; width: 100%; }
+
+  /* Outcome pill table */
+  .outcome-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .outcome-row:last-child { border-bottom: none; }
+  .outcome-pill { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; min-width: 140px; text-align: center; }
+  .outcome-bar-wrap { flex: 1; height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .outcome-bar { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .outcome-count { font-size: 12px; color: var(--muted); min-width: 30px; text-align: right; }
+
+  /* Sparkline */
+  .sparkline-wrap { position: relative; }
+
+  /* No-data state */
+  .no-data { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .no-data .icon { font-size: 32px; margin-bottom: 12px; }
+  .no-data p { font-size: 13px; }
+
+  /* Rules summary */
+  .rule-block { margin-bottom: 12px; padding: 12px 14px; background: var(--surface2); border-radius: 6px; border-left: 3px solid var(--border); }
+  .rule-block.hard { border-left-color: var(--red); }
+  .rule-block.auto { border-left-color: var(--blue); }
+  .rule-block.propose { border-left-color: var(--yellow); }
+  .rule-id { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+  .rule-text { font-size: 13px; }
+  .rule-measure { font-size: 11px; color: var(--blue); margin-top: 5px; }
+
+  /* Edge decay chart legend */
+  .legend { display: flex; gap: 16px; font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+
+  @media (max-width: 900px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .col-span-2, .col-span-3 { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🇮🇳 India Trading Dashboard</h1>
+    <div class="subtitle">NSE · Nifty 50 · Intraday MIS · ₹20,000 capital</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="font-size:12px;color:var(--muted)" id="data-status">No post-mortem data loaded</span>
+    <label class="load-btn" style="cursor:pointer">
+      Load POST-MORTEMS.md
+      <input type="file" id="file-input" accept=".md,.txt" style="display:none">
+    </label>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── SCORECARD ─────────────────────────────────────────────────── -->
+  <div class="section-title">
+    📊 Scorecard
+    <span class="badge badge-blue" id="trade-count-badge">0 trades</span>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:20px" id="stat-cards">
+    <div class="stat-card">
+      <div class="stat-label">Win Rate</div>
+      <div class="stat-value muted" id="stat-winrate">—</div>
+      <div class="stat-sub" id="stat-winrate-sub">target ≥ 50%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg R-Multiple</div>
+      <div class="stat-value muted" id="stat-avgr">—</div>
+      <div class="stat-sub">target ≥ 0.5R</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Profit Factor</div>
+      <div class="stat-value muted" id="stat-pf">—</div>
+      <div class="stat-sub">target ≥ 1.5×</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Gate Respect</div>
+      <div class="stat-value muted" id="stat-gate">—</div>
+      <div class="stat-sub">target 100%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Catalyst Hit Rate</div>
+      <div class="stat-value muted" id="stat-catalyst">—</div>
+      <div class="stat-sub">WIN outcomes / trades</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Discipline</div>
+      <div class="stat-value muted" id="stat-discipline">—</div>
+      <div class="stat-sub">out of 5 · target ≥ 4</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Skill Trades</div>
+      <div class="stat-value muted" id="stat-skill">—</div>
+      <div class="stat-sub">mostly-skill + all-skill</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Hold Time</div>
+      <div class="stat-value muted" id="stat-hold">—</div>
+      <div class="stat-sub">minutes</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:20px">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--green)"></span>Edge Stability — Rolling 5-Trade Win Rate</div>
+      <canvas id="edge-chart" height="140"></canvas>
+      <div class="legend">
+        <span><span class="legend-dot" style="background:var(--green)"></span>Win rate</span>
+        <span><span class="legend-dot" style="background:var(--border)"></span>50% baseline</span>
+      </div>
+      <div class="no-data" id="edge-nodata">
+        <div class="icon">📈</div>
+        <p>Load POST-MORTEMS.md to see edge stability over time</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--purple)"></span>Outcome Distribution</div>
+      <div id="outcome-dist">
+        <div class="no-data">
+          <div class="icon">🎯</div>
+          <p>Load POST-MORTEMS.md to see outcome breakdown</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:20px">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--blue)"></span>R-Multiple Distribution</div>
+      <canvas id="r-chart" height="120"></canvas>
+      <div class="no-data" id="r-nodata">
+        <div class="icon">📐</div>
+        <p>Load post-mortems to see R distribution</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--yellow)"></span>Luck vs Skill</div>
+      <canvas id="luck-chart" height="120"></canvas>
+      <div class="no-data" id="luck-nodata">
+        <div class="icon">🎲</div>
+        <p>Load post-mortems to see skill assessment</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--orange)"></span>Win Rate by Tier</div>
+      <div id="tier-stats">
+        <div class="no-data">
+          <div class="icon">📊</div>
+          <p>Load post-mortems to see tier breakdown</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RULES ──────────────────────────────────────────────────────── -->
+  <div class="section-title">⚙️ Trading Rules</div>
+
+  <!-- Trade lifecycle phases -->
+  <div class="phase-row">
+    <div class="phase premarket">Pre-Market</div>
+    <div class="phase entry">Entry Gate</div>
+    <div class="phase manage">Intraday Manage</div>
+    <div class="phase exit">Exit</div>
+    <div class="phase postmarket">Post-Market</div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:20px">
+
+    <!-- Entry Gates -->
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--green)"></span>Entry Gate — All 9 Must Pass</div>
+      <div class="gate-list">
+        <div class="gate-item">
+          <div class="gate-icon hard">G1</div>
+          <div class="gate-text">
+            <strong>Kill switch off</strong>
+            <span>No <code>memory/KILL_SWITCH.md</code> present. Non-negotiable hard stop.</span>
+            <div class="gate-measure">measure: kill_switch_trigger_count</div>
+          </div>
+        </div>
+        <div class="gate-item">
+          <div class="gate-icon pass">G2</div>
+          <div class="gate-text">
+            <strong>Open positions &lt; 3</strong>
+            <span>Never hold more than 3 intraday positions simultaneously.</span>
+            <div class="gate-measure">measure: concurrent_position_distribution</div>
+          </div>
+        </div>
+        <div class="gate-item">
+          <div class="gate-icon pass">G3</div>
+          <div class="gate-text">
+            <strong>Position cost ≤ 20% of margin</strong>
+            <span>Cost = qty × entry ≤ 20% of ~₹1,00,000 available margin.</span>
+            <div class="gate-measure">measure: cost_gate_reject_rate</div>
+          </div>
+        </div>
+        <div class="gate-item">
+          <div class="gate-icon pass">G4</div>
+          <div class="gate-text">
+            <strong>Catalyst in RESEARCH-LOG.md</strong>
+            <span>Written today, less than 24 hours old. No impulse trades.</span>
+            <div class="gate-measure">measure: catalyst_hit_rate (WIN % where catalyst worked)</div>
+          </div>
+        </div>
+        <div class="gate-item">
+          <div class="gate-icon hard">G5</div>
+          <div class="gate-text">
+            <strong>VIX &lt; 20</strong>
+            <span>High VIX = fat tails. ATR stops become unreliable. Skip the day.</span>
+            <div class="gate-measure">measure: vix_gate_block_rate</div>
+          </div>
+        </div>
+        <div class="gate-item">
+          <div class="gate-icon pass">G6</div>
+          <div class="gate-text">
+            <strong>Ticker on today's APPROVED-WATCHLIST</strong>
+            <span>Pre-committed before 09:15 IST. Human-approved file.</span>
+            <div class="gate-measure">measure: off-watchlist_trade_rate (target 0%)</div>
+          </div>
+        </div>
+        <div class="gate-item">
+          <div class="gate-icon warn">G7</div>
+          <div class="gate-text">
+            <strong>No thesis-break flag</strong>
+            <span>LIVE-PULSE.md must not show thesis_break for this ticker.</span>
+            <div class="gate-measure">measure: thesis_break_entry_rate (target 0%)</div>
+          </div>
+        </div>
+        <div class="gate-item">
+          <div class="gate-icon hard">G8</div>
+          <div class="gate-text">
+            <strong>Day P&amp;L ≥ -₹300</strong>
+            <span>Once daily cap fires, session is over. No revenge trades.</span>
+            <div class="gate-measure">measure: halt_day_frequency</div>
+          </div>
+        </div>
+        <div class="gate-item">
+          <div class="gate-icon pass">G9</div>
+          <div class="gate-text">
+            <strong>Market hours: Mon–Fri 09:15–15:15 IST</strong>
+            <span>No entries within 5 min of 15:15 square-off.</span>
+            <div class="gate-measure">measure: n/a (clock check)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sizing + Management -->
+    <div style="display:flex;flex-direction:column;gap:20px">
+
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--yellow)"></span>Sizing — 3-Tier ATR System</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th><th>R Budget</th><th>₹20k</th><th>When</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tier-1">1 — Speculative</td>
+              <td>0.5%</td><td>₹100</td>
+              <td style="color:var(--muted);font-size:12px">Weak catalyst / new setup</td>
+            </tr>
+            <tr>
+              <td class="tier-2">2 — Standard</td>
+              <td>1.0%</td><td>₹200</td>
+              <td style="color:var(--muted);font-size:12px">Confirmed momentum + catalyst</td>
+            </tr>
+            <tr>
+              <td class="tier-3">3 — High Conviction</td>
+              <td>1.5%</td><td>₹300</td>
+              <td style="color:var(--muted);font-size:12px">Breakout + volume + sector align</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:6px;font-size:12px;color:var(--muted)">
+          <strong style="color:var(--text)">Formula:</strong>
+          stop_dist = 2.5 × ATR(14) · capped 0.3%–7% of entry ·
+          qty = R_budget ÷ stop_dist · account heat ≤ ₹1,200
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--purple)"></span>Intraday Management (autonomous)</div>
+        <div class="stop-levels">
+          <div class="price-axis"></div>
+          <div class="level level-target2">
+            <span class="level-label green" style="font-size:11px;font-weight:700">+2.5R — Target 2 → trail 50%</span>
+          </div>
+          <div class="level level-target1">
+            <span class="level-label green" style="font-size:11px;opacity:0.8">+1.5R — Target 1 → sell 50%, SL → entry</span>
+          </div>
+          <div class="level level-t15r" style="border-top:1px dashed var(--purple);background:none">
+            <span class="level-label purple" style="font-size:11px">+1.5R — move SL to entry+0.5R (auto)</span>
+          </div>
+          <div class="level level-t08r" style="border-top:1px dashed var(--blue);background:none">
+            <span class="level-label blue" style="font-size:11px">+0.8R — move SL to breakeven (auto)</span>
+          </div>
+          <div class="level level-entry" style="background:var(--yellow);height:2px">
+            <span class="level-label yellow" style="font-size:11px;font-weight:700">Entry price</span>
+          </div>
+          <div class="level level-stop">
+            <span class="level-label red" style="font-size:11px;font-weight:700">Stop — 2.5 × ATR below entry</span>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">
+          Stop tightening is autonomous (no human approval). Never loosen. Never move in loss direction.
+          Thesis-break requires 2-pulse confirmation before auto-exit.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Hard Rules summary -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-title"><span class="dot" style="background:var(--red)"></span>Hard Rules — Never Violate</div>
+    <div class="grid-3">
+      <div>
+        <div class="rule-block hard">
+          <div class="rule-id">D1 — DAILY CAP</div>
+          <div class="rule-text">Cumulative day P&L ≤ -₹300 → halt immediately. No new entries for the rest of the session.</div>
+          <div class="rule-measure">measure: halt_day_count + next-day recovery P&L</div>
+        </div>
+        <div class="rule-block hard">
+          <div class="rule-id">K1 — KILL SWITCH</div>
+          <div class="rule-text">Account draws ≥ ₹3,000 (15%) from peak → close all MIS, write KILL_SWITCH.md, wait for human to lift.</div>
+          <div class="rule-measure">measure: kill_switch_triggers + recovery time</div>
+        </div>
+      </div>
+      <div>
+        <div class="rule-block hard">
+          <div class="rule-id">E4 — SQUARE OFF 15:15</div>
+          <div class="rule-text">All MIS positions closed by 15:15 IST without exception. Dhan auto-square at 15:20 = discipline failure.</div>
+          <div class="rule-measure">measure: auto_square_rate (target 0%)</div>
+        </div>
+        <div class="rule-block hard">
+          <div class="rule-id">D2 — TWO LOSING WEEKS</div>
+          <div class="rule-text">Two back-to-back losing weeks → halve all tier sizes until a green week. Tier 2 drops from ₹200 to ₹100.</div>
+          <div class="rule-measure">measure: size_reduction_periods + equity curve shape</div>
+        </div>
+      </div>
+      <div>
+        <div class="rule-block hard">
+          <div class="rule-id">NO F&O WRITING</div>
+          <div class="rule-text">No options selling. No naked options. No F&O writing of any kind. Capital &lt; ₹3L makes this impossible anyway.</div>
+          <div class="rule-measure">measure: n/a (structural block)</div>
+        </div>
+        <div class="rule-block auto">
+          <div class="rule-id">M1/M2 — AUTONOMOUS STOP TIGHTEN</div>
+          <div class="rule-text">At +0.8R → SL to entry. At +1.5R → SL to entry+0.5R. No human approval needed. Logged in LIVE-PULSE.md.</div>
+          <div class="rule-measure">measure: breakeven_move_rate + win_rate_after_breakeven_move</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Intelligence checklist -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-title"><span class="dot" style="background:var(--green)"></span>Intelligence vs Luck — Measurement Framework</div>
+    <div class="grid-4">
+      <div style="padding:12px;background:var(--surface2);border-radius:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px">Catalyst Hit Rate</div>
+        <div style="font-size:12px;color:var(--muted)">% of trades where price moved ≥ 0.5% in expected direction within 60 min. High rate = research is real edge, not lucky guesses.</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text)">Target: <strong>&gt; 60%</strong></div>
+      </div>
+      <div style="padding:12px;background:var(--surface2);border-radius:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:6px">Gate Respect Score</div>
+        <div style="font-size:12px;color:var(--muted)">% of trades where all 9 entry gates were logged as passed. Below 100% = discipline problem, not strategy problem.</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text)">Target: <strong>100%</strong></div>
+      </div>
+      <div style="padding:12px;background:var(--surface2);border-radius:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--purple);margin-bottom:6px">Edge Stability</div>
+        <div style="font-size:12px;color:var(--muted)">Rolling 5-trade win rate plotted over time. Flat = consistent edge. Decaying = overfitting. Rising = learning.</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text)">Target: <strong>flat or rising, ≥ 50%</strong></div>
+      </div>
+      <div style="padding:12px;background:var(--surface2);border-radius:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:6px">R-Quality</div>
+        <div style="font-size:12px;color:var(--muted)">Avg R on winners vs losers. If wins ≈ +0.5R and losses ≈ -1R, the system has positive EV structure regardless of luck.</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text)">Target: <strong>avg win &gt; 0.5R</strong></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ── Data parsing ────────────────────────────────────────────────────────────
+
+function parsePostMortems(text) {
+  const trades = [];
+  const blocks = text.split(/\n---+\n/).filter(b => b.includes('trade_id') || b.includes('outcome_code'));
+  for (const block of blocks) {
+    const t = {};
+    for (const line of block.split('\n')) {
+      const m = line.match(/^[-*]?\s*(\w+):\s*(.+)/);
+      if (m) t[m[1].trim()] = m[2].trim();
+    }
+    if (t.outcome_code) trades.push(t);
+  }
+  return trades;
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function pct(n, d) { return d === 0 ? 0 : Math.round((n / d) * 100); }
+function mean(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+function colorForValue(v, lo, hi) {
+  if (v >= hi) return 'var(--green)';
+  if (v >= lo) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+// ── Render stats ─────────────────────────────────────────────────────────────
+
+function renderStats(trades) {
+  if (!trades.length) return;
+
+  const wins = trades.filter(t => t.outcome_code && t.outcome_code.startsWith('WIN'));
+  const losses = trades.filter(t => t.outcome_code && t.outcome_code.startsWith('LOSS'));
+  const winRate = pct(wins.length, trades.length);
+
+  const rValues = trades.map(t => parseFloat(t.R || t.r_multiple || 0)).filter(v => !isNaN(v));
+  const avgR = rValues.length ? mean(rValues) : 0;
+
+  const winRs = wins.map(t => Math.abs(parseFloat(t.R || 0)));
+  const lossRs = losses.map(t => Math.abs(parseFloat(t.R || 0)));
+  const pf = lossRs.reduce((a, b) => a + b, 0) > 0
+    ? (winRs.reduce((a, b) => a + b, 0) / lossRs.reduce((a, b) => a + b, 0)).toFixed(2)
+    : '∞';
+
+  const gatesOk = trades.filter(t => {
+    const gp = (t.gate_passed || '');
+    return ['G1','G2','G3','G4','G5','G6','G7','G8','G9'].every(g => gp.includes(g));
+  });
+  const gateScore = pct(gatesOk.length, trades.length);
+
+  const catalystHit = pct(wins.length, trades.length);
+
+  const disciplines = trades.map(t => parseFloat(t.discipline || 0)).filter(v => v > 0);
+  const avgDisc = disciplines.length ? mean(disciplines).toFixed(1) : '—';
+
+  const skillTrades = trades.filter(t => ['all-skill','mostly-skill'].includes((t.luck_vs_skill||'').toLowerCase()));
+  const skillPct = pct(skillTrades.length, trades.length);
+
+  const holds = trades.map(t => {
+    const mins = parseFloat(t.hold_time || 0);
+    return isNaN(mins) ? 0 : mins;
+  }).filter(v => v > 0);
+  const avgHold = holds.length ? Math.round(mean(holds)) : 0;
+
+  document.getElementById('trade-count-badge').textContent = `${trades.length} trade${trades.length !== 1 ? 's' : ''}`;
+
+  const set = (id, val, lo, hi, suffix='') => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = val + suffix;
+      el.className = 'stat-value ' + (typeof val === 'number' ? (val >= hi ? 'green' : val >= lo ? 'yellow' : 'red') : 'muted');
+    }
+  };
+
+  set('stat-winrate', winRate, 50, 60, '%');
+  const wrSub = document.getElementById('stat-winrate-sub');
+  if (wrSub) wrSub.textContent = `${wins.length}W / ${losses.length}L · target ≥ 50%`;
+
+  set('stat-avgr', avgR.toFixed(2), 0.3, 0.6);
+  set('stat-pf', pf === '∞' ? '∞' : parseFloat(pf), 1.0, 1.5);
+  set('stat-gate', gateScore, 90, 100, '%');
+  set('stat-catalyst', catalystHit, 50, 60, '%');
+
+  const discEl = document.getElementById('stat-discipline');
+  if (discEl) {
+    discEl.textContent = avgDisc;
+    const v = parseFloat(avgDisc);
+    discEl.className = 'stat-value ' + (v >= 4 ? 'green' : v >= 3 ? 'yellow' : 'red');
+  }
+
+  set('stat-skill', skillPct, 50, 70, '%');
+
+  const holdEl = document.getElementById('stat-hold');
+  if (holdEl) {
+    holdEl.textContent = avgHold || '—';
+    holdEl.className = 'stat-value muted';
+  }
+}
+
+// ── Edge decay chart ─────────────────────────────────────────────────────────
+
+function renderEdgeChart(trades) {
+  const canvas = document.getElementById('edge-chart');
+  const nodata = document.getElementById('edge-nodata');
+  if (trades.length < 3) { canvas.style.display='none'; nodata.style.display='block'; return; }
+  canvas.style.display = 'block'; nodata.style.display = 'none';
+
+  const W = canvas.offsetWidth * window.devicePixelRatio || 600;
+  const H = 140 * window.devicePixelRatio;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const scale = window.devicePixelRatio || 1;
+  ctx.scale(scale, scale);
+  const w = W / scale, h = H / scale;
+  const pad = { top: 10, right: 10, bottom: 30, left: 40 };
+
+  ctx.fillStyle = '#161b22';
+  ctx.fillRect(0, 0, w, h);
+
+  // rolling 5-trade win rate
+  const points = [];
+  for (let i = 4; i < trades.length; i++) {
+    const slice = trades.slice(i - 4, i + 1);
+    const wr = pct(slice.filter(t => t.outcome_code.startsWith('WIN')).length, 5);
+    points.push({ x: i, y: wr });
+  }
+
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+
+  // 50% baseline
+  ctx.strokeStyle = '#30363d';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  const y50 = pad.top + ch * (1 - 50 / 100);
+  ctx.beginPath(); ctx.moveTo(pad.left, y50); ctx.lineTo(pad.left + cw, y50); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // axes
+  ctx.strokeStyle = '#30363d'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(pad.left, pad.top); ctx.lineTo(pad.left, pad.top + ch); ctx.lineTo(pad.left + cw, pad.top + ch); ctx.stroke();
+
+  // y axis labels
+  ctx.fillStyle = '#7d8590'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+  [0, 25, 50, 75, 100].forEach(v => {
+    const y = pad.top + ch * (1 - v / 100);
+    ctx.fillText(v + '%', pad.left - 4, y + 4);
+  });
+
+  // x axis labels
+  ctx.textAlign = 'center'; ctx.fillStyle = '#7d8590';
+  points.forEach((p, i) => {
+    if (i % Math.ceil(points.length / 5) === 0) {
+      const x = pad.left + (p.x / (trades.length - 1)) * cw;
+      ctx.fillText('T' + (p.x + 1), x, h - 6);
+    }
+  });
+
+  if (points.length < 2) return;
+
+  // gradient fill
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + ch);
+  grad.addColorStop(0, 'rgba(63,185,80,0.3)');
+  grad.addColorStop(1, 'rgba(63,185,80,0)');
+  ctx.beginPath();
+  ctx.moveTo(pad.left + (points[0].x / (trades.length - 1)) * cw, pad.top + ch);
+  points.forEach(p => {
+    const x = pad.left + (p.x / (trades.length - 1)) * cw;
+    const y = pad.top + ch * (1 - p.y / 100);
+    ctx.lineTo(x, y);
+  });
+  ctx.lineTo(pad.left + (points[points.length-1].x / (trades.length - 1)) * cw, pad.top + ch);
+  ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  // line
+  ctx.strokeStyle = '#3fb950'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  points.forEach((p, i) => {
+    const x = pad.left + (p.x / (trades.length - 1)) * cw;
+    const y = pad.top + ch * (1 - p.y / 100);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // dots
+  points.forEach(p => {
+    const x = pad.left + (p.x / (trades.length - 1)) * cw;
+    const y = pad.top + ch * (1 - p.y / 100);
+    ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = p.y >= 50 ? '#3fb950' : '#f85149'; ctx.fill();
+  });
+}
+
+// ── Outcome distribution ─────────────────────────────────────────────────────
+
+function renderOutcomeDist(trades) {
+  const el = document.getElementById('outcome-dist');
+  if (!trades.length) return;
+
+  const codes = ['WIN_TARGET','WIN_TRAILING','LOSS_STOP','LOSS_THESIS_BROKE','LOSS_TIME_STOP','LOSS_MANUAL'];
+  const colors = ['#3fb950','#58a6ff','#f85149','#ffa657','#d29922','#bc8cff'];
+  const counts = {};
+  codes.forEach(c => counts[c] = 0);
+  trades.forEach(t => { if (counts[t.outcome_code] !== undefined) counts[t.outcome_code]++; });
+  const max = Math.max(...Object.values(counts), 1);
+
+  el.innerHTML = codes.map((c, i) => `
+    <div class="outcome-row">
+      <div class="outcome-pill" style="background:${colors[i]}22;color:${colors[i]}">${c.replace('_', ' ')}</div>
+      <div class="outcome-bar-wrap">
+        <div class="outcome-bar" style="width:${pct(counts[c], max)}%;background:${colors[i]}"></div>
+      </div>
+      <div class="outcome-count">${counts[c]}</div>
+    </div>
+  `).join('');
+}
+
+// ── R distribution chart ─────────────────────────────────────────────────────
+
+function renderRChart(trades) {
+  const canvas = document.getElementById('r-chart');
+  const nodata = document.getElementById('r-nodata');
+  const rVals = trades.map(t => parseFloat(t.R || t.r_multiple || 0)).filter(v => !isNaN(v));
+  if (rVals.length < 2) { canvas.style.display='none'; nodata.style.display='block'; return; }
+  canvas.style.display='block'; nodata.style.display='none';
+
+  const W = canvas.offsetWidth * window.devicePixelRatio || 300;
+  const H = 120 * window.devicePixelRatio;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const scale = window.devicePixelRatio || 1;
+  ctx.scale(scale, scale);
+  const w = W / scale, h = H / scale;
+
+  ctx.fillStyle = '#161b22'; ctx.fillRect(0, 0, w, h);
+
+  const pad = { top: 6, right: 8, bottom: 20, left: 8 };
+  const lo = Math.min(-1.5, ...rVals), hi = Math.max(3, ...rVals);
+  const range = hi - lo;
+  const buckets = 20;
+  const bw = range / buckets;
+  const hist = new Array(buckets).fill(0);
+  rVals.forEach(v => {
+    const i = clamp(Math.floor((v - lo) / bw), 0, buckets - 1);
+    hist[i]++;
+  });
+  const maxH = Math.max(...hist);
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+  const barW = cw / buckets;
+
+  hist.forEach((count, i) => {
+    const bval = lo + i * bw + bw / 2;
+    const bh = (count / maxH) * ch;
+    ctx.fillStyle = bval >= 0 ? '#1a3a24' : '#3a1a1a';
+    ctx.fillRect(pad.left + i * barW, pad.top + ch - bh, barW - 1, bh);
+    if (bval >= 0) { ctx.fillStyle = '#3fb950'; } else { ctx.fillStyle = '#f85149'; }
+    ctx.fillRect(pad.left + i * barW, pad.top + ch - bh, barW - 1, 2);
+  });
+
+  // zero line
+  const zeroX = pad.left + ((-lo) / range) * cw;
+  ctx.strokeStyle = '#58a6ff'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]);
+  ctx.beginPath(); ctx.moveTo(zeroX, pad.top); ctx.lineTo(zeroX, pad.top + ch); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = '#7d8590'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('0R', zeroX, h - 4);
+  ctx.fillText(lo.toFixed(1) + 'R', pad.left, h - 4);
+  ctx.fillText(hi.toFixed(1) + 'R', w - pad.right, h - 4);
+}
+
+// ── Luck/Skill chart ─────────────────────────────────────────────────────────
+
+function renderLuckChart(trades) {
+  const canvas = document.getElementById('luck-chart');
+  const nodata = document.getElementById('luck-nodata');
+  if (!trades.length) { canvas.style.display='none'; nodata.style.display='block'; return; }
+  canvas.style.display='block'; nodata.style.display='none';
+
+  const labels = ['all-skill','mostly-skill','neutral','mostly-luck','all-luck'];
+  const colors = ['#3fb950','#58a6ff','#7d8590','#ffa657','#f85149'];
+  const counts = {};
+  labels.forEach(l => counts[l] = 0);
+  trades.forEach(t => {
+    const ls = (t.luck_vs_skill || '').toLowerCase().trim();
+    if (counts[ls] !== undefined) counts[ls]++;
+  });
+
+  const W = canvas.offsetWidth * window.devicePixelRatio || 300;
+  const H = 120 * window.devicePixelRatio;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const scale = window.devicePixelRatio || 1;
+  ctx.scale(scale, scale);
+  const w = W / scale, h = H / scale;
+  ctx.fillStyle = '#161b22'; ctx.fillRect(0, 0, w, h);
+
+  const total = trades.length;
+  const pad = { left: 90, right: 8, top: 4, bottom: 4 };
+  const cw = w - pad.left - pad.right;
+  const rowH = (h - pad.top - pad.bottom) / labels.length;
+
+  labels.forEach((label, i) => {
+    const count = counts[label];
+    const barW = total > 0 ? (count / total) * cw : 0;
+    const y = pad.top + i * rowH;
+
+    ctx.fillStyle = colors[i] + '22';
+    ctx.fillRect(pad.left, y + 2, cw, rowH - 4);
+    ctx.fillStyle = colors[i];
+    ctx.fillRect(pad.left, y + 2, barW, rowH - 4);
+
+    ctx.fillStyle = '#e6edf3'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(label, pad.left - 6, y + rowH / 2 + 4);
+
+    ctx.fillStyle = colors[i]; ctx.textAlign = 'left';
+    ctx.fillText(count + (total > 0 ? ' (' + pct(count, total) + '%)' : ''), pad.left + barW + 4, y + rowH / 2 + 4);
+  });
+}
+
+// ── Tier stats ────────────────────────────────────────────────────────────────
+
+function renderTierStats(trades) {
+  const el = document.getElementById('tier-stats');
+  if (!trades.length) return;
+
+  const tiers = { '1': [], '2': [], '3': [] };
+  trades.forEach(t => {
+    const tier = t.tier || '2';
+    if (tiers[tier]) tiers[tier].push(t);
+  });
+
+  const rows = [1, 2, 3].map(n => {
+    const list = tiers[String(n)];
+    if (!list.length) return `<tr><td class="tier-${n}">Tier ${n}</td><td colspan="3" style="color:var(--muted)">no trades</td></tr>`;
+    const wins = list.filter(t => t.outcome_code.startsWith('WIN')).length;
+    const wr = pct(wins, list.length);
+    const rVals = list.map(t => parseFloat(t.R || 0)).filter(v => !isNaN(v));
+    const avgR = rVals.length ? mean(rVals).toFixed(2) : '—';
+    const wrColor = wr >= 60 ? 'var(--green)' : wr >= 45 ? 'var(--yellow)' : 'var(--red)';
+    return `<tr>
+      <td class="tier-${n}">Tier ${n}</td>
+      <td>${list.length}</td>
+      <td style="color:${wrColor}">${wr}%</td>
+      <td>${avgR}R</td>
+    </tr>`;
+  });
+
+  el.innerHTML = `<table>
+    <thead><tr><th>Tier</th><th>Trades</th><th>Win%</th><th>Avg R</th></tr></thead>
+    <tbody>${rows.join('')}</tbody>
+  </table>`;
+}
+
+// ── Main render ───────────────────────────────────────────────────────────────
+
+function renderAll(trades) {
+  renderStats(trades);
+  renderEdgeChart(trades);
+  renderOutcomeDist(trades);
+  renderRChart(trades);
+  renderLuckChart(trades);
+  renderTierStats(trades);
+}
+
+// ── Demo data (shown until real file loaded) ─────────────────────────────────
+
+const DEMO = [
+  { outcome_code: 'WIN_TARGET',       R: '1.4',  discipline: '4', luck_vs_skill: 'mostly-skill', gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '2', hold_time: '95'  },
+  { outcome_code: 'LOSS_STOP',        R: '-1.0', discipline: '5', luck_vs_skill: 'neutral',      gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '2', hold_time: '42'  },
+  { outcome_code: 'WIN_TRAILING',     R: '2.1',  discipline: '4', luck_vs_skill: 'all-skill',    gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '3', hold_time: '210' },
+  { outcome_code: 'LOSS_THESIS_BROKE',R: '-0.8', discipline: '4', luck_vs_skill: 'mostly-skill', gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '2', hold_time: '65'  },
+  { outcome_code: 'WIN_TARGET',       R: '1.6',  discipline: '5', luck_vs_skill: 'all-skill',    gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '2', hold_time: '88'  },
+  { outcome_code: 'LOSS_STOP',        R: '-1.0', discipline: '3', luck_vs_skill: 'mostly-luck',  gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '1', hold_time: '30'  },
+  { outcome_code: 'WIN_TARGET',       R: '1.3',  discipline: '4', luck_vs_skill: 'neutral',      gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '2', hold_time: '120' },
+  { outcome_code: 'WIN_TRAILING',     R: '2.8',  discipline: '5', luck_vs_skill: 'all-skill',    gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '3', hold_time: '310' },
+  { outcome_code: 'LOSS_TIME_STOP',   R: '-0.5', discipline: '4', luck_vs_skill: 'neutral',      gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '1', hold_time: '200' },
+  { outcome_code: 'WIN_TARGET',       R: '1.5',  discipline: '5', luck_vs_skill: 'mostly-skill', gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '2', hold_time: '75'  },
+];
+
+// File loader
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const trades = parsePostMortems(ev.target.result);
+    document.getElementById('data-status').textContent =
+      trades.length ? `${trades.length} trade${trades.length !== 1 ? 's' : ''} from ${file.name}` : 'No parseable trade blocks found';
+    if (trades.length) renderAll(trades);
+  };
+  reader.readAsText(file);
+});
+
+// Render demo on load
+window.addEventListener('load', () => {
+  document.getElementById('data-status').textContent = 'Showing demo data (10 sample trades)';
+  renderAll(DEMO);
+});
+
+window.addEventListener('resize', () => {
+  const trades = []; // will re-render from DEMO unless real data loaded
+  renderEdgeChart(DEMO);
+  renderRChart(DEMO);
+  renderLuckChart(DEMO);
+});
+</script>
+</body>
+</html>
