@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>India Trading Dashboard</title>
+<meta http-equiv="refresh" content="60">
 <style>
   :root {
     --bg: #0d1117; --surface: #161b22; --surface2: #1c2128;
@@ -144,10 +145,18 @@
     <h1>🇮🇳 India Trading Dashboard</h1>
     <div class="subtitle">NSE · Nifty 50 · Intraday MIS · ₹20,000 capital</div>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;">
-    <span style="font-size:12px;color:var(--muted)" id="data-status">No post-mortem data loaded</span>
-    <label class="load-btn" style="cursor:pointer">
-      Load POST-MORTEMS.md
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;">
+      <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">VIX</span>
+      <span id="live-vix" style="font-size:18px;font-weight:700;color:var(--yellow)">—</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;" id="live-quotes-bar"></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+      <span style="font-size:11px;color:var(--muted)" id="data-status">Connecting…</span>
+      <span style="font-size:11px;color:var(--muted)" id="last-refresh"></span>
+    </div>
+    <label class="load-btn" style="cursor:pointer;background:var(--surface2);color:var(--text);border:1px solid var(--border);font-size:12px;padding:6px 12px;">
+      Load file
       <input type="file" id="file-input" accept=".md,.txt" style="display:none">
     </label>
   </div>
@@ -859,7 +868,7 @@ function renderAll(trades) {
   renderTierStats(trades);
 }
 
-// ── Demo data (shown until real file loaded) ─────────────────────────────────
+// ── Demo data (fallback when API unavailable) ─────────────────────────────────
 
 const DEMO = [
   { outcome_code: 'WIN_TARGET',       R: '1.4',  discipline: '4', luck_vs_skill: 'mostly-skill', gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '2', hold_time: '95'  },
@@ -874,31 +883,117 @@ const DEMO = [
   { outcome_code: 'WIN_TARGET',       R: '1.5',  discipline: '5', luck_vs_skill: 'mostly-skill', gate_passed: 'G1,G2,G3,G4,G5,G6,G7,G8,G9', tier: '2', hold_time: '75'  },
 ];
 
-// File loader
+// ── Live data state ───────────────────────────────────────────────────────────
+
+let _liveMode = false;
+let _currentTrades = DEMO;
+const API = ''; // same origin when served by Flask; empty = relative URLs
+
+// ── Live API fetchers ─────────────────────────────────────────────────────────
+
+async function fetchData() {
+  try {
+    const r = await fetch(API + '/api/data');
+    if (!r.ok) throw new Error(r.status);
+    const json = await r.json();
+    _liveMode = true;
+    const trades = json.trades && json.trades.length ? json.trades : DEMO;
+    _currentTrades = trades;
+    const src = json.trades && json.trades.length
+      ? `${json.trades.length} trade${json.trades.length !== 1 ? 's' : ''} · live`
+      : 'No trades yet · showing demo';
+    document.getElementById('data-status').textContent = src;
+    document.getElementById('data-status').style.color = json.trades && json.trades.length
+      ? 'var(--green)' : 'var(--muted)';
+    document.getElementById('last-refresh').textContent =
+      'Refreshed ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    renderAll(trades);
+  } catch {
+    if (!_liveMode) {
+      document.getElementById('data-status').textContent = 'Server offline · showing demo';
+      document.getElementById('data-status').style.color = 'var(--muted)';
+      renderAll(DEMO);
+    } else {
+      document.getElementById('last-refresh').textContent = 'Last refresh failed';
+    }
+  }
+}
+
+async function fetchVix() {
+  try {
+    const r = await fetch(API + '/api/vix');
+    if (!r.ok) return;
+    const j = await r.json();
+    const el = document.getElementById('live-vix');
+    if (j.vix) {
+      el.textContent = parseFloat(j.vix).toFixed(2);
+      el.style.color = parseFloat(j.vix) >= 20 ? 'var(--red)' : 'var(--yellow)';
+    }
+  } catch {}
+}
+
+async function fetchQuotes() {
+  const watchlist = ['HDFCBANK','RELIANCE','TCS','INFY','ICICIBANK'];
+  try {
+    const results = await Promise.all(
+      watchlist.map(sym =>
+        fetch(API + '/api/quote?sym=' + sym)
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null)
+      )
+    );
+    const bar = document.getElementById('live-quotes-bar');
+    bar.innerHTML = results.map((r, i) => {
+      if (!r || !r.ltp) return '';
+      return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;">
+        <span style="color:var(--muted);margin-right:4px">${watchlist[i]}</span>
+        <span style="font-weight:600">₹${parseFloat(r.ltp).toLocaleString('en-IN')}</span>
+      </div>`;
+    }).join('');
+  } catch {}
+}
+
+// ── File loader (manual fallback) ────────────────────────────────────────────
+
 document.getElementById('file-input').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
     const trades = parsePostMortems(ev.target.result);
-    document.getElementById('data-status').textContent =
-      trades.length ? `${trades.length} trade${trades.length !== 1 ? 's' : ''} from ${file.name}` : 'No parseable trade blocks found';
-    if (trades.length) renderAll(trades);
+    if (trades.length) {
+      _currentTrades = trades;
+      document.getElementById('data-status').textContent =
+        `${trades.length} trade${trades.length !== 1 ? 's' : ''} from ${file.name}`;
+      renderAll(trades);
+    } else {
+      document.getElementById('data-status').textContent = 'No parseable trade blocks found';
+    }
   };
   reader.readAsText(file);
 });
 
-// Render demo on load
-window.addEventListener('load', () => {
-  document.getElementById('data-status').textContent = 'Showing demo data (10 sample trades)';
+// ── Boot + polling ────────────────────────────────────────────────────────────
+
+window.addEventListener('load', async () => {
+  // First render with demo immediately so page isn't blank
   renderAll(DEMO);
+
+  // Then try live API
+  await fetchData();
+  await fetchVix();
+  await fetchQuotes();
+
+  // Poll: trade data every 60s, quotes/VIX every 30s
+  setInterval(fetchData, 60_000);
+  setInterval(fetchVix,   30_000);
+  setInterval(fetchQuotes, 30_000);
 });
 
 window.addEventListener('resize', () => {
-  const trades = []; // will re-render from DEMO unless real data loaded
-  renderEdgeChart(DEMO);
-  renderRChart(DEMO);
-  renderLuckChart(DEMO);
+  renderEdgeChart(_currentTrades);
+  renderRChart(_currentTrades);
+  renderLuckChart(_currentTrades);
 });
 </script>
 </body>
