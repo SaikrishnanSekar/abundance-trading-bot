@@ -1,84 +1,41 @@
 #!/usr/bin/env python3
 """
-Kotak Neo realtime data client.  No pip dependencies — stdlib only.
+Kotak Neo realtime data client (DATA ONLY — orders stay on Dhan).
 
-Auth flow (3 steps):
-  1. POST /oauth2/token           consumer_key (Basic auth, no secret)  → session_token
-  2. POST /login/v2/validate      mobile + password                     → triggers 2FA
-  3. POST /login/otp/validate     mobile + TOTP (RFC 6238)              → {token, sid, ucc}
-
-Session cached in system tmpdir (~6 h). Re-auth transparent on expiry.
-
-Instrument master (symbol → Kotak token) cached in data/kotak_master.json (refreshed daily).
+Uses the official neo-api-client v2 SDK (Kotak-Neo/Kotak-neo-api-v2 on GitHub).
+Auth: consumer_key + mobile + UCC + TOTP + MPIN (no consumer_secret needed).
+Session cached in data/.kotak_session.json (~6 h). Re-auth is transparent.
+Instrument master (symbol→token) cached in data/kotak_master.json (refreshed daily).
 
 Commands:
-  python3 scripts/_kotak.py auth              test full auth, print session info
+  python3 scripts/_kotak.py auth              full auth test, print session info
   python3 scripts/_kotak.py vix               India VIX as float
   python3 scripts/_kotak.py quote SYMBOL      live LTP as float (NSE equity)
-  python3 scripts/_kotak.py flush             delete cached session (force re-auth)
+  python3 scripts/_kotak.py flush             delete cached session + master
+
+Reads from env / .env:
+  KOTAK_CONSUMER_KEY, KOTAK_MOBILE, KOTAK_UCC, KOTAK_MPIN, KOTAK_TOTP_SECRET
 """
 
-import base64, csv, hashlib, hmac, io, json, os, struct, sys, time
-import urllib.error, urllib.parse, urllib.request
+import csv, io, json, os, sys, time
 from pathlib import Path
 
-AUTH_BASE = "https://napi.kotaksecurities.com"
-GW_BASE   = "https://gw-napi.kotaksecurities.com"
-LAPI_BASE = "https://lapi.kotaksecurities.com"
+import pyotp
+import requests as _req_lib
+from neo_api_client import NeoAPI
 
 _HERE         = Path(__file__).resolve().parent
-SESSION_CACHE = Path(__file__).resolve().parent.parent / "data" / ".kotak_session.json"
-MASTER_CACHE  = Path(__file__).resolve().parent.parent / "data" / "kotak_master.json"
+SESSION_CACHE = _HERE.parent / "data" / ".kotak_session.json"
+MASTER_CACHE  = _HERE.parent / "data" / "kotak_master.json"
 
-# ── TOTP (RFC 6238, SHA-1, 30 s, 6 digits) ───────────────────────────────────
+# NSE VIX token candidates (nse_cm master CSV row with pTrdSymbol=INDIA VIX)
+_VIX_TOKENS = [
+    {"instrument_token": "26017", "exchange_segment": "nse_cm"},
+    {"instrument_token": "13",    "exchange_segment": "nse_cm"},
+    {"instrument_token": "26000", "exchange_segment": "nse_cm"},
+]
 
-def _totp(secret: str) -> str:
-    s = secret.upper().replace(" ", "").replace("-", "")
-    pad = (8 - len(s) % 8) % 8
-    if pad:
-        s += "=" * pad
-    key     = base64.b32decode(s)
-    counter = struct.pack(">Q", int(time.time()) // 30)
-    h       = hmac.new(key, counter, hashlib.sha1).digest()
-    offset  = h[-1] & 0x0F
-    code    = struct.unpack(">I", h[offset:offset + 4])[0] & 0x7FFFFFFF
-    return str(code % 1_000_000).zfill(6)
-
-
-# ── HTTP ─────────────────────────────────────────────────────────────────────
-
-def _req(url, body=None, headers=None, method=None, form=False):
-    hdrs = {"Accept": "application/json", **(headers or {})}
-    data = None
-    if body is not None:
-        if form:
-            data = urllib.parse.urlencode(body).encode()
-            hdrs["Content-Type"] = "application/x-www-form-urlencoded"
-        else:
-            data = json.dumps(body).encode()
-            hdrs["Content-Type"] = "application/json"
-    if method is None:
-        method = "POST" if data is not None else "GET"
-    req = urllib.request.Request(url, data=data, headers=hdrs, method=method)
-    for attempt in range(3):
-        try:
-            with urllib.request.urlopen(req, timeout=15) as r:
-                return json.loads(r.read().decode("utf-8", errors="replace"))
-        except urllib.error.HTTPError as e:
-            raw = ""
-            try:
-                raw = e.read().decode("utf-8", errors="replace")[:600]
-            except Exception:
-                pass
-            if e.code in (429, 500, 502, 503) and attempt < 2:
-                time.sleep(2 ** attempt)
-                continue
-            raise RuntimeError(f"HTTP {e.code} {url}\n{raw}") from e
-        except Exception as e:
-            if attempt < 2:
-                time.sleep(2 ** attempt)
-                continue
-            raise RuntimeError(f"Request failed {url}: {e}") from e
+_SCRIP_MASTER_URL = "https://mis.kotaksecurities.com/script-details/1.0/masterscrip/file-paths"
 
 
 # ── Credentials ───────────────────────────────────────────────────────────────
@@ -92,7 +49,7 @@ def _load_env() -> dict:
                 k, _, v = line.partition("=")
                 if k.strip() not in os.environ:
                     os.environ[k.strip()] = v.strip()
-    needed = ["KOTAK_CONSUMER_KEY", "KOTAK_MOBILE", "KOTAK_PASSWORD", "KOTAK_TOTP_SECRET"]
+    needed = ["KOTAK_CONSUMER_KEY", "KOTAK_MOBILE", "KOTAK_UCC", "KOTAK_MPIN", "KOTAK_TOTP_SECRET"]
     missing = [k for k in needed if not os.environ.get(k)]
     if missing:
         print(f"kotak: missing env vars: {', '.join(missing)}", file=sys.stderr)
@@ -100,14 +57,15 @@ def _load_env() -> dict:
     return {
         "consumer_key": os.environ["KOTAK_CONSUMER_KEY"],
         "mobile":       os.environ["KOTAK_MOBILE"],
-        "password":     os.environ["KOTAK_PASSWORD"],
+        "ucc":          os.environ["KOTAK_UCC"],
+        "mpin":         os.environ["KOTAK_MPIN"],
         "totp_secret":  os.environ["KOTAK_TOTP_SECRET"],
     }
 
 
 # ── Session cache ─────────────────────────────────────────────────────────────
 
-def _load_session() -> dict | None:
+def _load_session_cache() -> dict | None:
     try:
         if SESSION_CACHE.exists():
             s = json.loads(SESSION_CACHE.read_text())
@@ -118,218 +76,162 @@ def _load_session() -> dict | None:
     return None
 
 
-def _save_session(data: dict, ttl: int = 21600):
+def _save_session_cache(data: dict, ttl: int = 21600):
     data["expires_at"] = time.time() + ttl
     SESSION_CACHE.parent.mkdir(parents=True, exist_ok=True)
     SESSION_CACHE.write_text(json.dumps(data))
 
 
-# ── Authentication ────────────────────────────────────────────────────────────
+# ── Auth ──────────────────────────────────────────────────────────────────────
 
-def _authenticate(creds: dict) -> dict:
-    # ── Step 1: OAuth2 session token (consumer_key, no secret) ──
-    b64 = base64.b64encode(f"{creds['consumer_key']}:".encode()).decode()
-    print("kotak: [1/3] requesting session token...", file=sys.stderr)
-    r1 = _req(
-        f"{AUTH_BASE}/oauth2/token",
-        body={"grant_type": "client_credentials"},
-        headers={"Authorization": f"Basic {b64}"},
-        form=True,
+def _wire_client(client: NeoAPI, sess: dict):
+    """Set edit_token, edit_sid, base_url on a NeoAPI client object."""
+    client.configuration.edit_token = sess["token"]
+    client.configuration.edit_sid   = sess.get("sid", "")
+    client.configuration.edit_rid   = sess.get("rid", "")
+    if sess.get("baseUrl"):
+        client.configuration.base_url = sess["baseUrl"]
+
+
+def _authenticate(creds: dict) -> NeoAPI:
+    print("kotak: [1/3] init NeoAPI client...", file=sys.stderr)
+    client = NeoAPI(
+        environment="prod",
+        consumer_key=creds["consumer_key"],
+        access_token=None,
+        neo_fin_key=None,
     )
-    sess_token = r1.get("access_token") or r1.get("token")
-    if not sess_token:
-        raise RuntimeError(f"Step 1 — no access_token. Response: {r1}")
-    print("kotak: [1/3] OK", file=sys.stderr)
 
-    # ── Step 2: Login with mobile + password ──
-    print("kotak: [2/3] login mobile+password...", file=sys.stderr)
-    r2 = _req(
-        f"{AUTH_BASE}/login/1.0/login/v2/validate",
-        body={"mobileNumber": creds["mobile"], "password": creds["password"]},
-        headers={"Authorization": f"Bearer {sess_token}", "sid": sess_token},
+    totp = pyotp.TOTP(creds["totp_secret"]).now()
+    print(f"kotak: [2/3] totp_login (TOTP={totp})...", file=sys.stderr)
+    r2 = client.totp_login(
+        mobile_number=creds["mobile"],
+        ucc=creds["ucc"],
+        totp=totp,
     )
-    if r2.get("errorCode") or r2.get("error"):
-        raise RuntimeError(f"Step 2 login failed: {r2}")
-    # Some API versions return final token already at step 2 (TOTP pre-verified)
-    d2 = r2.get("data") or {}
-    if d2.get("token"):
-        print("kotak: [2/3] direct token (TOTP pre-verified)", file=sys.stderr)
-        return _extract_session(d2)
-    print("kotak: [2/3] OK — proceeding to TOTP", file=sys.stderr)
+    if not (r2 or {}).get("data", {}).get("token"):
+        raise RuntimeError(f"totp_login failed: {r2}")
+    print(f"kotak: [2/3] OK — ucc={r2['data'].get('ucc','?')}", file=sys.stderr)
 
-    # ── Step 3: 2FA with TOTP ──
-    otp = _totp(creds["totp_secret"])
-    print(f"kotak: [3/3] 2FA TOTP={otp}...", file=sys.stderr)
-    r3 = _req(
-        f"{AUTH_BASE}/login/1.0/login/otp/validate",
-        body={"mobileNumber": creds["mobile"], "otp": otp},
-        headers={"Authorization": f"Bearer {sess_token}", "sid": sess_token},
-    )
-    if r3.get("errorCode") or r3.get("error"):
-        raise RuntimeError(f"Step 3 2FA failed: {r3}")
-    d3 = r3.get("data") or r3
-    if not d3.get("token"):
-        raise RuntimeError(f"Step 3 — no token in response: {r3}")
-    print(f"kotak: [3/3] OK — ucc={d3.get('ucc','?')}", file=sys.stderr)
-    return _extract_session(d3)
+    print("kotak: [3/3] totp_validate (mpin)...", file=sys.stderr)
+    r3 = client.totp_validate(mpin=creds["mpin"])
+    if not (r3 or {}).get("data", {}).get("token"):
+        raise RuntimeError(f"totp_validate failed: {r3}")
+    print(f"kotak: [3/3] OK — kType={r3['data'].get('kType','?')}", file=sys.stderr)
 
-
-def _extract_session(d: dict) -> dict:
-    return {
-        "token":      d["token"],
-        "sid":        d.get("sid", d["token"]),
-        "rid":        d.get("rid", ""),
-        "ucc":        d.get("ucc", ""),
-        "hsServerId": d.get("hsServerId", ""),
+    sess = {
+        "token":   r3["data"]["token"],
+        "sid":     r3["data"].get("sid", ""),
+        "rid":     r3["data"].get("rid", ""),
+        "ucc":     r3["data"].get("ucc", ""),
+        "baseUrl": r3["data"].get("baseUrl", ""),
     }
+    _save_session_cache(sess)
+    _wire_client(client, sess)
+    return client
 
 
-def _get_session() -> dict:
-    s = _load_session()
-    if s:
-        return s
-    creds = _load_env()
-    s = _authenticate(creds)
-    _save_session(s)
-    return s
-
-
-# ── Instrument master ─────────────────────────────────────────────────────────
-
-def _auth_headers(sess: dict) -> dict:
-    return {
-        "Authorization": f"Bearer {sess['token']}",
-        "sid":           sess["sid"],
-        "Auth":          sess["token"],
-        "rid":           sess.get("rid", ""),
-        "hs_server_id":  sess.get("hsServerId", ""),
-    }
-
-
-def _build_master(sess: dict) -> dict:
-    """
-    Download Kotak instrument master and build symbol → {token, segment} map.
-    Tries two endpoints in order; caches result for 24 h.
-    """
-    print("kotak: downloading instrument master...", file=sys.stderr)
-
-    # Endpoint A — JSON instruments list (newer API)
-    mapping = {}
-    try:
-        resp = _req(
-            f"{GW_BASE}/market-feeds/1.0/market-feeds/instruments",
-            method="GET",
-            headers=_auth_headers(sess),
+def _get_client(creds: dict) -> NeoAPI:
+    cached = _load_session_cache()
+    if cached:
+        print("kotak: using cached session", file=sys.stderr)
+        client = NeoAPI(
+            environment="prod",
+            consumer_key=creds["consumer_key"],
+            access_token=cached["token"],
         )
-        instruments = resp if isinstance(resp, list) else resp.get("data", [])
-        for inst in instruments:
-            sym   = (inst.get("pSymbol") or inst.get("symbol") or "").upper().strip()
-            token = str(inst.get("pSymbolCode") or inst.get("instrument_token") or "").strip()
-            seg   = (inst.get("pExchSeg") or inst.get("exchange_segment") or "").lower()
-            srs   = (inst.get("pSeries") or inst.get("series") or "EQ").upper().strip()
-            if sym and token and "nse_cm" in seg and srs == "EQ":
-                mapping[sym] = {"token": token, "segment": "nse_cm"}
-    except Exception as e:
-        print(f"kotak: instruments endpoint A failed ({e}), trying CSV master...", file=sys.stderr)
+        _wire_client(client, cached)
+        return client
+    return _authenticate(creds)
 
-    # Endpoint B — CSV scrip master (fallback)
-    if not mapping:
-        try:
-            req = urllib.request.Request(
-                f"{LAPI_BASE}/trade/instruments/master",
-                headers={**_auth_headers(sess), "Accept": "text/csv,application/octet-stream,*/*"},
-            )
-            with urllib.request.urlopen(req, timeout=30) as r:
-                raw = r.read().decode("utf-8", errors="replace")
-            reader = csv.DictReader(io.StringIO(raw))
-            for row in reader:
-                sym   = (row.get("pSymbol") or row.get("Symbol") or "").upper().strip()
-                token = str(row.get("pSymbolCode") or row.get("InstrumentToken") or "").strip()
-                seg   = (row.get("pExchSeg") or row.get("ExchangeSegment") or "").lower()
-                srs   = (row.get("pSeries") or row.get("Series") or "EQ").upper().strip()
-                if sym and token and "nse_cm" in seg and srs == "EQ":
-                    mapping[sym] = {"token": token, "segment": "nse_cm"}
-        except Exception as e:
-            print(f"kotak: CSV master also failed ({e})", file=sys.stderr)
 
-    if not mapping:
-        raise RuntimeError("Could not build instrument master from either endpoint")
+# ── Instrument master (symbol → token) ───────────────────────────────────────
+
+def _build_master(consumer_key: str) -> dict:
+    """Download NSE CM scrip master CSV and build {SYMBOL: token} map."""
+    print("kotak: fetching scrip master file-paths...", file=sys.stderr)
+    r = _req_lib.get(_SCRIP_MASTER_URL, headers={"Authorization": consumer_key}, timeout=15)
+    r.raise_for_status()
+    paths = r.json().get("data", {}).get("filesPaths", [])
+    nse_cm_url = next((p for p in paths if "nse_cm" in p.lower()), None)
+    if not nse_cm_url:
+        raise RuntimeError(f"nse_cm CSV not found in file-paths: {paths}")
+
+    print(f"kotak: downloading {nse_cm_url}...", file=sys.stderr)
+    csv_r = _req_lib.get(nse_cm_url, timeout=30)
+    csv_r.raise_for_status()
+
+    mapping = {}
+    reader = csv.DictReader(io.StringIO(csv_r.text))
+    for row in reader:
+        token = (row.get("pSymbol") or "").strip()
+        ref   = (row.get("pScripRefKey") or "").upper().strip()
+        trd   = (row.get("pTrdSymbol") or "").upper().strip()
+        if not token or not ref:
+            continue
+        # Index by base symbol (pScripRefKey = "HDFCBANK") and trading symbol (pTrdSymbol = "HDFCBANK-EQ")
+        mapping[ref] = token
+        if trd and trd != ref:
+            mapping[trd] = token
 
     MASTER_CACHE.parent.mkdir(parents=True, exist_ok=True)
     MASTER_CACHE.write_text(json.dumps(mapping))
-    print(f"kotak: master cached — {len(mapping)} NSE_CM EQ instruments.", file=sys.stderr)
+    print(f"kotak: master cached — {len(mapping)} NSE_CM symbols.", file=sys.stderr)
     return mapping
 
 
-def _get_master(sess: dict) -> dict:
+def _get_master(consumer_key: str) -> dict:
     if MASTER_CACHE.exists():
         age = time.time() - MASTER_CACHE.stat().st_mtime
-        if age < 86400:  # 24 h
+        if age < 86400:
             return json.loads(MASTER_CACHE.read_text())
-    return _build_master(sess)
+    return _build_master(consumer_key)
 
 
 # ── Market data ───────────────────────────────────────────────────────────────
 
-def _quote_call(sess: dict, tokens: list) -> list:
-    """POST market-feeds; returns list of quote dicts."""
-    resp = _req(
-        f"{GW_BASE}/market-feeds/1.0/market-feeds",
-        body={"instrument_tokens": tokens, "quote_type": ""},
-        headers=_auth_headers(sess),
-    )
-    data = resp.get("data") or resp
-    if isinstance(data, dict):
-        data = list(data.values())
-    return data if isinstance(data, list) else [data]
-
-
-def _extract_ltp(items: list) -> str | None:
+def _ltp_from_quotes(quotes) -> str | None:
+    items = quotes if isinstance(quotes, list) else []
     for item in items:
         if not isinstance(item, dict):
             continue
-        for key in ("last_price", "ltp", "LastTradePrice", "lastPrice", "close"):
-            v = item.get(key)
-            if v not in (None, "", 0):
-                return str(v)
+        v = item.get("ltp") or item.get("last_price") or item.get("LastTradePrice")
+        if v not in (None, "", "0", 0):
+            return str(v)
     return None
 
 
-def cmd_vix(sess: dict):
-    """India VIX — try known Kotak NSE index tokens in order."""
-    candidates = [
-        ("nse_index", "26017"),  # standard NSE VIX code
-        ("nse_index", "13"),
-        ("nse_index", "26000"),
-        ("bse_index", "999920041"),
-    ]
-    for seg, tok in candidates:
+def cmd_vix(client: NeoAPI):
+    for tok in _VIX_TOKENS:
         try:
-            items = _quote_call(sess, [{"exchange_segment": seg, "instrument_token": tok}])
-            ltp = _extract_ltp(items)
+            q = client.quotes(instrument_tokens=[tok], quote_type="ltp")
+            ltp = _ltp_from_quotes(q)
             if ltp:
                 print(ltp)
                 return
         except Exception as e:
-            print(f"kotak: VIX seg={seg} tok={tok} → {e}", file=sys.stderr)
+            print(f"kotak: VIX token {tok['instrument_token']} failed: {e}", file=sys.stderr)
     print("kotak: India VIX not found via any candidate token", file=sys.stderr)
     sys.exit(1)
 
 
-def cmd_quote(sess: dict, symbol: str):
-    """Live LTP for an NSE equity symbol."""
-    master = _get_master(sess)
-    sym = symbol.upper().strip()
-    entry = master.get(sym)
-    if not entry:
+def cmd_quote(client: NeoAPI, creds: dict, symbol: str):
+    sym    = symbol.upper().strip()
+    master = _get_master(creds["consumer_key"])
+    token  = master.get(sym) or master.get(sym + "-EQ")
+    if not token:
         print(f"kotak: {sym} not in instrument master — check symbol spelling", file=sys.stderr)
         sys.exit(1)
-    items = _quote_call(sess, [{"exchange_segment": entry["segment"], "instrument_token": entry["token"]}])
-    ltp = _extract_ltp(items)
+
+    q   = client.quotes(
+        instrument_tokens=[{"instrument_token": token, "exchange_segment": "nse_cm"}],
+        quote_type="ltp",
+    )
+    ltp = _ltp_from_quotes(q)
     if ltp:
         print(ltp)
         return
-    print(f"kotak: no LTP for {sym} — raw: {items}", file=sys.stderr)
+    print(f"kotak: no LTP for {sym} (token={token}) — raw: {q}", file=sys.stderr)
     sys.exit(1)
 
 
@@ -348,21 +250,25 @@ if __name__ == "__main__":
         print("kotak: session and master cache flushed.")
         sys.exit(0)
 
+    creds = _load_env()
+
     if subcmd == "auth":
-        SESSION_CACHE.unlink(missing_ok=True)  # force fresh auth
-        sess = _get_session()
-        print(f"kotak: auth OK — ucc={sess.get('ucc')} sid={str(sess.get('sid',''))[:12]}...")
+        SESSION_CACHE.unlink(missing_ok=True)
+        client = _authenticate(creds)
+        cached = _load_session_cache()
+        print(f"kotak: auth OK — ucc={cached.get('ucc')} sid={str(cached.get('sid',''))[:12]}...")
+        client.logout()
         sys.exit(0)
 
-    sess = _get_session()
+    client = _get_client(creds)
 
     if subcmd == "vix":
-        cmd_vix(sess)
+        cmd_vix(client)
     elif subcmd == "quote":
         if len(sys.argv) < 3:
             print("_kotak.py: quote requires SYMBOL", file=sys.stderr)
             sys.exit(1)
-        cmd_quote(sess, sys.argv[2])
+        cmd_quote(client, creds, sys.argv[2])
     else:
         print(f"_kotak.py: unknown subcommand: {subcmd}", file=sys.stderr)
         sys.exit(1)
