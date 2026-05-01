@@ -26,6 +26,7 @@
 #     --research-quality 1-5 \
 #     --discipline 1-5 \
 #     --luck-vs-skill all-skill|mostly-skill|neutral|mostly-luck|all-luck \
+#     --tier 1|2|3          (risk tier from size_calc: 1=0.5%, 2=1.0%, 3=1.5%; default 2)
 #     --adjustment "<free text>"
 #
 # Writes to: memory/<market>/POST-MORTEMS.md (atomic write via tmp + os.replace).
@@ -44,6 +45,7 @@ ENTRY_PRICE="" EXIT_PRICE="" QTY="" CAPITAL=""
 STOP_SPEC="" TARGET_SPEC="" MFE="" MAE=""
 OUTCOME_CODE="" CATALYST_USED="" CATALYST_SOURCE="" GATE_PASSED=""
 ENTRY_Q="" MGMT_Q="" RSCH_Q="" DISC="" LUCK_SKILL=""
+TIER="2"
 ADJUSTMENT=""
 
 while [ $# -gt 0 ]; do
@@ -71,6 +73,7 @@ while [ $# -gt 0 ]; do
     --research-quality) RSCH_Q="$2"; shift 2 ;;
     --discipline) DISC="$2"; shift 2 ;;
     --luck-vs-skill) LUCK_SKILL="$2"; shift 2 ;;
+    --tier) TIER="$2"; shift 2 ;;
     --adjustment) ADJUSTMENT="$2"; shift 2 ;;
     -h|--help) usage ;;
     *) echo "postmortem.sh: unknown arg: $1" >&2; exit 2 ;;
@@ -87,6 +90,7 @@ done
 
 # Validate enums
 case "$MARKET" in india|us) ;; *) echo "postmortem.sh: market must be india|us"; exit 2 ;; esac
+case "$TIER" in 1|2|3) ;; *) echo "postmortem.sh: --tier must be 1, 2, or 3"; exit 2 ;; esac
 case "$OUTCOME_CODE" in
   WIN_TARGET|WIN_TRAILING|LOSS_STOP|LOSS_THESIS_BROKE|LOSS_TIME_STOP|LOSS_MANUAL) ;;
   *) echo "postmortem.sh: outcome_code must be one of WIN_TARGET|WIN_TRAILING|LOSS_STOP|LOSS_THESIS_BROKE|LOSS_TIME_STOP|LOSS_MANUAL"; exit 2 ;;
@@ -132,7 +136,7 @@ fi
 export MARKET TRADE_ID SYM SECTOR ENTRY_TIME EXIT_TIME ENTRY_PRICE EXIT_PRICE
 export QTY CAPITAL STOP_SPEC TARGET_SPEC MFE MAE OUTCOME_CODE
 export CATALYST_USED CATALYST_SOURCE GATE_PASSED
-export ENTRY_Q MGMT_Q RSCH_Q DISC LUCK_SKILL ADJUSTMENT FILE
+export ENTRY_Q MGMT_Q RSCH_Q DISC LUCK_SKILL TIER ADJUSTMENT FILE
 
 python3 - <<'PY'
 import os, pathlib, datetime, math, sys
@@ -147,8 +151,10 @@ target = os.environ.get('TARGET_SPEC') or ''
 mfe = float(os.environ['MFE'])
 mae = float(os.environ['MAE'])
 
-# R = 1.5% of capital (per strategy). Positive per trade.
-R = 0.015 * cap
+# R = tier risk % × capital. Tier 1=0.5%, 2=1.0%, 3=1.5%.
+TIER_RISK = {1: 0.005, 2: 0.010, 3: 0.015}
+tier = int(os.environ.get('TIER', '2'))
+R = TIER_RISK.get(tier, 0.010) * cap
 # R-multiple on realized pnl.
 pnl_abs = (exit_ - entry) * qty
 pnl_pct = (exit_ - entry) / entry * 100

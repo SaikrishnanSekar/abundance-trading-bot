@@ -25,7 +25,7 @@ Runs AFTER 15:15 square-off window. Verifies all MIS positions are flat, compile
      --entry-price <from TRADE-LOG> \
      --exit-price <fill price> \
      --qty <from TRADE-LOG> \
-     --capital 50000 \
+     --capital 20000 \
      --stop-spec <from TRADE-LOG> \
      --target-spec <from TRADE-LOG or ""> \
      --mfe <peak LTP during trade> \
@@ -38,6 +38,7 @@ Runs AFTER 15:15 square-off window. Verifies all MIS positions are flat, compile
      --mgmt-quality <1-5> \
      --research-quality <1-5> \
      --discipline <1-5> \
+     --tier <1|2|3 from TRADE-LOG size_calc output> \
      --luck-vs-skill <all-skill|mostly-skill|neutral|mostly-luck|all-luck> \
      --adjustment "<note>"
    ```

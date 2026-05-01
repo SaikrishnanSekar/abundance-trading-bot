@@ -70,7 +70,7 @@ def build_args_from_cli():
     ap.add_argument("--thesis-break", default="false")
     ap.add_argument("--position-cost-pct", type=float, required=True)
     ap.add_argument("--position-cost-max", type=float, required=True)
-    ap.add_argument("--market-is-open", default="true")
+    ap.add_argument("--market-is-open", default="false")
     a = ap.parse_args()
     return {
         "market": a.market,
