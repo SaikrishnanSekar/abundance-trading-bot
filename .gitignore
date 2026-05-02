@@ -26,3 +26,6 @@ Thumbs.db
 
 # Bhavcopy cache (downloaded at runtime, not committed)
 data/bhavcopy/
+
+# Runtime session tokens (never commit)
+data/.kotak_session.json

@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trading Rules Simulator</title>
+<style>
+  :root {
+    --bg: #101315;
+    --panel: #171b1f;
+    --panel-2: #20262b;
+    --line: #34404a;
+    --text: #edf2f4;
+    --muted: #99a6b2;
+    --green: #41c46e;
+    --red: #ff5f5a;
+    --amber: #f2b84b;
+    --blue: #53a7ff;
+    --teal: #37c6b3;
+    --violet: #b48cff;
+    --ink: #0b0d0f;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: 0;
+  }
+
+  button, input, select { font: inherit; }
+
+  .app {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  header {
+    border-bottom: 1px solid var(--line);
+    background: #15191d;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(20px, 3vw, 31px);
+    line-height: 1.05;
+    font-weight: 760;
+  }
+
+  .sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 7px;
+  }
+
+  .market-tabs {
+    display: inline-grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--panel-2);
+  }
+
+  .tab {
+    border: 0;
+    color: var(--muted);
+    background: transparent;
+    padding: 10px 16px;
+    cursor: pointer;
+    min-width: 96px;
+  }
+
+  .tab.active {
+    color: var(--ink);
+    background: var(--teal);
+    font-weight: 760;
+  }
+
+  main {
+    display: grid;
+    grid-template-columns: minmax(320px, 430px) 1fr;
+    gap: 18px;
+    padding: 18px;
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .panel h2 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .controls {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+  }
+
+  .control {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid rgba(255,255,255,.07);
+  }
+
+  .control:first-of-type { border-top: 0; }
+
+  .control label {
+    color: var(--text);
+    font-weight: 650;
+    font-size: 13px;
+  }
+
+  .control output {
+    color: var(--teal);
+    font-weight: 760;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+  }
+
+  .control small {
+    color: var(--muted);
+    grid-column: 1 / -1;
+    line-height: 1.35;
+  }
+
+  input[type="range"] {
+    grid-column: 1 / -1;
+    width: 100%;
+    accent-color: var(--teal);
+  }
+
+  .switches {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .check {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    min-height: 42px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 8px 10px;
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .check input { accent-color: var(--teal); }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .btn {
+    border: 0;
+    border-radius: 7px;
+    min-height: 42px;
+    cursor: pointer;
+    font-weight: 760;
+    color: var(--ink);
+    background: var(--teal);
+  }
+
+  .btn.secondary {
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+  }
+
+  .stage {
+    display: grid;
+    grid-template-rows: auto minmax(360px, 1fr) auto;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .metric {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  .metric span {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .metric strong {
+    display: block;
+    margin-top: 6px;
+    font-size: clamp(18px, 2.1vw, 27px);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .arena {
+    position: relative;
+    overflow: hidden;
+    min-height: 475px;
+    background:
+      linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px),
+      #11161a;
+    background-size: 44px 44px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .lane {
+    position: absolute;
+    left: 22px;
+    right: 22px;
+    height: 2px;
+    background: rgba(255,255,255,.08);
+  }
+
+  .lane.entry { top: 56%; background: var(--amber); }
+  .lane.stop { top: 73%; background: var(--red); }
+  .lane.t1 { top: 43%; background: rgba(65,196,110,.75); }
+  .lane.t2 { top: 31%; background: var(--green); }
+
+  .lane-label {
+    position: absolute;
+    right: 12px;
+    transform: translateY(-50%);
+    background: rgba(16,19,21,.82);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .gate-strip {
+    position: absolute;
+    left: 18px;
+    top: 18px;
+    display: grid;
+    gap: 8px;
+    z-index: 3;
+  }
+
+  .gate-dot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 28px;
+    min-width: 195px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: rgba(23,27,31,.9);
+    padding: 0 9px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .gate-dot::before {
+    content: "";
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--line);
+  }
+
+  .gate-dot.pass { color: var(--text); border-color: rgba(65,196,110,.48); }
+  .gate-dot.pass::before { background: var(--green); box-shadow: 0 0 16px rgba(65,196,110,.7); }
+  .gate-dot.fail { color: var(--text); border-color: rgba(255,95,90,.55); }
+  .gate-dot.fail::before { background: var(--red); box-shadow: 0 0 16px rgba(255,95,90,.65); }
+
+  .packet {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 26px rgba(55,198,179,.82);
+    offset-path: path("M 95 330 C 190 80, 360 80, 465 188 S 690 360, 850 162 S 1080 220, 1210 130");
+    offset-distance: 0%;
+    z-index: 2;
+  }
+
+  .packet.run { animation: travel 5.5s linear infinite; }
+  @keyframes travel { to { offset-distance: 100%; } }
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .decision {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    width: min(620px, calc(100% - 34px));
+    border: 1px solid var(--line);
+    background: rgba(23,27,31,.93);
+    border-radius: 8px;
+    padding: 14px;
+    z-index: 4;
+  }
+
+  .decision strong {
+    display: block;
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .decision p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.42;
+    font-size: 13px;
+  }
+
+  .rules {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .rule-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .rule {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 10px;
+    align-items: start;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    background: var(--panel);
+  }
+
+  .rule b {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .rule span {
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .pass-text { color: var(--green) !important; }
+  .fail-text { color: var(--red) !important; }
+  .warn-text { color: var(--amber) !important; }
+
+  @media (max-width: 1050px) {
+    main { grid-template-columns: 1fr; }
+    .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .rules { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 620px) {
+    main { padding: 10px; }
+    header { padding: 14px; }
+    .metrics { grid-template-columns: 1fr; }
+    .switches { grid-template-columns: 1fr; }
+    .arena { min-height: 560px; }
+    .gate-strip { position: relative; left: auto; top: auto; padding: 12px; }
+    .decision { position: relative; left: auto; bottom: auto; transform: none; margin: 12px; width: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>Trading Rules Simulator</h1>
+      <div class="sub">Animate the gate checks, position sizing, stop management, and exits from this repo's rulebook.</div>
+    </div>
+    <div class="market-tabs" aria-label="Market selector">
+      <button class="tab active" id="india-tab" type="button">India MIS</button>
+      <button class="tab" id="us-tab" type="button">US Swing</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="controls panel" aria-label="Simulation controls">
+      <h2>Scenario Controls</h2>
+
+      <div class="control" id="price-control">
+        <label for="entry">Entry price</label>
+        <output id="entry-out"></output>
+        <input id="entry" type="range" min="80" max="4200" step="1" value="1800">
+        <small>Starting price for the simulated trade.</small>
+      </div>
+
+      <div class="control india-only">
+        <label for="atr">ATR(14)</label>
+        <output id="atr-out"></output>
+        <input id="atr" type="range" min="1" max="180" step="0.5" value="34">
+        <small>India stop distance is 2.5 x ATR, capped at 7% of entry.</small>
+      </div>
+
+      <div class="control india-only">
+        <label for="tier">Risk tier</label>
+        <output id="tier-out"></output>
+        <input id="tier" type="range" min="1" max="3" step="1" value="2">
+        <small>Tier 1 = 0.5%, Tier 2 = 1%, Tier 3 = 1.5% of cash capital.</small>
+      </div>
+
+      <div class="control us-only" hidden>
+        <label for="conviction">Conviction</label>
+        <output id="conviction-out"></output>
+        <input id="conviction" type="range" min="1" max="3" step="1" value="2">
+        <small>US size uses 15%, 20%, or 25% of account equity.</small>
+      </div>
+
+      <div class="control">
+        <label for="vix">VIX</label>
+        <output id="vix-out"></output>
+        <input id="vix" type="range" min="8" max="38" step="0.1" value="15.5">
+        <small>India blocks at VIX >= 20. US blocks at 30 and size-scales above 25.</small>
+      </div>
+
+      <div class="control">
+        <label for="openPositions">Open positions</label>
+        <output id="open-out"></output>
+        <input id="openPositions" type="range" min="0" max="5" step="1" value="1">
+        <small>India max is 3 intraday positions. US max is 4 swing positions.</small>
+      </div>
+
+      <div class="control">
+        <label for="dayPnl">Day P&L</label>
+        <output id="day-out"></output>
+        <input id="dayPnl" type="range" min="-4" max="3" step="0.1" value="0">
+        <small>Both markets block new entries at -1.5% daily loss.</small>
+      </div>
+
+      <div class="switches">
+        <label class="check"><input id="approved" type="checkbox" checked> Approved watchlist</label>
+        <label class="check"><input id="catalyst" type="checkbox" checked> Fresh catalyst</label>
+        <label class="check"><input id="marketOpen" type="checkbox" checked> Market open</label>
+        <label class="check"><input id="thesisBreak" type="checkbox"> Thesis break</label>
+        <label class="check"><input id="killSwitch" type="checkbox"> Kill switch</label>
+        <label class="check us-only" hidden><input id="earnings" type="checkbox"> Earnings within 5 sessions</label>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="run" type="button">Run Simulation</button>
+        <button class="btn secondary" id="randomize" type="button">Random Setup</button>
+      </div>
+    </section>
+
+    <section class="stage">
+      <div class="metrics" aria-label="Computed values">
+        <div class="metric"><span>Gate Result</span><strong id="gateMetric">PASS</strong></div>
+        <div class="metric"><span>Quantity</span><strong id="qtyMetric">0</strong></div>
+        <div class="metric"><span>Cost</span><strong id="costMetric">0</strong></div>
+        <div class="metric"><span>Initial Stop</span><strong id="stopMetric">0</strong></div>
+        <div class="metric"><span>Exit State</span><strong id="exitMetric">Waiting</strong></div>
+      </div>
+
+      <div class="arena panel" aria-label="Animated trade simulator">
+        <canvas id="chart"></canvas>
+        <div class="lane t2"><span class="lane-label" id="t2Label">Target 2</span></div>
+        <div class="lane t1"><span class="lane-label" id="t1Label">Target 1</span></div>
+        <div class="lane entry"><span class="lane-label" id="entryLabel">Entry</span></div>
+        <div class="lane stop"><span class="lane-label" id="stopLabel">Stop</span></div>
+        <div class="packet run" id="packet"></div>
+        <div class="gate-strip" id="gateStrip"></div>
+        <div class="decision">
+          <strong id="decisionTitle">Ready</strong>
+          <p id="decisionText">Adjust the inputs, then run a simulation. The animation blocks unsafe setups before entry and manages approved trades with repo rules.</p>
+        </div>
+      </div>
+
+      <div class="rules">
+        <section class="panel">
+          <h2>Entry Criteria</h2>
+          <div class="rule-list" id="entryRules"></div>
+        </section>
+        <section class="panel">
+          <h2>Exit Criteria</h2>
+          <div class="rule-list" id="exitRules"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const moneyIN = (n) => "Rs " + Math.round(n).toLocaleString("en-IN");
+const moneyUS = (n) => "$" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
+const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+
+const state = {
+  market: "india",
+  running: false,
+  frame: 0,
+  prices: [],
+  exitState: "Waiting",
+  stopNow: 0,
+  t1Hit: false
+};
+
+const cfg = {
+  india: {
+    capital: 20000,
+    margin: 100000,
+    maxPositions: 3,
+    costMaxPct: 20,
+    vixMax: 20,
+    dayLossPct: -1.5,
+    symbol: "RELIANCE",
+    currency: moneyIN
+  },
+  us: {
+    equity: 800,
+    maxPositions: 4,
+    costMaxPct: 25,
+    vixMax: 30,
+    dayLossPct: -1.5,
+    symbol: "NVDA",
+    currency: moneyUS
+  }
+};
+
+const controls = ["entry", "atr", "tier", "conviction", "vix", "openPositions", "dayPnl", "approved", "catalyst", "marketOpen", "thesisBreak", "killSwitch", "earnings"];
+
+function values() {
+  return {
+    entry: Number($("entry").value),
+    atr: Number($("atr").value),
+    tier: Number($("tier").value),
+    conviction: Number($("conviction").value),
+    vix: Number($("vix").value),
+    openPositions: Number($("openPositions").value),
+    dayPnl: Number($("dayPnl").value),
+    approved: $("approved").checked,
+    catalyst: $("catalyst").checked,
+    marketOpen: $("marketOpen").checked,
+    thesisBreak: $("thesisBreak").checked,
+    killSwitch: $("killSwitch").checked,
+    earnings: $("earnings").checked
+  };
+}
+
+function calc() {
+  const v = values();
+  if (state.market === "india") {
+    const c = cfg.india;
+    const riskPct = [0, 0.005, 0.01, 0.015][v.tier];
+    const rBudget = c.capital * riskPct;
+    const stopDist = Math.min(2.5 * v.atr, v.entry * 0.07);
+    const minStop = v.entry * 0.003;
+    let qty = Math.max(1, Math.floor(rBudget / stopDist));
+    const maxCost = c.margin * c.costMaxPct / 100;
+    qty = Math.max(1, Math.min(qty, Math.floor(maxCost / v.entry)));
+    const cost = qty * v.entry;
+    const stop = v.entry - stopDist;
+    return {
+      entry: v.entry,
+      qty,
+      cost,
+      stop,
+      stopDist,
+      t1: v.entry + 1.5 * stopDist,
+      t2: v.entry + 2.5 * stopDist,
+      risk: qty * stopDist,
+      costPct: cost / c.margin * 100,
+      rBudget,
+      rejectedBySizing: stopDist < minStop || qty * stopDist > c.capital * 0.06
+    };
+  }
+
+  const c = cfg.us;
+  let sizeMultiplier = 1;
+  if (v.vix >= 30) sizeMultiplier = 0;
+  else if (v.vix > 25) sizeMultiplier = 0.35;
+  const pct = [0, 0.15, 0.20, 0.25][v.conviction] * sizeMultiplier;
+  const cost = c.equity * pct;
+  const qty = Math.max(1, Math.floor(cost / v.entry));
+  return {
+    entry: v.entry,
+    qty,
+    cost: qty * v.entry,
+    stop: v.entry * 0.93,
+    stopDist: v.entry * 0.07,
+    t1: v.entry * 1.15,
+    t2: v.entry * 1.20,
+    trailPct: 10,
+    costPct: qty * v.entry / c.equity * 100,
+    rejectedBySizing: qty * v.entry > c.equity * 0.25
+  };
+}
+
+function gates() {
+  const v = values();
+  const x = calc();
+  const c = cfg[state.market];
+  const base = [
+    ["G1", "Kill switch off", !v.killSwitch],
+    ["G2", `Open positions < ${c.maxPositions}`, v.openPositions < c.maxPositions],
+    ["G3", `Position cost <= ${c.costMaxPct}%`, !x.rejectedBySizing && x.costPct <= c.costMaxPct],
+    ["G4", "Fresh catalyst exists", v.catalyst],
+    ["G5", `VIX < ${c.vixMax}`, v.vix < c.vixMax],
+    ["G6", "Ticker approved today", v.approved],
+    ["G7", "No thesis-break flag", !v.thesisBreak],
+    ["G8", "Day P&L above -1.5%", v.dayPnl > c.dayLossPct],
+    ["G9", "Market is open", v.marketOpen]
+  ];
+  if (state.market === "us") {
+    base.splice(2, 0, ["G2b", "New trades this week < 2", true]);
+    base.splice(7, 0, ["G7b", "No earnings within 5 sessions", !v.earnings]);
+  }
+  return base;
+}
+
+function passed() {
+  return gates().every((g) => g[2]);
+}
+
+function updateLabels() {
+  const v = values();
+  const x = calc();
+  const c = cfg[state.market];
+  $("entry-out").textContent = c.currency(v.entry);
+  $("atr-out").textContent = moneyIN(v.atr);
+  $("tier-out").textContent = "Tier " + v.tier;
+  $("conviction-out").textContent = "Level " + v.conviction;
+  $("vix-out").textContent = v.vix.toFixed(1);
+  $("open-out").textContent = String(v.openPositions);
+  $("day-out").textContent = v.dayPnl.toFixed(1) + "%";
+
+  $("gateMetric").textContent = passed() ? "PASS" : "BLOCK";
+  $("gateMetric").className = passed() ? "pass-text" : "fail-text";
+  $("qtyMetric").textContent = x.qty;
+  $("costMetric").textContent = c.currency(x.cost);
+  $("stopMetric").textContent = c.currency(x.stop);
+  $("exitMetric").textContent = state.exitState;
+  $("exitMetric").className = state.exitState.includes("LOSS") ? "fail-text" : state.exitState.includes("WIN") ? "pass-text" : "";
+
+  $("entryLabel").textContent = "Entry " + c.currency(x.entry);
+  $("stopLabel").textContent = "Stop " + c.currency(state.stopNow || x.stop);
+  $("t1Label").textContent = state.market === "india" ? "T1 " + c.currency(x.t1) : "+15% tighten";
+  $("t2Label").textContent = state.market === "india" ? "T2 " + c.currency(x.t2) : "+20% tighten";
+}
+
+function renderGates() {
+  $("gateStrip").innerHTML = gates().map((g) =>
+    `<div class="gate-dot ${g[2] ? "pass" : "fail"}"><b>${g[0]}</b> ${g[1]}</div>`
+  ).join("");
+}
+
+function renderRules() {
+  const entry = state.market === "india"
+    ? [
+      ["Scope", "Nifty 50 equity intraday MIS only. Sleeves are suspended."],
+      ["Approval", "Ticker must be in today's APPROVED-WATCHLIST.md."],
+      ["Research", "Catalyst must exist in today's RESEARCH-LOG.md."],
+      ["Risk", "Max 3 positions, max 20% of available margin per position."],
+      ["Volatility", "No new entries when India VIX is 20 or higher."],
+      ["Clock", "Entries only during NSE session before 15:15 IST."]
+    ]
+    : [
+      ["Scope", "Swing stocks only. No options, leveraged ETFs, or penny stocks."],
+      ["Approval", "Ticker must be in today's APPROVED-WATCHLIST.md."],
+      ["Research", "Fresh catalyst required before any proposal."],
+      ["Risk", "Max 4 positions, max 25% equity per position, max 2 new trades per week."],
+      ["Earnings", "No entry within 5 sessions of own earnings."],
+      ["Clock", "Market must be open according to Alpaca clock."]
+    ];
+
+  const exit = state.market === "india"
+    ? [
+      ["Initial stop", "Place SL_M within 10 seconds of fill."],
+      ["T1", "At +1.5R, close 50% and move stop to entry."],
+      ["T2", "At +2.5R, trail the remaining 50%."],
+      ["Tighten", "At +0.8R move stop to breakeven; at +1.5R move stop to entry + 0.5R."],
+      ["Daily halt", "At -1.5% day loss, block new entries for the session."],
+      ["Square-off", "All MIS positions flat by 15:15 IST."]
+    ]
+    : [
+      ["Initial stop", "Place real 10% trailing-stop GTC immediately after fill."],
+      ["Hard loss", "Manual exit at -7% from entry. No averaging down."],
+      ["Tighten 1", "At +15%, tighten trail to 7%, never within 3% of current price."],
+      ["Tighten 2", "At +20%, tighten trail to 5%."],
+      ["Sector ban", "After 2 failed trades in a sector, ban it for 5 sessions."],
+      ["Kill switch", "At 15% account drawdown, flatten and block new entries."]
+    ];
+
+  $("entryRules").innerHTML = entry.map((r) => `<div class="rule"><b>${r[0]}</b><span>${r[1]}</span></div>`).join("");
+  $("exitRules").innerHTML = exit.map((r) => `<div class="rule"><b>${r[0]}</b><span>${r[1]}</span></div>`).join("");
+}
+
+function setMarket(market) {
+  state.market = market;
+  $("india-tab").classList.toggle("active", market === "india");
+  $("us-tab").classList.toggle("active", market === "us");
+  document.querySelectorAll(".india-only").forEach((el) => el.hidden = market !== "india");
+  document.querySelectorAll(".us-only").forEach((el) => el.hidden = market !== "us");
+  $("entry").min = market === "india" ? 80 : 15;
+  $("entry").max = market === "india" ? 4200 : 900;
+  $("entry").value = market === "india" ? 1800 : 120;
+  resetRun("Ready");
+  renderRules();
+  draw();
+}
+
+function resetRun(label) {
+  state.running = false;
+  state.frame = 0;
+  state.prices = [];
+  state.exitState = label || "Waiting";
+  state.stopNow = 0;
+  state.t1Hit = false;
+  $("packet").classList.toggle("run", true);
+  update();
+}
+
+function buildPath() {
+  const x = calc();
+  const points = [];
+  const bias = passed() ? 1 : -1;
+  const length = state.market === "india" ? 80 : 120;
+  let price = x.entry;
+  for (let i = 0; i < length; i++) {
+    const wave = Math.sin(i / 5) * x.stopDist * 0.12;
+    const drift = x.stopDist * 0.038 * bias;
+    const noise = (Math.random() - 0.47) * x.stopDist * 0.18;
+    price += drift + wave + noise;
+    if (i === 0) price = x.entry;
+    points.push(price);
+  }
+  if (passed()) {
+    points[Math.floor(length * 0.47)] = state.market === "india" ? x.t1 * 1.002 : x.t1 * 1.002;
+    points[Math.floor(length * 0.74)] = state.market === "india" ? x.t2 * 1.002 : x.t2 * 1.002;
+  } else {
+    points[Math.floor(length * 0.58)] = x.stop * 0.998;
+  }
+  return points;
+}
+
+function runSimulation() {
+  const x = calc();
+  state.stopNow = x.stop;
+  state.t1Hit = false;
+  state.prices = buildPath();
+  state.frame = 0;
+  state.running = true;
+  state.exitState = passed() ? "Entered" : "Blocked";
+  $("packet").classList.toggle("run", passed());
+
+  if (!passed()) {
+    const failed = gates().filter((g) => !g[2]).map((g) => g[0]).join(", ");
+    $("decisionTitle").textContent = "Entry Blocked";
+    $("decisionText").textContent = `Failed gates: ${failed}. The repo rules stop here before any order proposal.`;
+    state.running = false;
+  } else {
+    $("decisionTitle").textContent = "Entry Approved";
+    $("decisionText").textContent = state.market === "india"
+      ? `Simulating ${cfg.india.symbol}: qty ${x.qty}, risk ${moneyIN(x.risk)}, SL_M at ${moneyIN(x.stop)}.`
+      : `Simulating ${cfg.us.symbol}: qty ${x.qty}, 10% trail required immediately, hard stop ${moneyUS(x.stop)}.`;
+  }
+  update();
+}
+
+function stepTrade() {
+  if (!state.running) return;
+  const x = calc();
+  const price = state.prices[state.frame] || x.entry;
+
+  if (state.market === "india") {
+    const pnlR = (price - x.entry) / x.stopDist;
+    if (pnlR >= 0.8 && state.stopNow < x.entry) state.stopNow = x.entry;
+    if (pnlR >= 1.5 && state.stopNow < x.entry + 0.5 * x.stopDist) {
+      state.stopNow = x.entry + 0.5 * x.stopDist;
+      state.t1Hit = true;
+    }
+    if (price <= state.stopNow) finish("LOSS_STOP", `Price touched the active stop at ${moneyIN(state.stopNow)}. No stop loosening is allowed.`);
+    if (price >= x.t2) finish("WIN_TRAILING", `Price reached T2. The remaining half is managed by trailing stop.`);
+    else if (price >= x.t1 && !state.t1Hit) {
+      state.t1Hit = true;
+      $("decisionTitle").textContent = "Target 1 Hit";
+      $("decisionText").textContent = "Close 50%, move stop to entry, and continue managing the remainder.";
+    }
+  } else {
+    const pnlPct = (price - x.entry) / x.entry * 100;
+    if (price <= x.stop) finish("LOSS_STOP", `Hard -7% exit triggered at ${moneyUS(x.stop)}. No averaging down.`);
+    if (pnlPct >= 20) finish("WIN_TRAILING", "Price reached +20%. Trail can tighten to 5%, subject to the 3% distance rule.");
+    else if (pnlPct >= 15) {
+      state.stopNow = Math.max(state.stopNow, price * 0.93);
+      $("decisionTitle").textContent = "Trail Tighten Zone";
+      $("decisionText").textContent = "At +15%, the 10% trail may tighten to 7% if it stays at least 3% from current price.";
+    }
+  }
+
+  state.frame++;
+  if (state.frame >= state.prices.length) finish("TIME_STOP", "Simulation ended without a target or stop. In routine logic, this becomes review or manual proposal territory.");
+}
+
+function finish(label, text) {
+  state.exitState = label;
+  state.running = false;
+  $("packet").classList.toggle("run", false);
+  $("decisionTitle").textContent = label.replace("_", " ");
+  $("decisionText").textContent = text;
+}
+
+function draw() {
+  const canvas = $("chart");
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, rect.width, rect.height);
+
+  const x = calc();
+  const prices = state.prices.length ? state.prices.slice(0, Math.max(2, state.frame)) : [x.entry, x.entry * 1.02, x.entry * .99, x.entry * 1.04];
+  const lo = Math.min(x.stop * .985, ...prices);
+  const hi = Math.max(x.t2 * 1.015, ...prices);
+  const pad = { l: 260, r: 40, t: 40, b: 95 };
+  const w = Math.max(50, rect.width - pad.l - pad.r);
+  const h = Math.max(50, rect.height - pad.t - pad.b);
+  const px = (i) => pad.l + (i / Math.max(1, state.prices.length - 1 || prices.length - 1)) * w;
+  const py = (p) => pad.t + (1 - (p - lo) / (hi - lo || 1)) * h;
+
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = state.exitState.includes("LOSS") ? "#ff5f5a" : "#37c6b3";
+  ctx.beginPath();
+  prices.forEach((p, i) => {
+    const xPos = px(i);
+    const yPos = py(p);
+    if (i === 0) ctx.moveTo(xPos, yPos);
+    else ctx.lineTo(xPos, yPos);
+  });
+  ctx.stroke();
+
+  const last = prices[prices.length - 1];
+  ctx.fillStyle = "#edf2f4";
+  ctx.beginPath();
+  ctx.arc(px(prices.length - 1), py(last), 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#99a6b2";
+  ctx.font = "12px system-ui";
+  ctx.fillText("Animated price path", pad.l, pad.t - 12);
+  ctx.fillStyle = "#edf2f4";
+  ctx.font = "bold 16px system-ui";
+  ctx.fillText((state.market === "india" ? moneyIN(last) : moneyUS(last)), px(prices.length - 1) + 10, py(last) + 5);
+}
+
+function update() {
+  updateLabels();
+  renderGates();
+  renderRules();
+}
+
+function tick() {
+  stepTrade();
+  update();
+  draw();
+  requestAnimationFrame(tick);
+}
+
+function randomize() {
+  $("vix").value = (10 + Math.random() * 23).toFixed(1);
+  $("openPositions").value = Math.floor(Math.random() * 5);
+  $("dayPnl").value = (-2.4 + Math.random() * 4.4).toFixed(1);
+  $("approved").checked = Math.random() > .18;
+  $("catalyst").checked = Math.random() > .18;
+  $("marketOpen").checked = Math.random() > .1;
+  $("thesisBreak").checked = Math.random() < .12;
+  $("killSwitch").checked = Math.random() < .07;
+  $("earnings").checked = state.market === "us" && Math.random() < .22;
+  resetRun("Ready");
+}
+
+controls.forEach((id) => $(id).addEventListener("input", () => resetRun("Ready")));
+$("run").addEventListener("click", runSimulation);
+$("randomize").addEventListener("click", randomize);
+$("india-tab").addEventListener("click", () => setMarket("india"));
+$("us-tab").addEventListener("click", () => setMarket("us"));
+window.addEventListener("resize", draw);
+
+setMarket("india");
+tick();
+</script>
+</body>
+</html>

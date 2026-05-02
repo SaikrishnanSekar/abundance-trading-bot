@@ -32,10 +32,12 @@ if [ -z "$Q" ]; then
   exit 2
 fi
 
+export _PPX_Q="$Q"
+export _PPX_MODEL="$MODEL"
 BODY=$(python3 -c "
 import json, sys, os
-q = os.environ['Q']
-model = os.environ['MODEL']
+q = os.environ['_PPX_Q']
+model = os.environ['_PPX_MODEL']
 payload = {
   'model': model,
   'messages': [
@@ -46,7 +48,8 @@ payload = {
   'return_citations': True,
 }
 print(json.dumps(payload))
-" Q="$Q" MODEL="$MODEL")
+")
+unset _PPX_Q _PPX_MODEL
 
 RESP=$(curl -fsS https://api.perplexity.ai/chat/completions \
   -H "Authorization: Bearer ${PERPLEXITY_API_KEY}" \
