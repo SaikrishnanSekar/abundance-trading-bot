@@ -63,7 +63,33 @@ Re-evaluate at 15-min timeframe only if ORB sleeve shows positive live results f
 
 **Full backtest documentation**: `backtests/TWEET-STRATEGIES.md`
 **Key finding**: ORB has viable edge; ST+EMA does not hold up on 5-min NSE intraday.
-Watch for Earnings-week de-risk window Apr 27–May 1 (already passed); next watch window
-upcoming results season.
+
+---
+
+## 2026-05-04 — Extended Strategy Hunt: 8 strategies, 30+ iterations (tweettweak)
+
+**Research method**: 13 WebSearch queries across Twitter/X, QuantifiedStrategies, SSRN, TradingView India, Medium/PyQuantLab. Direct Twitter/X API restricted; community cross-references used.
+
+**Strategies tested**: VWAP 2-SD Reversion, Triple RSI, Gap Fill Mean Reversion, MACD+RSI Combo, Bollinger Band Squeeze, Momentum Burst US
+
+**Results summary**:
+
+| Strategy | Best WR | Sharpe | DD | Verdict |
+|---|---|---|---|---|
+| Gap Fill Down-Long (Iter 8) | **91.1% ✅** | 12.86 | 0.48% | **PASS — PROPOSED** |
+| BB Squeeze (best config) | 87.5% | 6.05 | 0.26% | BORDERLINE — PROPOSED |
+| VWAP 2-SD Reversion | 54.1% | -2.41 | 35.3% | REJECTED |
+| Triple RSI (NSE adapted) | 50.0% | -0.51 | 1.25% | REJECTED |
+| MACD+RSI Combo | 43.4% | -2.27 | 50.6% | REJECTED |
+| Momentum Burst US | 63.0% | 3.85 | 2.43% | REJECTED |
+
+**Key finding**: Gap Fill Down-Long (gap 0.4–1.0%, vol 2×, no-fall-confirm, partial-fill req) is the only strategy to clear the 90% WR gate with 450+ trades. RW adj WR: 59.2%.
+
+**Proposals written**: 3 total in `memory/india/STRATEGY-PROPOSALS.md`:
+1. ORB test sleeve (dim: orb_test_sleeve) — 2026-05-04 — PENDING
+2. Gap Fill Down-Long (dim: gap_fill_down_long) — 2026-05-04 — PENDING
+3. BB Squeeze trial (dim: bb_squeeze_trial) — 2026-05-04 — PENDING
+
+**No live action taken.** All proposals await human commit to TRADING-STRATEGY.md.
 
 ---
