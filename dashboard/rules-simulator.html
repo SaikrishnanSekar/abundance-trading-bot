@@ -387,6 +387,133 @@
     line-height: 1.35;
   }
 
+  .explainer {
+    display: grid;
+    gap: 14px;
+  }
+
+  .bucket-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .bucket {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  .bucket h3 {
+    margin: 0 0 8px;
+    color: var(--text);
+    font-size: 15px;
+  }
+
+  .bucket p, .bucket li {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .bucket ul {
+    margin: 8px 0 0;
+    padding-left: 18px;
+  }
+
+  .timeline {
+    display: grid;
+    gap: 10px;
+  }
+
+  .time-row {
+    display: grid;
+    grid-template-columns: 86px 1fr;
+    gap: 12px;
+    align-items: start;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    padding: 11px;
+  }
+
+  .time-row b {
+    color: var(--teal);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .time-row span {
+    color: var(--text);
+    display: block;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .time-row p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .scenario {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  .scenario.good { border-color: rgba(65,196,110,.45); }
+  .scenario.bad { border-color: rgba(255,95,90,.45); }
+  .scenario h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+  }
+
+  .step-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 74px 1fr;
+    gap: 10px;
+    padding: 9px;
+    border-radius: 7px;
+    background: var(--panel-2);
+    border: 1px solid rgba(255,255,255,.07);
+  }
+
+  .step b {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .step span {
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .note-box {
+    border: 1px solid rgba(242,184,75,.45);
+    background: rgba(242,184,75,.08);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
   .pass-text { color: var(--green) !important; }
   .fail-text { color: var(--red) !important; }
   .warn-text { color: var(--amber) !important; }
@@ -395,6 +522,8 @@
     main { grid-template-columns: 1fr; }
     .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .rules { grid-template-columns: 1fr; }
+    .bucket-grid { grid-template-columns: 1fr; }
+    .scenario-grid { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 620px) {
@@ -405,6 +534,7 @@
     .arena { min-height: 560px; }
     .gate-strip { position: relative; left: auto; top: auto; padding: 12px; }
     .decision { position: relative; left: auto; bottom: auto; transform: none; margin: 12px; width: auto; }
+    .time-row, .step { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -522,6 +652,177 @@
           <div class="rule-list" id="exitRules"></div>
         </section>
       </div>
+
+      <section class="panel explainer" aria-label="Monday India chronology">
+        <h2>Monday Chronology - India Only</h2>
+        <div class="note-box">
+          Think of Monday as a checklist day. The bot does not wake up and buy stocks. It first prepares research, asks you to approve a short watchlist, waits for live price confirmation, then proposes one trade. A real order happens only after human unlock.
+        </div>
+
+        <div class="bucket-grid">
+          <div class="bucket">
+            <h3>Bucket 1: Safety</h3>
+            <p>Before looking for trades, the bot checks whether trading is even allowed.</p>
+            <ul>
+              <li>No kill switch file.</li>
+              <li>Monday is not an NSE holiday.</li>
+              <li>India VIX is below 20.</li>
+              <li>Daily loss has not hit Rs 300.</li>
+            </ul>
+          </div>
+          <div class="bucket">
+            <h3>Bucket 2: Stock Filtering</h3>
+            <p>The bot starts with Nifty 50 only, then narrows to stocks with a fresh reason to move.</p>
+            <ul>
+              <li>Fresh news or sector catalyst.</li>
+              <li>Clean momentum or pullback setup.</li>
+              <li>Good enough volume to avoid sleepy names.</li>
+              <li>Only 3 to 5 candidates are sent to you.</li>
+            </ul>
+          </div>
+          <div class="bucket">
+            <h3>Bucket 3: Human Control</h3>
+            <p>You decide what can be traded that day. No approval means no trade.</p>
+            <ul>
+              <li>You approve RELIANCE, HDFCBANK, etc.</li>
+              <li>Rejected names are blocked.</li>
+              <li>Approved names still need live entry gates later.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="timeline">
+          <div class="time-row">
+            <b>08:40</b>
+            <div><span>Read the rulebook</span><p>Load India strategy, trade log, research log, approved watchlist, weekly review, proposals, and NSE holidays. The active India capital is Rs 20,000, so daily loss cap is Rs 300 and kill switch is around Rs 3,000 drawdown from peak.</p></div>
+          </div>
+          <div class="time-row">
+            <b>08:45</b>
+            <div><span>Check market safety</span><p>Call the VIX wrapper. If VIX is 20 or higher, the day becomes watch-only. If the kill switch exists, all new entries are blocked.</p></div>
+          </div>
+          <div class="time-row">
+            <b>08:50</b>
+            <div><span>Build candidate list</span><p>Scan Nifty 50 names for fresh catalysts. Example: RELIANCE has strong energy news, HDFCBANK has banking momentum, SUNPHARMA has pharma rotation.</p></div>
+          </div>
+          <div class="time-row">
+            <b>09:00</b>
+            <div><span>Ask you for approval</span><p>The bot sends 3 to 5 candidates. If you reply Y1 Y3, only those names become tradeable. If you reply NONE or do not reply, the rest of the day has no entries.</p></div>
+          </div>
+          <div class="time-row">
+            <b>09:20</b>
+            <div><span>Look for live confirmation</span><p>Now the bot watches only approved stocks. It checks early price action, volume, breakout or pullback quality, VIX, open position count, cost cap, and daily P&L.</p></div>
+          </div>
+          <div class="time-row">
+            <b>09:25+</b>
+            <div><span>Propose, then wait</span><p>If one setup is strongest, the bot proposes quantity, entry, stop, T1, and T2. It still cannot place the order until you unlock that exact trade.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel explainer" aria-label="Execution and skip examples">
+        <h2>Two Monday Scenarios</h2>
+        <div class="scenario-grid">
+          <div class="scenario good">
+            <h3 class="pass-text">Scenario A: Trade Gets Executed</h3>
+            <div class="step-list">
+              <div class="step"><b>Candidate</b><span>RELIANCE appears in pre-market research because energy stocks are strong and the stock has a fresh catalyst.</span></div>
+              <div class="step"><b>Approval</b><span>You approve RELIANCE in the watchlist. This means RELIANCE is allowed to be considered, not automatically bought.</span></div>
+              <div class="step"><b>Live setup</b><span>At 09:20, RELIANCE breaks above the opening range with better volume. VIX is 15.8, open positions are 0, and day P&L is Rs 0.</span></div>
+              <div class="step"><b>Sizing</b><span>Entry Rs 1,800, ATR Rs 34. Stop distance is 2.5 x 34 = Rs 85. Tier 2 risk budget is Rs 200. Quantity is floor(200 / 85) = 2 shares.</span></div>
+              <div class="step"><b>Proposal</b><span>Bot proposes: Buy RELIANCE MIS, qty 2, stop Rs 1,715, T1 Rs 1,927.50, T2 Rs 2,012.50.</span></div>
+              <div class="step"><b>Unlock</b><span>You explicitly approve the proposal. Only then the bot places the buy order and immediately places the SL_M stop.</span></div>
+            </div>
+          </div>
+
+          <div class="scenario bad">
+            <h3 class="fail-text">Scenario B: Trade Gets Skipped</h3>
+            <div class="step-list">
+              <div class="step"><b>Candidate</b><span>INFY has a weak bounce but no fresh catalyst in the research log.</span></div>
+              <div class="step"><b>Approval</b><span>Even if INFY looks tempting on the chart, it is not in APPROVED-WATCHLIST.md for Monday.</span></div>
+              <div class="step"><b>Gate fail</b><span>The entry gate fails: no approved watchlist entry and no fresh catalyst. The bot blocks the trade before sizing.</span></div>
+              <div class="step"><b>Risk fail</b><span>Another possible skip: day P&L is already -Rs 320. Since the daily loss cap is Rs 300, all new entries are blocked for the rest of Monday.</span></div>
+              <div class="step"><b>Outcome</b><span>No order proposal, no order placement, no workaround. The bot waits for the next routine or next trading day.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel explainer" aria-label="Continue versus exit examples">
+        <h2>After Entry: Continue vs Exit</h2>
+        <div class="bucket-grid">
+          <div class="bucket">
+            <h3 class="pass-text">Trade Continues</h3>
+            <p>RELIANCE is bought at Rs 1,800 with stop at Rs 1,715. Price moves to Rs 1,870. This is profitable, but below T1. The bot keeps the position open and watches it during pulse checks.</p>
+            <ul>
+              <li>If profit reaches about +0.8R, stop can move up to breakeven.</li>
+              <li>The stop can only move up, never down.</li>
+              <li>No exit happens just because the trade is mildly green.</li>
+            </ul>
+          </div>
+          <div class="bucket">
+            <h3 class="warn-text">Partial Win</h3>
+            <p>Price reaches T1 at Rs 1,927.50. The bot closes 50% and moves the stop to entry. Now the worst case on the remaining piece is roughly flat.</p>
+            <ul>
+              <li>T1 means bank some profit.</li>
+              <li>Remaining quantity is protected.</li>
+              <li>If price later reaches T2, the rest is trailed.</li>
+            </ul>
+          </div>
+          <div class="bucket">
+            <h3 class="fail-text">Trade Exits</h3>
+            <p>If price falls to Rs 1,715, the stop exits the trade. If a thesis-break appears, the bot flags watch-only and asks for human action. If it is 15:15 IST, MIS must be squared off.</p>
+            <ul>
+              <li>Stop hit: exit.</li>
+              <li>15:15 IST: exit all MIS.</li>
+              <li>Kill switch: flatten everything and stop trading.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel explainer" aria-label="Feedback loop">
+        <h2>Feedback Loop: How The Bot Learns Safely</h2>
+        <div class="note-box">
+          The bot does not secretly change rules after a loss or win. It collects evidence, writes notes, scores itself, and proposes improvements. You decide whether any rule actually changes.
+        </div>
+        <div class="timeline">
+          <div class="time-row">
+            <b>Exit</b>
+            <div><span>Write a post-mortem</span><p>After every closed trade, the bot records what happened: entry quality, management quality, research quality, discipline, and whether the result was skill or luck.</p></div>
+          </div>
+          <div class="time-row">
+            <b>Example</b>
+            <div><span>A losing RELIANCE trade</span><p>Suppose RELIANCE had a catalyst, but volume faded after entry and it closed near the stop. The post-mortem may say: research quality 4/5, entry quality 2/5, discipline 5/5, adjustment candidate: require stronger first-5-minute volume before entry.</p></div>
+          </div>
+          <div class="time-row">
+            <b>Daily</b>
+            <div><span>Score the day</span><p>The daily summary computes rolling 5-trade and 20-trade metrics: win rate, average R, profit factor, discipline, and whether gates were respected.</p></div>
+          </div>
+          <div class="time-row">
+            <b>Weekly</b>
+            <div><span>Turn patterns into proposals</span><p>If several trades show the same weakness, the bot writes a proposal in STRATEGY-PROPOSALS.md. Example: Add rule that long entries need first-5-minute volume above 1.5x average.</p></div>
+          </div>
+          <div class="time-row">
+            <b>Human</b>
+            <div><span>You approve or reject</span><p>If you accept, you commit the change into TRADING-STRATEGY.md. If you reject, the bot cannot keep nagging immediately because cooldown and rejection-suppression rules apply.</p></div>
+          </div>
+        </div>
+
+        <div class="bucket-grid">
+          <div class="bucket">
+            <h3>Feedback Example 1</h3>
+            <p>Five trades entered after open gaps all faded. The bot proposes: wait for a pullback or opening-range hold instead of buying the first spike.</p>
+          </div>
+          <div class="bucket">
+            <h3>Feedback Example 2</h3>
+            <p>Three winning trades reached +0.8R then reversed. The bot may propose tightening the stop earlier, but only if enough trade evidence exists.</p>
+          </div>
+          <div class="bucket">
+            <h3>Feedback Example 3</h3>
+            <p>If discipline is perfect but results are weak, the issue may be the setup filter. If discipline is poor, the issue is rule-following, not the strategy.</p>
+          </div>
+        </div>
+      </section>
     </section>
   </main>
 </div>
