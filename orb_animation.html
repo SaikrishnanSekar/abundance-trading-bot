@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORB Strategy Animation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+  body { 
+    background: #0f172a; 
+    color: #f8fafc; 
+    font-family: 'Inter', sans-serif; 
+    margin: 0; 
+    padding: 2rem; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+  }
+  .container { 
+    max-width: 900px; 
+    width: 100%; 
+    background: #1e293b; 
+    border-radius: 1rem; 
+    padding: 2rem; 
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); 
+    border: 1px solid #334155;
+  }
+  h1 { 
+    text-align: center; 
+    background: -webkit-linear-gradient(#38bdf8, #818cf8); 
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+    font-weight: 800;
+    font-size: 2.5rem;
+    margin-top: 0;
+  }
+  .controls { 
+    display: flex; 
+    justify-content: center; 
+    gap: 1rem; 
+    margin: 1.5rem 0; 
+  }
+  button { 
+    background: #38bdf8; 
+    color: #0f172a; 
+    border: none; 
+    padding: 0.75rem 1.5rem; 
+    font-weight: 600; 
+    border-radius: 0.5rem; 
+    cursor: pointer; 
+    transition: all 0.2s ease; 
+    font-size: 1rem;
+  }
+  button:hover:not(:disabled) { 
+    background: #7dd3fc; 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); 
+  }
+  button:disabled { 
+    background: #334155; 
+    color: #64748b; 
+    cursor: not-allowed; 
+  }
+  .explanation { 
+    min-height: 80px; 
+    font-size: 1.15rem; 
+    line-height: 1.6; 
+    text-align: center; 
+    color: #cbd5e1; 
+    margin-bottom: 1.5rem; 
+    padding: 1rem;
+    background: #0f172a;
+    border-radius: 0.5rem;
+    border-left: 4px solid #38bdf8;
+  }
+  .highlight { color: #38bdf8; font-weight: 600; }
+  
+  /* SVG Styles */
+  svg { 
+    width: 100%; 
+    height: 500px; 
+    background: #020617; 
+    border-radius: 0.75rem; 
+    overflow: visible; 
+    border: 1px solid #334155;
+  }
+  
+  .step-el { opacity: 0; transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+  
+  .candle-wick { stroke-width: 2; }
+  .line-or { stroke: #fbbf24; stroke-width: 2; stroke-dasharray: 6,4; }
+  .line-buffer { stroke: #818cf8; stroke-width: 1.5; stroke-dasharray: 3,3; }
+  .line-sl { stroke: #ef4444; stroke-width: 2; }
+  .line-target { stroke: #10b981; stroke-width: 2; }
+  .text-label { fill: #f8fafc; font-size: 13px; font-family: 'Inter', monospace; font-weight: 600; }
+  .vol-line { stroke: #64748b; stroke-width: 1; stroke-dasharray: 4,4; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Opening Range Breakout (ORB)</h1>
+  
+  <div class="explanation" id="exp-text">
+    Click <strong>Start Animation</strong> to see how the ORB strategy works step-by-step based on your exact rules.
+  </div>
+  
+  <div class="controls">
+    <button id="btn-prev" disabled>Previous Step</button>
+    <button id="btn-next">Start Animation</button>
+  </div>
+
+  <svg viewBox="0 0 800 550">
+    <!-- Volume section at the bottom (Y: 450 to 550) -->
+    <line class="vol-line step-el step-1" x1="40" y1="500" x2="760" y2="500" />
+    <text class="text-label step-el step-1" x="770" y="505" fill="#64748b">20-p Avg Vol</text>
+    
+    <line class="vol-line step-el step-3" x1="40" y1="475" x2="760" y2="475" stroke="#38bdf8" />
+    <text class="text-label step-el step-3" x="770" y="480" fill="#38bdf8">1.5x Vol Req</text>
+
+    <!-- Candles -->
+    <!-- Candle 1: 09:15 -->
+    <g class="step-el step-1">
+      <line class="candle-wick" x1="115" y1="330" x2="115" y2="400" stroke="#10b981"/>
+      <rect x="100" y="360" width="30" height="20" fill="#10b981"/>
+      <text x="100" y="440" fill="#64748b" font-size="12">09:15</text>
+      <rect x="100" y="490" width="30" height="40" fill="#10b981" opacity="0.4"/>
+    </g>
+
+    <!-- Candle 2: 09:20 -->
+    <g class="step-el step-1">
+      <line class="candle-wick" x1="175" y1="320" x2="175" y2="370" stroke="#10b981"/>
+      <rect x="160" y="340" width="30" height="20" fill="#10b981"/>
+      <text x="160" y="440" fill="#64748b" font-size="12">09:20</text>
+      <rect x="160" y="505" width="30" height="25" fill="#10b981" opacity="0.4"/>
+    </g>
+
+    <!-- Candle 3: 09:25 -->
+    <g class="step-el step-1">
+      <line class="candle-wick" x1="235" y1="310" x2="235" y2="380" stroke="#ef4444"/>
+      <rect x="220" y="340" width="30" height="30" fill="#ef4444"/>
+      <text x="220" y="440" fill="#64748b" font-size="12">09:25</text>
+      <rect x="220" y="485" width="30" height="45" fill="#ef4444" opacity="0.4"/>
+    </g>
+
+    <!-- OR Lines -->
+    <line class="line-or step-el step-2" x1="40" y1="310" x2="760" y2="310"/>
+    <text class="text-label step-el step-2" x="770" y="315" fill="#fbbf24">ORH</text>
+    
+    <line class="line-or step-el step-2" x1="40" y1="400" x2="760" y2="400"/>
+    <text class="text-label step-el step-2" x="770" y="405" fill="#fbbf24">ORL</text>
+
+    <!-- Candle 4: 09:30 (No breakout) -->
+    <g class="step-el step-3">
+      <line class="candle-wick" x1="295" y1="340" x2="295" y2="380" stroke="#10b981"/>
+      <rect x="280" y="350" width="30" height="20" fill="#10b981"/>
+      <text x="280" y="440" fill="#64748b" font-size="12">09:30</text>
+      <rect x="280" y="510" width="30" height="20" fill="#10b981" opacity="0.4"/>
+    </g>
+
+    <!-- Buffer Line -->
+    <line class="line-buffer step-el step-3" x1="40" y1="300" x2="760" y2="300"/>
+    <text class="text-label step-el step-3" x="770" y="295" fill="#818cf8">Buffer (1.001)</text>
+
+    <!-- Candle 5: 09:35 (Breakout) -->
+    <g class="step-el step-4">
+      <line class="candle-wick" x1="355" y1="270" x2="355" y2="360" stroke="#10b981"/>
+      <rect x="340" y="290" width="30" height="60" fill="#10b981"/>
+      <text x="340" y="440" fill="#64748b" font-size="12">09:35</text>
+      
+      <!-- High Volume Bar -->
+      <rect x="340" y="450" width="30" height="80" fill="#38bdf8" opacity="0.9"/>
+      
+      <!-- Entry Marker -->
+      <circle cx="355" cy="290" r="5" fill="#38bdf8"/>
+      <text x="375" y="285" fill="#38bdf8" font-size="14" font-weight="bold">ENTRY</text>
+    </g>
+
+    <!-- Targets & SL -->
+    <line class="line-sl step-el step-5" x1="330" y1="400" x2="760" y2="400"/>
+    <text class="text-label step-el step-5" x="770" y="405" fill="#ef4444">STOP LOSS</text>
+
+    <line class="line-target step-el step-5" x1="330" y1="110" x2="760" y2="110"/>
+    <text class="text-label step-el step-5" x="770" y="115" fill="#10b981">TARGET</text>
+    
+    <!-- Range Arrow -->
+    <g class="step-el step-2" id="range-arrow">
+      <line x1="80" y1="310" x2="80" y2="400" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+      <text x="35" y="360" fill="#94a3b8" font-size="12">Range</text>
+    </g>
+
+    <!-- Target Arrow -->
+    <g class="step-el step-5" id="target-arrow">
+      <line x1="450" y1="290" x2="450" y2="110" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow-green)"/>
+      <text x="465" y="200" fill="#10b981" font-size="13" font-weight="600">Target Distance = 2x Range</text>
+    </g>
+
+    <!-- Arrow Heads -->
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" />
+      </marker>
+      <marker id="arrow-green" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" />
+      </marker>
+    </defs>
+
+  </svg>
+</div>
+
+<script>
+  const explanations = [
+    "Welcome! Let's explore the <span class='highlight'>Opening Range Breakout (ORB)</span> strategy. Click 'Start Animation'.",
+    "<strong>Step 1: The Opening Range (09:15 - 09:30)</strong><br>We wait for the first three 5-minute candles to form. This establishes the initial market direction and volatility.",
+    "<strong>Step 2: Establish High and Low</strong><br>We identify the highest point (<span class='highlight' style='color:#fbbf24'>ORH</span>) and lowest point (<span class='highlight' style='color:#fbbf24'>ORL</span>) of this 15-minute range.",
+    "<strong>Step 3: Wait & Buffer</strong><br>We add a 1.001x buffer to the ORH to avoid fake breakouts. Notice the volume requirements below.",
+    "<strong>Step 4: The Breakout!</strong><br>At 09:35, a candle closes <em>above the buffer</em> AND the volume is <em>≥ 1.5× the 20-period average</em>. This is our <span class='highlight'>ENTRY</span> signal for a LONG trade.",
+    "<strong>Step 5: Risk & Reward</strong><br>Immediately upon entry, we place a <span class='highlight' style='color:#ef4444'>Stop Loss</span> at the other side of the opening range (ORL) and set a <span class='highlight' style='color:#10b981'>Target</span> that is 2x the width of the initial range."
+  ];
+
+  let currentStep = 0;
+  const maxSteps = 5;
+
+  const expText = document.getElementById('exp-text');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+
+  function updateVisuals() {
+    // Update explanation text
+    expText.innerHTML = explanations[currentStep];
+    
+    // Toggle element opacities based on step
+    for(let i=1; i<=maxSteps; i++) {
+      const elements = document.querySelectorAll('.step-' + i);
+      elements.forEach(el => {
+        el.style.opacity = i <= currentStep ? '1' : '0';
+      });
+    }
+
+    // Button states
+    btnPrev.disabled = currentStep === 0;
+    
+    if(currentStep === maxSteps) {
+      btnNext.disabled = true;
+      btnNext.innerText = "Completed";
+    } else {
+      btnNext.disabled = false;
+      btnNext.innerText = currentStep === 0 ? "Start Animation" : "Next Step";
+    }
+  }
+
+  btnNext.addEventListener('click', () => {
+    if(currentStep < maxSteps) {
+      currentStep++;
+      updateVisuals();
+    }
+  });
+
+  btnPrev.addEventListener('click', () => {
+    if(currentStep > 0) {
+      currentStep--;
+      updateVisuals();
+    }
+  });
+
+  // Init visual state
+  updateVisuals();
+</script>
+</body>
+</html>
