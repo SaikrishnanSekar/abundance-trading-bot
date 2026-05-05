@@ -39,16 +39,15 @@ Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this
 - expected_impact: Higher-frequency setups at market open; ORB historically 55–65% WR on NSE 5-min data with volume filter.
 - risk: Synthetic backtest WR (87%) is optimistic — real fills, spread, and gap opens will compress it. Capped R-budget limits max loss to ₹500 across the 5-trade trial.
 - cooldown_until: 2026-05-18
-- status: PENDING
+- status: ACCEPTED — 2026-05-05
 
 **Rationale**: Two independent community sources (@TradeWithSudhir, SSRN Wang & Gangwar Mar 2025) confirm ORB with volume confirmation as the most consistently cited edge on NSE intraday. Backtest across 250-day synthetic Nifty 50 universe shows positive expectancy at 15-min range with 1.5× volume filter. Iter 2 (30-min) over-filters (15 trades/year) — Iter 1 params proposed. Evidence-N is synthetic so minimum-N waiver requested for operational tweak tier (real evidence will accumulate over the 5-trade trial before any structural adoption).
 
 **Evidence summary**: backtests/strategy1_orb.py — Iter 1: 454 trades, 87% WR, Sharpe 25.7, max DD 1.21%, total PnL +₹58,841. Real-world adjustment: discount WR to 60%, Sharpe to ~3–4. Still positive expectancy.
 
-**Accept**: Add the ORB sub-setup rules above to `TRADING-STRATEGY.md` under a new `## ORB Trial Sleeve` section.
-**Reject**: Move this block to STRATEGY-PROPOSALS-REJECTED.md with dim:orb_test_sleeve.
+**Real-data validation (2026-05-05)**: backtests/real_orb_backtest.py — 546 trades across 15 tickers, 56 trading days. Real WR 52.0%, Avg R 1.10, PnL +₹7,166, Sharpe 1.10, Max DD 15.75%. Preferred tickers: BHARTIARTL (65.2%), HDFCBANK (60.6%), RELIANCE/AXISBANK (56.4%).
 
-Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.
+**Accepted**: ORB Trial Sleeve section added to `TRADING-STRATEGY.md` on 2026-05-05.
 
 ---
 

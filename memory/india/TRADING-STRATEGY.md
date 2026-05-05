@@ -121,3 +121,53 @@ python3 scripts/size_calc.py \
 
 Nifty 50 constituents only. Security IDs in `data/nse_securities.json`.
 Tier 2/3 sleeves (midcap/ETF) suspended until further notice.
+
+---
+
+## ORB Trial Sleeve (approved 2026-05-05)
+
+**Status**: ACTIVE — 5-trade live trial. Review post-mortems after trade 5 before extending.
+
+### Setup rules
+
+- **Timeframe**: 5-min candles, NSE 09:15–15:15 IST
+- **Opening range**: first 3 × 5-min candles (09:15, 09:20, 09:25)
+  - ORH = max(high of bars 0–2)
+  - ORL = min(low  of bars 0–2)
+- **Long entry**: 5-min close > ORH × 1.001 AND volume ≥ 1.5× 20-bar rolling avg
+- **Short entry**: 5-min close < ORL × 0.999 AND volume ≥ 1.5× 20-bar rolling avg
+- **Stop**: other side of opening range (ORL for long, ORH for short)
+- **Target**: entry ± 2× (ORH − ORL)
+- **Entry window**: 09:30–13:00 IST only; flat by 15:10
+- **Max 1 trade per ticker per day** (first signal only)
+
+### Sizing during trial
+
+- R-budget: **₹100 per trade** (half of Tier 2 standard) for the 5-trade trial
+- Use `scripts/size_calc.py` — pass `--tier 1` to get the ₹100 cap
+- All existing gates still apply: VIX < 20, watchlist, daily loss cap, 3-position max
+
+### Preferred tickers (real-data validated)
+
+From 56-day real NSE 5-min backtest (2026-02-06 → 2026-05-05), prioritise these four
+which showed ≥ 56% win rate on real data:
+
+| Ticker | Real WR | Real AvgR | Real PnL (56d) |
+|--------|---------|-----------|----------------|
+| BHARTIARTL | 65.2% | 1.01 | +₹1,794 |
+| HDFCBANK | 60.6% | 1.38 | +₹1,404 |
+| RELIANCE | 56.4% | 1.41 | +₹1,501 |
+| AXISBANK | 56.4% | 1.36 | +₹1,536 |
+
+Avoid ORB on WIPRO, TATASTEEL, INFY, TCS until performance reviewed (WR ≤ 45–51%).
+
+### Exit rule
+
+After 5 live ORB trades, append post-mortems and update `STRATEGY-PROPOSALS.md`:
+- If live WR ≥ 50% and PnL > 0 → propose upgrade to full ₹200 R-budget
+- If live WR < 50% or PnL ≤ 0 → propose suspension; move to REJECTED
+
+### What does NOT change
+
+All CORE hard rules (VIX gate, 3-position cap, 15:15 square-off, daily loss cap,
+kill switch) still apply. ORB trades count toward the 3-position intraday limit.
