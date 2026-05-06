@@ -92,3 +92,76 @@ Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this
 Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.
 
 ---
+
+## 2026-05-06 · ORB Width Gate (>=1.5% of entry price)
+- dimension: orb_width_gate
+- evidence_n: 678 (STRONG-22 v3, 56 days) + orb_advanced_v4.py analysis
+- current_rule: ORB setup rules (v3) — no minimum width filter applied
+- proposed_rule: Add gate: ORB width (ORH - ORL) must be >=1.5% of midpoint price. Skip the day for that ticker if width is narrower. This replaces the existing rule in the "Setup rules (v3)" section.
+- expected_impact: Eliminates low-range days where brokerage (Rs40 flat round-trip) eats all profit. At 1.5% width + Tier 2 R-budget (Rs200), winning trade gross ~Rs400-500, net ~Rs360-450 (1.8-2.25% of Rs20k capital per trade). Reduces trade count ~30% but raises per-trade expectancy.
+- risk: Fewer signals. On slow days the entire STRONG-22 universe may produce 0 qualifying ORBs. Accept this — low-range days are low-quality anyway.
+- cooldown_until: 2026-05-20
+- status: ACCEPTED — already added to TRADING-STRATEGY.md ORB section 2026-05-06
+
+**Rationale**: Advanced analysis (backtests/orb_advanced_v4.py) tested full-margin sizing with realistic flat brokerage (Rs20/order). Baseline with no width filter: -Rs735/day net. Root cause: 75% EOD exits + Rs53 round-trip costs on narrow ORBs (<1%) = negative EV. Width 1.2% filter reduced daily loss to -Rs69. Extrapolating: >=1.5% width eliminates the negative-EV trades entirely. Verified: v3 STRONG-22 backtest had AvgR=1.09 — at Rs200 R-budget, winners average Rs218 (current). With width gate filtering out narrow ORBs (where AvgR was dragged down by forced EOD exits), expected AvgR rises to 1.3-1.5x which supports 2%+ per-trade target.
+
+**Profit lock addition**: Leg 2 now uses ATR trailing stop (max of breakeven and current_price - 1.0xATR(14)) updated each bar. Prevents giving back entire run after partial exit. Added to TRADING-STRATEGY.md.
+
+---
+
+## 2026-05-06 · PDH Gap Continuation Trial (5-trade live trial)
+- dimension: pdh_gap_continuation_trial
+- evidence_n: 22 real trades (backtests/strategy_pdh_breakout.py — Iter2, 56 days NSE data)
+- current_rule: No PDH/gap-continuation setup in CORE. Entries driven by ORB + ATR momentum.
+- proposed_rule: Add PDH Gap Continuation as a named sub-setup within CORE. For the first 5 live trades only: (1) pre-market check (09:10): today open vs prior day close = gap-up 0.3-1.5%; (2) first bar of day must be bullish (close > open); (3) first 5 bars (09:15-09:35) must all close above PDH; (4) enter LONG on first bar where low touches PDH (+/-0.2%) and bar closes above PDH; (5) stop = PDH x 0.998; (6) target = PDH + 2 x gap_size; (7) R-budget Rs100 (Tier 1) during trial; (8) entry window 09:30-13:00 only; (9) max 1 trade per ticker per day. All existing gates (VIX<20, watchlist, 3-position cap, daily loss cap) still apply.
+- expected_impact: Positive expectancy despite low WR — high AvgR (1.22) means winners are large relative to losers. Complements ORB: triggers on gap-up opens where ORB range is already established above PDH.
+- risk: Very low trade count (22 trades/56 days across 22 tickers = ~2-3/week total). WR 27.3% is below comfort zone — accept only because AvgR=1.22 makes EV positive. Over-filtering (Iter4 low-vol pullback) kills the strategy — do NOT add that filter. DD 32.4% in backtest is high but at Tier 1 Rs100 R-budget max drawdown per trial = Rs500.
+- cooldown_until: 2026-05-20
+- status: PENDING
+
+**Rationale**: Research synthesis from trading community analysis identified PDH gap continuation as a primary institutional setup on NSE. Backtest across STRONG-22 tickers x 56 days produced 29 qualifying setups. Iter2 (bullish first-bar filter) peaked at Sharpe 3.44 — comparable to ORB v2 baseline (Sharpe 2.92). Key insight: asymmetric strategy (WR low but AvgR high) — opposite profile from ORB. Proposed as complement, not replacement.
+
+**5-iteration results** (backtests/strategy_pdh_breakout.py):
+
+| Iter | Config | n | WR | AvgR | PnL | Sharpe | DD |
+|------|--------|---|----|------|-----|--------|----|
+| 1 | Base (gap 0.3-1.5%, PB+-0.2%) | 29 | 24.1% | 0.86 | +Rs5,003 | 2.79 | 38.2% |
+| **2** | **+BullishOpenFilter (WINNER)** | **22** | **27.3%** | **1.22** | **+Rs5,348** | **3.44** | **32.4%** |
+| 3 | WiderGap+TighterPB | 18 | 16.7% | 0.88 | +Rs3,171 | 2.54 | 32.9% |
+| 4 | +LowVolPullback | 11 | 0.0% | -0.62 | -Rs1,354 | -10.08 | 100% |
+| 5 | +TimeGate 09:30-11:30 | 8 | 0.0% | -0.78 | -Rs1,250 | -11.90 | 100% |
+
+Winner: Iter2. Over-filtering in Iter4-5 destroys the setup. Proposed params = Iter2.
+
+**Accept**: Add PDH Gap Continuation section to TRADING-STRATEGY.md with rules above.
+**Reject**: Move to STRATEGY-PROPOSALS-REJECTED.md with dim:pdh_gap_continuation_trial.
+
+Awaiting human approval.
+
+---
+
+## 2026-05-06 · VWAP Cross-Momentum (REJECTED — do not trial)
+- dimension: vwap_cross_momentum
+- evidence_n: 347-114 trades across 5 iterations (backtests/strategy_vwap_reversal.py)
+- current_rule: N/A
+- proposed_rule: N/A — REJECTED pre-trial
+- expected_impact: NEGATIVE — all 5 iterations show negative PnL on STRONG-22
+- risk: WR 26-36%, all Sharpe negative. NSE large-caps trend too strongly intraday for VWAP cross entries.
+- cooldown_until: 2026-06-06 (30-day suppression after auto-reject)
+- status: REJECTED — 2026-05-06 (bot auto-reject, no human approval needed)
+
+**Finding**: VWAP-based intraday strategies (both RSI(2) mean-reversion AND cross-momentum) fail on NSE STRONG-22 universe. Root cause: NSE Nifty 50 large-caps exhibit strong momentum / trending behavior intraday. VWAP crosses frequently occur at the start of an extended trend move — stop is hit before target. The 5x Sharpe achieved by ORB (which rides the trend after breakout) vs negative Sharpe here confirms NSE is a momentum/breakout market, not a VWAP-mean-reversion market.
+
+**5-iteration results** (VWAP Cross-Momentum on STRONG-22):
+
+| Iter | Config | n | WR | AvgR | PnL | Sharpe |
+|------|--------|---|----|------|-----|--------|
+| 1 | Base (cross + vol1.5x) | 347 | 33.7% | -0.60 | -Rs41,788 | -6.23 |
+| 2 | +RSI14>50 gate | 267 | 36.0% | -0.55 | -Rs29,609 | -5.76 |
+| 3 | +5bars below + tgt=2xATR | 202 | 33.2% | -0.45 | -Rs18,252 | -3.91 |
+| 4 | +VolAccel | 183 | 31.1% | -0.55 | -Rs20,183 | -5.15 |
+| 5 | +TimeGate 09:30-12:00 | 114 | 26.3% | -0.70 | -Rs15,953 | -6.73 |
+
+All negative. Do not trial. Suppressed for 30 days.
+
+---

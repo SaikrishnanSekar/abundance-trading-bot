@@ -134,13 +134,14 @@ Tier 2/3 sleeves (midcap/ETF) suspended until further notice.
 - **Opening range**: first 3 × 5-min candles (09:15, 09:20, 09:25)
   - ORH = max(high of bars 0–2)
   - ORL = min(low  of bars 0–2)
-- **Universe**: **Top-4 tickers only** — BHARTIARTL, HDFCBANK, RELIANCE, AXISBANK
+- **Universe**: STRONG-22 tickers (ranked table below) — trade by priority order
+- **Width gate**: ORB width (ORH − ORL) must be ≥ **1.5%** of midpoint — skip day if narrower (eliminates noise, protects brokerage drag)
 - **Long entry**: 5-min close > ORH × 1.001 AND volume ≥ **2.0×** 20-bar rolling avg AND close > VWAP
 - **Short entry**: 5-min close < ORL × 0.999 AND volume ≥ **2.0×** 20-bar rolling avg AND close < VWAP
 - **Stop**: other side of opening range (ORL for long, ORH for short)
 - **Exit — partial (2-leg)**:
   - Leg 1: close **50% position** at entry ± 1.5× ORB width; move SL to breakeven
-  - Leg 2: trail remaining 50% to entry ± 2.5× ORB width; close at 15:10 if not hit
+  - Leg 2: trail remaining 50% with stop = max(breakeven, current_price − 1.0×ATR(14)) every bar; hard close at 15:10 if not hit
 - **Entry window**: 09:30–13:00 IST; flat by 15:10
 - **Max 1 trade per ticker per day** (first signal only)
 

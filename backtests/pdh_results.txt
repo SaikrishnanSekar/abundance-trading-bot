@@ -1,0 +1,22 @@
+======================================================================
+STRATEGY 2: PDH Gap Continuation — 5 Iterations
+Universe: STRONG-22 | R-budget: Rs200 | 56-day real NSE data
+======================================================================
+
+Iter1 Base (gap 0.3-1.5%, PB±0.2%, hold 5bars)
+  n=29  WR=24.1%  AvgR=0.86  PnL=Rs5,003  Sharpe=2.79  DD=38.2%
+
+Iter2 +BullishOpenFilter
+  n=22  WR=27.3%  AvgR=1.22  PnL=Rs5,348  Sharpe=3.44  DD=32.4%
+
+Iter3 WiderGap+TighterPB (gap 0.5-2.0%, PB±0.1%)
+  n=18  WR=16.7%  AvgR=0.88  PnL=Rs3,171  Sharpe=2.54  DD=32.9%
+
+Iter4 +LowVolPullback (vol<0.7×avg at PB bar)
+  n=11  WR=0.0%  AvgR=-0.62  PnL=Rs-1,354  Sharpe=-10.08  DD=100.0%
+
+Iter5 +TimeGate (entry only 09:30-11:30)
+  n=8  WR=0.0%  AvgR=-0.78  PnL=Rs-1,250  Sharpe=-11.9  DD=100.0%
+
+*** BEST CONFIG (Sharpe): Iter2 +BullishOpenFilter
+    n=22 WR=27.3% AvgR=1.22 PnL=Rs5,348 Sharpe=3.44 DD=32.4%

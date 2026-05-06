@@ -1,0 +1,22 @@
+======================================================================
+STRATEGY 1: VWAP Cross-Momentum — 5 Iterations
+Universe: STRONG-22 | R-budget: Rs200 | 56-day real NSE data
+======================================================================
+
+Iter1 Base (VWAP cross + vol1.5x, tgt=1.5xATR, >=3bars below)
+  n=347  WR=33.7%  AvgR=-0.6  PnL=Rs-41,788  Sharpe=-6.23  DD=100.3%
+
+Iter2 +RSI14>50 gate on cross bar
+  n=267  WR=36.0%  AvgR=-0.55  PnL=Rs-29,609  Sharpe=-5.76  DD=100.4%
+
+Iter3 +min5bars below VWAP + wider tgt=2.0xATR
+  n=202  WR=33.2%  AvgR=-0.45  PnL=Rs-18,252  Sharpe=-3.91  DD=100.1%
+
+Iter4 +VolAccel (cross vol > prior bar)
+  n=183  WR=31.1%  AvgR=-0.55  PnL=Rs-20,183  Sharpe=-5.15  DD=101.0%
+
+Iter5 +TimeGate 09:30-12:00
+  n=114  WR=26.3%  AvgR=-0.7  PnL=Rs-15,953  Sharpe=-6.73  DD=100.0%
+
+*** BEST CONFIG (Sharpe): Iter3 +min5bars below VWAP + wider tgt=2.0xATR
+    n=202 WR=33.2% AvgR=-0.45 PnL=Rs-18,252 Sharpe=-3.91 DD=100.1%
