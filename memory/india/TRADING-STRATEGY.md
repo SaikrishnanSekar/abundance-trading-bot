@@ -152,13 +152,16 @@ Tier 2/3 sleeves (midcap/ETF) suspended until further notice.
 
 ### Tuning history (all on 56 days real NSE 5-min data)
 
-| Version | Config | Trades | Win Rate | Avg R | Total PnL | Sharpe | Max DD |
-|---------|--------|--------|----------|-------|-----------|--------|--------|
-| v1 (real baseline) | vol 1.5×, all tickers | 546 | 52.0% | 1.10 | +₹7,166 | 1.10 | 15.75% |
-| v2 (vol tuned) | vol 2.0×, all tickers | **394** | 56.9% | 1.21 | +₹13,531 | 2.92 | 9.96% |
-| **v3 (current)** | vol 2.0× + top-4 + VWAP + partial exit | **117** | **68.4%** | **1.32** | +₹7,195 | **6.45** | **2.13%** |
+| Version | Config | Tickers | Trades | Win Rate | Avg R | Total PnL | Sharpe | Max DD |
+|---------|--------|---------|--------|----------|-------|-----------|--------|--------|
+| v1 real baseline | vol 1.5×, 14 tickers | 14 | 546 | 52.0% | 1.10 | +₹7,166 | 1.10 | 15.75% |
+| v2 vol tuned | vol 2.0×, 14 tickers | 14 | 394 | 56.9% | 1.21 | +₹13,531 | 2.92 | 9.96% |
+| v3 top-4 | vol 2.0× + VWAP + partial | 4 | 117 | 68.4% | 1.32 | +₹7,195 | 6.45 | 2.13% |
+| **v3 full scan** | vol 2.0× + VWAP + partial, all 48 | 48 | 1486 | 57.0% | 1.21 | +₹50,631 | 2.97 | 8.68% |
+| **v3 STRONG tier** | vol 2.0× + VWAP + partial, top-22 | **22** | **678** | **67.4%** | **1.09** | **+₹38,113** | **5.04** | **4.81%** |
 
-> v3 trades fewer setups but each is significantly higher quality. Per-trade PnL: v2 ≈ ₹34, v3 ≈ ₹62.
+> STRONG tier (22 tickers, v3 params): best balance of WR, trade frequency, and risk-adjusted return.
+> Per-trade PnL: v2 all-tickers ≈ ₹34 → v3 STRONG-22 ≈ ₹56.
 
 ### v3 additional config results (2026-05-06 tuning study)
 
@@ -178,16 +181,47 @@ Tier 2/3 sleeves (midcap/ETF) suspended until further notice.
 - Use `scripts/size_calc.py` — pass `--tier 1` to get the ₹100 cap
 - All existing gates still apply: VIX < 20, watchlist, daily loss cap, 3-position max
 
-### Validated ticker universe (do NOT trade ORB on any other ticker)
+### Validated ticker universe — full Nifty 50 scan (2026-05-06)
 
-| Ticker | Individual WR | Note |
-|--------|--------------|------|
-| BHARTIARTL | 65.2% | Strongest single-ticker WR |
-| HDFCBANK | 60.6% | Best AvgR among large-caps |
-| RELIANCE | 56.4% | High volume — vol 2.0× filter fires cleanly |
-| AXISBANK | 56.4% | Consistent across sessions |
+Backtested across all 48 available Nifty 50 tickers, 56 days real NSE 5-min data.
+See `backtests/orb_nifty50_full.py` for methodology.
 
-**Hard rule**: No ORB trades on WIPRO, TATASTEEL, INFY, TCS, or any ticker not in this list.
+**STRONG tier (WR ≥ 58%, n ≥ 10, PnL > 0) — trade these first:**
+
+| Rank | Ticker | WR | AvgR | Sharpe | Note |
+|------|--------|-----|------|--------|------|
+| 1 | SHRIRAMFIN | 73.3% | 1.26 | 8.16 | #1 overall — highest WR + Sharpe |
+| 2 | BHARTIARTL | 70.6% | 1.17 | 6.59 | Confirmed from prior study |
+| 3 | HEROMOTOCO | 69.0% | 1.17 | 6.64 | High Sharpe — priority tier |
+| 4 | INDUSINDBK | 69.4% | 1.14 | 6.22 | High trade count (n=36) |
+| 5 | SUNPHARMA | 69.0% | 1.03 | 5.39 | Consistent |
+| 6 | DIVISLAB | 68.4% | 0.96 | 4.30 | High WR, lower AvgR |
+| 7 | TECHM | 67.7% | 1.02 | 4.53 | Tech sector ORB works well |
+| 8 | ADANIPORTS | 66.7% | 1.02 | 4.56 | Infra — consistent |
+| 9 | HINDUNILVR | 65.6% | 1.10 | 4.56 | FMCG stability |
+| 10 | ULTRACEMCO | 65.7% | 1.08 | 4.92 | |
+| 11 | LT | 62.5% | 1.57 | 4.62 | Best AvgR in STRONG tier |
+| 12 | BEL | 61.5% | 1.71 | 6.22 | High AvgR + Sharpe — underrated |
+| 13 | BAJAJ-AUTO | 61.1% | 1.09 | 3.49 | |
+| 14 | KOTAKBANK | 64.3% | 0.80 | 2.24 | WR good, AvgR thin — use Tier 1 |
+| 15 | AXISBANK | 60.0% | 1.57 | 5.10 | Confirmed from prior study |
+| 16 | BAJAJFINSV | 60.0% | 1.22 | 3.68 | |
+| 17 | HDFCBANK | 60.0% | 1.98 | 6.68 | Best AvgR in any tier |
+| 18 | DRREDDY | 58.1% | 1.35 | 3.50 | Pharma |
+| 19 | SBIN | 59.4% | 0.99 | 2.41 | PSU bank — watch spread |
+| 20 | WIPRO | 59.3% | 1.45 | 4.60 | Previously skip-listed — reversed |
+| 21 | TCS | 58.3% | 0.75 | 0.34 | WR ok but thin AvgR — Tier 1 only |
+| 22 | INFY | 70.8% | 0.71 | 3.16 | High WR but AvgR < 1 — Tier 1 only |
+
+**SKIP (negative PnL or WR < 50%):** JSWSTEEL, TATASTEEL, TITAN, NESTLEIND, BPCL, GRASIM, POWERGRID, BRITANNIA, CIPLA, ONGC, BAJFINANCE
+
+**UNTESTED** (fetch failed): TATAMOTORS, ZOMATO — do not trade until backtested.
+
+> When multiple signals fire simultaneously, prioritise by WR × Sharpe score (col order above).
+> Max 3 open intraday positions total — ORB trades count against this limit.
+
+**Previous top-4 status:** RELIANCE drops to GOOD tier (56.2% WR in full scan — below STRONG threshold).
+BHARTIARTL, HDFCBANK, AXISBANK remain STRONG and confirmed.
 
 ### DO NOT trade gap-direction filter
 
