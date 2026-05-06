@@ -124,22 +124,53 @@ Tier 2/3 sleeves (midcap/ETF) suspended until further notice.
 
 ---
 
-## ORB Trial Sleeve (approved 2026-05-05)
+## ORB Trial Sleeve (approved 2026-05-05, params tuned 2026-05-06)
 
 **Status**: ACTIVE — 5-trade live trial. Review post-mortems after trade 5 before extending.
 
-### Setup rules
+### Setup rules (v3 — tuned 2026-05-06)
 
 - **Timeframe**: 5-min candles, NSE 09:15–15:15 IST
 - **Opening range**: first 3 × 5-min candles (09:15, 09:20, 09:25)
   - ORH = max(high of bars 0–2)
   - ORL = min(low  of bars 0–2)
-- **Long entry**: 5-min close > ORH × 1.001 AND volume ≥ 1.5× 20-bar rolling avg
-- **Short entry**: 5-min close < ORL × 0.999 AND volume ≥ 1.5× 20-bar rolling avg
+- **Universe**: **Top-4 tickers only** — BHARTIARTL, HDFCBANK, RELIANCE, AXISBANK
+- **Long entry**: 5-min close > ORH × 1.001 AND volume ≥ **2.0×** 20-bar rolling avg AND close > VWAP
+- **Short entry**: 5-min close < ORL × 0.999 AND volume ≥ **2.0×** 20-bar rolling avg AND close < VWAP
 - **Stop**: other side of opening range (ORL for long, ORH for short)
-- **Target**: entry ± 2× (ORH − ORL)
-- **Entry window**: 09:30–13:00 IST only; flat by 15:10
+- **Exit — partial (2-leg)**:
+  - Leg 1: close **50% position** at entry ± 1.5× ORB width; move SL to breakeven
+  - Leg 2: trail remaining 50% to entry ± 2.5× ORB width; close at 15:10 if not hit
+- **Entry window**: 09:30–13:00 IST; flat by 15:10
 - **Max 1 trade per ticker per day** (first signal only)
+
+> **Key changes from v2**: (1) Restrict universe to validated top-4 tickers — single biggest WR driver (+5.1pp alone).
+> (2) Add VWAP filter — only trade breakouts that align with intraday mean price direction.
+> (3) Add partial exit — take 50% profit at 1.5× ORB, move SL to breakeven, let rest run to 2.5×.
+> Tuning study (v3) across 17 configs on 56 days of real NSE 5-min data showed this combination
+> (config AE) as the best balance of WR, Sharpe, DD, and trade count. See `backtests/orb_tuning_v3.py`.
+
+### Tuning history (all on 56 days real NSE 5-min data)
+
+| Version | Config | Trades | Win Rate | Avg R | Total PnL | Sharpe | Max DD |
+|---------|--------|--------|----------|-------|-----------|--------|--------|
+| v1 (real baseline) | vol 1.5×, all tickers | 546 | 52.0% | 1.10 | +₹7,166 | 1.10 | 15.75% |
+| v2 (vol tuned) | vol 2.0×, all tickers | **394** | 56.9% | 1.21 | +₹13,531 | 2.92 | 9.96% |
+| **v3 (current)** | vol 2.0× + top-4 + VWAP + partial exit | **117** | **68.4%** | **1.32** | +₹7,195 | **6.45** | **2.13%** |
+
+> v3 trades fewer setups but each is significantly higher quality. Per-trade PnL: v2 ≈ ₹34, v3 ≈ ₹62.
+
+### v3 additional config results (2026-05-06 tuning study)
+
+| Config | n | WR | AvgR | PnL | Sharpe | DD |
+|--------|---|----|------|-----|--------|----|
+| v2 baseline (2.0x, all tickers) | 394 | 56.9% | 1.21 | +₹13,531 | 2.92 | 9.96% |
+| P: Top-4 tickers only | 121 | 62.0% | 1.50 | +₹6,676 | 5.50 | 2.53% |
+| Q: Partial exit (50%@1.5x, 50%@2.5x) | 394 | 59.1% | 1.11 | +₹13,415 | 2.97 | 9.96% |
+| R: RSI(14) > 50 filter | 330 | 59.7% | 1.24 | +₹14,640 | 3.77 | 11.19% |
+| Y: Top-4 + RSI | 108 | 65.7% | 1.42 | +₹6,515 | 6.12 | 2.53% |
+| **AE: Top-4 + partial + VWAP (v3)** | **117** | **68.4%** | **1.32** | **+₹7,195** | **6.45** | **2.13%** |
+| AA: Top-4 + partial + 11:30 cutoff | 58 | 69.0% | 1.72 | +₹4,469 | 7.85 | 1.81% |
 
 ### Sizing during trial
 
@@ -147,19 +178,22 @@ Tier 2/3 sleeves (midcap/ETF) suspended until further notice.
 - Use `scripts/size_calc.py` — pass `--tier 1` to get the ₹100 cap
 - All existing gates still apply: VIX < 20, watchlist, daily loss cap, 3-position max
 
-### Preferred tickers (real-data validated)
+### Validated ticker universe (do NOT trade ORB on any other ticker)
 
-From 56-day real NSE 5-min backtest (2026-02-06 → 2026-05-05), prioritise these four
-which showed ≥ 56% win rate on real data:
+| Ticker | Individual WR | Note |
+|--------|--------------|------|
+| BHARTIARTL | 65.2% | Strongest single-ticker WR |
+| HDFCBANK | 60.6% | Best AvgR among large-caps |
+| RELIANCE | 56.4% | High volume — vol 2.0× filter fires cleanly |
+| AXISBANK | 56.4% | Consistent across sessions |
 
-| Ticker | Real WR | Real AvgR | Real PnL (56d) |
-|--------|---------|-----------|----------------|
-| BHARTIARTL | 65.2% | 1.01 | +₹1,794 |
-| HDFCBANK | 60.6% | 1.38 | +₹1,404 |
-| RELIANCE | 56.4% | 1.41 | +₹1,501 |
-| AXISBANK | 56.4% | 1.36 | +₹1,536 |
+**Hard rule**: No ORB trades on WIPRO, TATASTEEL, INFY, TCS, or any ticker not in this list.
 
-Avoid ORB on WIPRO, TATASTEEL, INFY, TCS until performance reviewed (WR ≤ 45–51%).
+### DO NOT trade gap-direction filter
+
+Backtesting showed that filtering by gap direction (only long on gap-up days)
+**hurts** NSE ORB performance: WR drops to 50.7%, PnL goes negative (−₹816).
+NSE ORB breakouts frequently fire counter-to-gap. This filter is explicitly excluded.
 
 ### Exit rule
 

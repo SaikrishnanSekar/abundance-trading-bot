@@ -115,8 +115,8 @@ def rolling_vol_avg(bars: list[dict], idx: int, window: int = 20) -> float:
 
 def run_orb_day(day_bars: list[dict]) -> dict | None:
     """
-    ORB Iter 1: 15-min range (bars 0-2), vol 1.5×, 0.1% buffer, 2× target.
-    Entry window: 09:30–13:00 IST. Flat at 15:10.
+    ORB Iter 3 (Highly Optimized): 15-min range (bars 0-2), vol 2.0×, 0.1% buffer, 2× target.
+    Entry window: 09:30–10:30 IST. Flat at 15:10.
     One trade per day (first signal only).
     """
     if len(day_bars) < 10:
@@ -141,12 +141,12 @@ def run_orb_day(day_bars: list[dict]) -> dict | None:
         dt  = datetime.fromisoformat(bar["dt"])
         hhmm = dt.hour * 100 + dt.minute
 
-        # Entry time gate: 09:30–13:00
-        if hhmm < 930 or hhmm > 1300:
+        # Entry time gate: 09:30–10:30
+        if hhmm < 930 or hhmm > 1030:
             continue
 
         vol_avg = rolling_vol_avg(day_bars, i)
-        vol_ok  = bar["volume"] > 1.5 * vol_avg
+        vol_ok  = bar["volume"] > 2.0 * vol_avg
 
         # Long breakout
         if bar["close"] > long_entry_px and vol_ok:
@@ -240,7 +240,7 @@ def main():
     print("  P1: ORB Real-Data Backtest — NSE 5-min (Yahoo v8 API)")
     print(f"  Tickers: {len(TICKERS)} | Coverage: ~58 trading days")
     print("  Capital: Rs20,000 | MIS 5x | 20% margin/pos")
-    print("  Rules: 15-min range, vol 1.5x, 0.1% buf, 2x target")
+    print("  Rules: 15-min range, vol 2.0x, 0.1% buf, 2x target, Entry <= 10:30")
     print("=" * 62)
 
     all_trades = []

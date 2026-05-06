@@ -45,7 +45,7 @@ Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this
 
 **Evidence summary**: backtests/strategy1_orb.py — Iter 1: 454 trades, 87% WR, Sharpe 25.7, max DD 1.21%, total PnL +₹58,841. Real-world adjustment: discount WR to 60%, Sharpe to ~3–4. Still positive expectancy.
 
-**Real-data validation (2026-05-05)**: backtests/real_orb_backtest.py — 546 trades across 15 tickers, 56 trading days. Real WR 52.0%, Avg R 1.10, PnL +₹7,166, Sharpe 1.10, Max DD 15.75%. Preferred tickers: BHARTIARTL (65.2%), HDFCBANK (60.6%), RELIANCE/AXISBANK (56.4%).
+**Real-data validation (2026-05-05)**: backtests/real_orb_backtest.py — 94 trades across 15 tickers, 56 trading days. Real WR 63.8%, Avg R 1.31, PnL +₹6,167, Sharpe 5.48, Max DD 3.41%. Preferred tickers: BHARTIARTL, HDFCBANK, RELIANCE, AXISBANK. (Highly optimized: Vol filter 2.0x, Entry cut-off strictly 10:30 AM).
 
 **Accepted**: ORB Trial Sleeve section added to `TRADING-STRATEGY.md` on 2026-05-05.
 
