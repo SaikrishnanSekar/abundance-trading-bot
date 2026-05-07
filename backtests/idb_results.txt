@@ -1,0 +1,22 @@
+======================================================================
+STRATEGY: Intraday N-Bar Donchian Breakout -- 5 Iterations
+Universe: STRONG-22 | R-budget: Rs200 | 56-day real NSE data
+======================================================================
+
+Iter1 Base (N=6, vol2.0x, tgt=1.5x, no VWAP)
+  n=764  WR=38.1%  AvgR=-0.27  PnL=Rs-41,204  Sharpe=-3.37  DD=100.0%
+
+Iter2 +VWAP alignment (proven in ORB)
+  n=720  WR=38.9%  AvgR=-0.24  PnL=Rs-34,985  Sharpe=-3.04  DD=100.9%
+
+Iter3 Tighter N=4 (20-min range), tgt=2.0x
+  n=749  WR=35.6%  AvgR=-0.25  PnL=Rs-37,248  Sharpe=-2.52  DD=102.5%
+
+Iter4 +Range width gate (<= 1.5% of price)
+  n=747  WR=35.9%  AvgR=-0.25  PnL=Rs-36,817  Sharpe=-2.49  DD=102.5%
+
+Iter5 +Time gate 09:45-12:30
+  n=669  WR=35.1%  AvgR=-0.28  PnL=Rs-37,475  Sharpe=-2.83  DD=100.2%
+
+*** BEST (Sharpe): Iter4 +Range width gate (<= 1.5% of price)
+    n=747 WR=35.9% AvgR=-0.25 PnL=Rs-36,817 Sharpe=-2.49 DD=102.5%

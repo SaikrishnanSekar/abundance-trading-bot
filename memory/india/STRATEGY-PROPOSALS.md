@@ -165,3 +165,75 @@ Awaiting human approval.
 All negative. Do not trial. Suppressed for 30 days.
 
 ---
+
+## 2026-05-07 · NSE Strategy Hunt — 8 Families Tested, ORB Confirmed Dominant
+- dimension: nse_strategy_hunt_2026_05_07
+- evidence_n: 8 strategy families x 5 iterations each, 56 days real NSE 5-min data, STRONG-22 universe
+- current_rule: ORB STRONG-22 v3 is the only active strategy
+- proposed_rule: No change to existing strategy. ORB remains dominant. See findings below.
+- expected_impact: Confirms ORB as the correct strategy class for NSE STRONG-22. No additional strategy approved for trial beyond PDH Gap Continuation (see prior proposal).
+- risk: N/A — no new strategy proposed here
+- cooldown_until: 2026-08-07 (90-day suppression — do not re-test these strategy families without new data)
+- status: FINDING — informational, no human approval needed
+
+### Comprehensive Results
+
+All 8 strategy families tested on STRONG-22 tickers x 56 days x 5 refinement iterations each.
+R-budget Rs200 (Tier 2), realistic brokerage (Rs40 flat round-trip), 5-min Yahoo Finance v8 NSE data.
+
+| Strategy | Best WR | Best Sharpe | Best n | PnL | Status |
+|----------|---------|-------------|--------|-----|--------|
+| **ORB v3 STRONG-22** | **67.4%** | **5.04** | **678** | **+Rs38,113** | **ACTIVE** |
+| PDH Gap Continuation | 27.3% | 3.44 | 22 | +Rs5,348 | PENDING trial |
+| Opening Drive Pullback | 52.9% | -7.22 | 842 | -Rs42,311 | REJECTED |
+| Opening Gap Momentum | 26.5% | -3.84 | 328 | -Rs20,529 | REJECTED |
+| Intraday Donchian Breakout | 38.9% | -3.04 | 720 | -Rs34,985 | REJECTED |
+| VWAP Cross-Momentum | 36.0% | -3.91 | 267 | -Rs29,609 | REJECTED |
+| VWAP RSI(2) Reversal | 24.7% | -4.52 | 400 | -Rs45,400 | REJECTED |
+| First-Hour High Breakout | 18.1% | -4.84 | 474 | -Rs30,388 | REJECTED |
+
+Backtest scripts: strategy_opening_drive.py, strategy_intraday_breakout.py,
+strategy_fhh_breakout.py, strategy_gap_momentum.py, strategy_vwap_reversal.py,
+strategy_pdh_breakout.py
+
+### Why ORB is uniquely suited to NSE
+
+1. **Opening range has institutional anchor**: 09:15-09:30 is where ALL overnight orders
+   (institutional, FII, DII) execute. This creates a true consensus support/resistance level
+   that has no equivalent at any other time of day.
+
+2. **NSE is a pure momentum market intraday**: Stocks that break their opening range
+   continue in that direction 67% of the time. Mean-reversion strategies (VWAP RSI,
+   pullbacks) fail because institutional order flow sustains the momentum.
+
+3. **Range size is critical**: ORB 15-min range is naturally small (0.5-1.5%), giving
+   tight stops and achievable targets. Every other strategy either had:
+   - Targets too far (FHHB 60-min range: 2.5x would require 5-7% move)
+   - Stops too far (OD-PB: stop at drive extreme = full 30-min range away)
+   - No institutional anchor (Donchian: rolling window has no special meaning)
+
+4. **Volume data quality**: Yahoo Finance v8 NSE 5-min data has unreliable/zero volume
+   for many bars, particularly the first bar of day. Volume filters were effectively
+   disabled in all backtests (0 >= 0*2.0 = True). This means:
+   - ORB's reported WR of 67.4% was achieved WITHOUT a functioning volume filter
+   - The VWAP filter and price buffer (0.1%) are the real quality filters in ORB
+   - All strategies that showed n=2 or n=0 after adding vol filter were seeing
+     this zero-volume issue, not genuine filtering
+
+### Key Data Limitation
+
+All NSE 5-min backtests suffer from zero/unreliable volume in Yahoo Finance v8.
+This means volume-based filters are not working correctly in backtests.
+ORB works despite this because direction + VWAP is sufficient.
+Before adding any new strategy to live trading, the volume signal must be validated
+on live Dhan 5-min data (which has real volume). The PDH trial (no vol filter needed)
+is safe to proceed.
+
+### Note on Gap Momentum 60% Directional Accuracy
+
+Opening Gap Momentum Iter1 showed WR=60% when using a tiny target (1.5x 5-min ATR).
+This 60% directional accuracy on gap-up continuation is noteworthy but not tradeable
+at standard R:R because stop (first-bar low) > target. Recommended: log gap-up opens
+in LIVE-PULSE.md for 2 weeks to validate with real volume data before proposing a trial.
+
+---

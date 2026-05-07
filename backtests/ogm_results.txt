@@ -1,0 +1,22 @@
+======================================================================
+STRATEGY: Opening Gap Momentum (OGM) -- 5 Iterations
+Universe: STRONG-22 | R-budget: Rs200 | 56-day real NSE data
+======================================================================
+
+Iter1 Base-Fixed (gap 0.5-2.5%, tgt=2x stop_dist)
+  n=417  WR=24.7%  AvgR=-0.33  PnL=Rs-27,748  Sharpe=-4.19  DD=102.6%
+
+Iter2 Tighter gap 0.5-1.5% (avoid news events)
+  n=328  WR=26.5%  AvgR=-0.31  PnL=Rs-20,529  Sharpe=-3.84  DD=103.2%
+
+Iter3 Bullish first bar (close > open on bar0 for longs)
+  n=268  WR=26.1%  AvgR=-0.27  PnL=Rs-14,557  Sharpe=-3.38  DD=107.9%
+
+Iter4 Tighter hold (<0.1% give-back on first bar)
+  n=268  WR=26.1%  AvgR=-0.27  PnL=Rs-14,557  Sharpe=-3.38  DD=107.9%
+
+Iter5 Wider tgt 3x stop (let winners run further)
+  n=268  WR=10.1%  AvgR=-0.31  PnL=Rs-16,744  Sharpe=-3.59  DD=106.9%
+
+*** BEST (Sharpe): Iter3 Bullish first bar (close > open on bar0 for longs)
+    n=268 WR=26.1% AvgR=-0.27 PnL=Rs-14,557 Sharpe=-3.38 DD=107.9%

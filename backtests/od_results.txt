@@ -1,0 +1,24 @@
+======================================================================
+STRATEGY: Opening Drive Pullback (OD-PB) -- 5 Iterations
+Universe: STRONG-22 | R-budget: Rs200 | 56-day real NSE data
+======================================================================
+
+Iter1 Base (6-bar drive, fib 23-61.8%, tgt 1.5x)
+  n=842  WR=52.9%  AvgR=-0.25  PnL=Rs-42,311  Sharpe=-7.22  DD=100.7%
+
+Iter2 +VolSpike on entry bar (vol>=1.5x)
+  n=326  WR=44.5%  AvgR=-0.33  PnL=Rs-21,243  Sharpe=-9.3  DD=100.2%
+
+Iter3 +VWAP alignment + tgt 2.0x
+  n=268  WR=26.1%  AvgR=-0.26  PnL=Rs-13,810  Sharpe=-5.7  DD=104.3%
+
+Iter4 +MinDrive 0.8% (strong drives only)
+  n=64  WR=18.8%  AvgR=-0.16  PnL=Rs-1,991  Sharpe=-4.22  DD=128.0%
+
+Iter5 TighterPB 50% max (shallower=stronger momentum)
+  n=58  WR=19.0%  AvgR=-0.16  PnL=Rs-1,891  Sharpe=-4.42  DD=123.0%
+
+*** BEST Sharpe: Iter4 +MinDrive 0.8% (strong drives only)
+    n=64 WR=18.8% AvgR=-0.16 PnL=Rs-1,991 Sharpe=-4.22 DD=128.0%
+*** BEST WR:     Iter1 Base (6-bar drive, fib 23-61.8%, tgt 1.5x)
+    n=842 WR=52.9% AvgR=-0.25 PnL=Rs-42,311 Sharpe=-7.22 DD=100.7%

@@ -1,0 +1,22 @@
+======================================================================
+STRATEGY: First-Hour High/Low Breakout (FHHB) -- 5 Iterations
+Universe: STRONG-22 | R-budget: Rs200 | 56-day real NSE data
+======================================================================
+
+Iter1 Base (60-min, vol2.0x, VWAP, tgt1=0.5x tgt2=1.0x)  [tickers=22]
+  n=474  WR=18.1%  AvgR=-0.32  PnL=Rs-30,388  Sharpe=-10.42  DD=100.0%
+
+Iter2 +1.5% width gate  [tickers=22]
+  n=176  WR=6.8%  AvgR=-0.33  PnL=Rs-11,665  Sharpe=-13.84  DD=100.4%
+
+Iter3 STRONG-8 only (top tickers by WR x Sharpe)  [tickers=8]
+  n=67  WR=7.5%  AvgR=-0.28  PnL=Rs-3,756  Sharpe=-12.83  DD=101.2%
+
+Iter4 Time gate 10:15-12:00  [tickers=22]
+  n=108  WR=11.1%  AvgR=-0.29  PnL=Rs-6,369  Sharpe=-12.18  DD=100.7%
+
+Iter5 Wider tgt2=1.5x, STRONG-22, width gate, time gate  [tickers=22]
+  n=108  WR=3.7%  AvgR=-0.3  PnL=Rs-6,412  Sharpe=-11.97  DD=101.4%
+
+*** BEST (Sharpe): Iter1 Base (60-min, vol2.0x, VWAP, tgt1=0.5x tgt2=1.0x)
+    n=474 WR=18.1% AvgR=-0.32 PnL=Rs-30,388 Sharpe=-10.42 DD=100.0%
