@@ -140,6 +140,90 @@ Awaiting human approval.
 
 ---
 
+## 2026-05-12 - Macro Regime Filter for Intraday CORE
+- dimension: macro_regime_filter
+- evidence_n: 678 ORB STRONG-22 trades + 2026-05-12 macro research synthesis
+- current_rule: "VIX < 20 gate. No entries at VIX >= 20." Macro inputs beyond VIX are written in RESEARCH-LOG but do not change sizing/direction.
+- proposed_rule: Add a daily macro regime label in pre-market research and gate_check.py: RISK-ON, NEUTRAL, RISK-OFF. Inputs: India VIX, Brent crude 5-day change/level, USDINR 5-day change, FPI/FII cash flow trend, Nifty gap vs prior close, and sector breadth at 09:30. RISK-ON: normal ORB rules, Tier 2 allowed. NEUTRAL: Tier 1 default, Tier 2 only on ORB+VWAP+PDH/PDL confluence. RISK-OFF: no gap-fade longs; only short-side ORB/PDL breakdowns or watch-only, max 1 open position, R-budget 50% of normal tier. Any VIX >= 25 remains SKIP.
+- expected_impact: Converts macro stress into smaller size and direction bias instead of relying only on VIX; supports 8-10% monthly goal by avoiding low-quality longs on crude/FPI/INR shock days.
+- risk: More missed long trades during sharp relief rallies; requires clean pre-market data capture.
+- cooldown_until: 2026-05-26
+- status: PENDING
+
+**Rationale**: Current May 2026 regime has Brent above $104/bbl, heavy FPI outflows, rupee pressure, and West Asia risk while India VIX is still below 20. A VIX-only gate can mark the session tradable even when macro pressure makes gap-fade longs and weak-sector longs poor expectancy. This proposal keeps ORB as the core edge but makes size/direction conditional on macro stress.
+
+**Implementation note**: Add `macro_regime` and `allowed_bias` fields to the pre-market block and gate output. No autonomous entry authority changes; every new entry still requires approved watchlist + human unlock.
+
+**Accept**: Add Macro Regime Filter to `TRADING-STRATEGY.md`; update premarket_watchlist.py/gate_check.py to emit and enforce the regime.
+**Reject**: Move block to STRATEGY-PROPOSALS-REJECTED.md with dim:macro_regime_filter.
+
+Awaiting human approval.
+
+---
+
+## 2026-05-12 - ORB + PDH/PDL + VWAP Confluence Upgrade
+- dimension: orb_pdh_vwap_confluence
+- evidence_n: 678 ORB STRONG-22 trades + 22 PDH continuation trades + 2026 external ORB/PRB/VWAP research
+- current_rule: ORB v3 entry requires 5-min close beyond ORH/ORL, volume >= 2.0x, and VWAP alignment. PDH Gap Continuation is a separate pending trial.
+- proposed_rule: Add a high-conviction ORB confluence tag: LONG qualifies only when close > ORH x 1.001, close > VWAP, and either close > PDH or Nifty sector index is above its own opening range. SHORT qualifies only when close < ORL x 0.999, close < VWAP, and either close < PDL or sector index is below its own opening range. Confluence trades may use Tier 2 R-budget after ORB trial review; non-confluence ORB trades stay Tier 1 during the same review window.
+- expected_impact: Filters ORB to institutional breakout + prior-range confirmation, aiming for fewer but higher-quality trades and a realistic 8-10% monthly net path.
+- risk: Trade count drops; strong intraday reversals from below PDH/above PDL may be skipped.
+- cooldown_until: 2026-05-26
+- status: PENDING
+
+**Rationale**: Public NSE ORB scanners and 2026 strategy guides consistently add previous-range breakout and VWAP confirmation to reduce false breakouts. Repo backtests already show ORB is dominant and PDH continuation is positive but low frequency. Combining PDH/PDL or sector-index confirmation into ORB is a cleaner upgrade than launching another standalone strategy.
+
+**Monthly target math**: With Rs20k capital, 8-10% monthly is Rs1,600-2,000 net. At Tier 2 Rs200 R-budget, this needs roughly 8-10 net R/month after costs. With max 3 positions and daily loss cap Rs300, the system should prioritize only confluence ORB trades for Tier 2 sizing.
+
+**Accept**: Add "ORB Confluence Tier" under ORB rules and update scanner output to label confluence vs base ORB.
+**Reject**: Move block to STRATEGY-PROPOSALS-REJECTED.md with dim:orb_pdh_vwap_confluence.
+
+Awaiting human approval.
+
+---
+
+## 2026-05-12 - Sector Relative Strength Rotation Gate
+- dimension: sector_relative_strength_rotation
+- evidence_n: 678 ORB STRONG-22 trades + STRONG-22 sector distribution review
+- current_rule: STRONG-22 tickers are ranked by ticker-level ORB performance only; sector context is noted in research but not enforced.
+- proposed_rule: At 09:30, compute sector relative strength for banks, IT, pharma, auto, infra/capital goods, FMCG, energy, metals using sector index or basket return vs Nifty from open and prior close. LONG ORB entries allowed only in sectors ranked top 3 or sectors green while Nifty is green. SHORT ORB entries allowed only in sectors ranked bottom 3 or sectors red while Nifty is red. Exception: rank #1-#5 STRONG tickers may trade Tier 1 if ticker ORB confluence is present.
+- expected_impact: Aligns stock trades with sector money flow, reducing false single-name breakouts against sector pressure.
+- risk: Requires reliable sector mapping and index/basket data; may miss idiosyncratic stock-specific breakouts.
+- cooldown_until: 2026-05-26
+- status: PENDING
+
+**Rationale**: Intraday large-cap moves in India are strongly sector-led: banks, IT, autos, pharma, and energy rotate with FII flow, crude, INR, earnings, and policy headlines. Existing ORB rank is ticker-specific; adding sector relative strength should improve selection when multiple STRONG-22 signals fire at once.
+
+**Operational rule**: This is a selection gate, not a license to increase max positions. Max 3 open intraday positions and daily loss cap remain unchanged.
+
+**Accept**: Add sector RS gate to `TRADING-STRATEGY.md`; add sector map to data file and scanner ranking.
+**Reject**: Move block to STRATEGY-PROPOSALS-REJECTED.md with dim:sector_relative_strength_rotation.
+
+Awaiting human approval.
+
+---
+
+## 2026-05-12 - Adaptive 8-10% Monthly Profit Hurdle
+- dimension: adaptive_profit_hurdle
+- evidence_n: operational target proposal; requires 20 live trades before structural adoption
+- current_rule: Monthly target is static in `TRADING-STRATEGY.md`; no rule scales down after hitting target or after early-month drawdown.
+- proposed_rule: Add a monthly performance governor tied to 8-10% net profit: target band = 8-10% of cash capital. If month-to-date net P&L reaches +8%, switch all new entries to Tier 1 unless A+ confluence (macro RISK-ON + ORB confluence + sector top/bottom 3). If month-to-date net P&L reaches +10%, new entries become watch-only for the rest of the month except safety exits/stop tightening. If month-to-date P&L falls below -3%, Tier 1 only until two consecutive green sessions. Existing daily loss and kill-switch rules stay dominant.
+- expected_impact: Turns the requested 8-10% monthly goal into a disciplined harvesting band instead of overtrading after a good start.
+- risk: Could cap upside in rare high-trend months; may feel conservative when the system is hot.
+- cooldown_until: 2026-05-26
+- status: PENDING
+
+**Rationale**: An 8-10% monthly target is aggressive but feasible only if gains are protected. The current framework has downside stops but no upside throttle. A profit hurdle prevents giving back a strong month through late-month overtrading while keeping A+ confluence trades available at reduced risk.
+
+**Evidence requirement**: Treat as structural; do not accept until at least 20 live India trades have post-mortems and rolling score data.
+
+**Accept**: Add Monthly Profit Hurdle section to `TRADING-STRATEGY.md` after 20 live trades.
+**Reject**: Move block to STRATEGY-PROPOSALS-REJECTED.md with dim:adaptive_profit_hurdle.
+
+Awaiting human approval.
+
+---
+
 ## 2026-05-06 · VWAP Cross-Momentum (REJECTED — do not trial)
 - dimension: vwap_cross_momentum
 - evidence_n: 347-114 trades across 5 iterations (backtests/strategy_vwap_reversal.py)
@@ -163,6 +247,75 @@ Awaiting human approval.
 | 5 | +TimeGate 09:30-12:00 | 114 | 26.3% | -0.70 | -Rs15,953 | -6.73 |
 
 All negative. Do not trial. Suppressed for 30 days.
+
+---
+
+## 2026-05-08 · VIX Graduated Sizing (replace binary VIX<20 gate)
+- dimension: vix_graduated_sizing
+- evidence_n: 678 (ORB STRONG-22 v3, 56 days — all trades at undifferentiated VIX level)
+- current_rule: "VIX < 20 gate. No entries at VIX ≥ 20." (TRADING-STRATEGY.md Hard rules)
+- proposed_rule: Replace binary gate with 4-tier modifier:
+  - VIX < 15: 110% of tier R-budget (bonus in very calm conditions)
+  - VIX 15–20: 100% (current full budget — no change)
+  - VIX 20–25: 70% of tier R-budget (caution — still trade, smaller size)
+  - VIX > 25: SKIP (no new entries, same as today's VIX > 20 behaviour but wider safe zone)
+  size_calc.py `--tier` mapping: Tier 1 = ₹100 → ₹110/₹100/₹70/skip, Tier 2 = ₹200 → ₹220/₹200/₹140/skip, Tier 3 = ₹300 → ₹330/₹300/₹210/skip.
+- expected_impact: Allows ORB trades at VIX 20–25 with reduced sizing rather than full halt. Jeff Sun uses 5-tier VIX modifier; NSE India VIX 20–25 is elevated but not crisis level. Estimated 5–10 additional trade days per year that are currently blocked.
+- risk: VIX 20–25 days have wider intraday ranges — ORB stop (ORL) may be hit more often. Partially mitigated by 70% sizing (max loss on a VIX-25 Tier 2 trade = ₹140 vs ₹200). Net expected impact on ₹300 daily loss cap: unchanged — a single stopped-out trade still ≤ ₹140.
+- cooldown_until: 2026-05-22
+- status: PENDING
+
+**Rationale**: Jeff Sun (SKILL.md) uses a 5-tier VIX sizing framework (VIX <16=full, 16–20=normal, 20–25=70%, 25–30=50%, >30=30%). Our binary VIX<20 gate is overly conservative for the 20–25 range — India VIX occasionally spikes above 20 on event days (RBI policy, Budget, US Fed) without sustained market breakdown. The ORB setup quality is still valid at VIX 20–25 given the volume + VWAP + RSI gates. The ₹300 daily loss cap provides the real safety floor regardless of VIX tier.
+
+**Accept**: Update TRADING-STRATEGY.md "Hard rules" VIX line to: "VIX gate: use graduated sizing (VIX <15=110%, 15-20=100%, 20-25=70%, >25=skip). Update size_calc.py with vix_multiplier flag."
+**Reject**: Move to STRATEGY-PROPOSALS-REJECTED.md with dim:vix_graduated_sizing.
+
+Awaiting human approval.
+
+---
+
+## 2026-05-08 · ORB 3-Leg Exit (33/33/33 instead of 50/50)
+- dimension: orb_exit_3leg
+- evidence_n: 678 (ORB STRONG-22 v3, 56 days) — proposes split change only, no entry filter change
+- current_rule: "Leg 1: close 50% position at entry ± 1.5× ORB width; move SL to breakeven. Leg 2: trail remaining 50% with stop = max(breakeven, current_price − 1.0×ATR(14))" (TRADING-STRATEGY.md ORB section)
+- proposed_rule: 3-leg exit:
+  - Leg 1 (33% of position): close at entry + 1.5× ORB width; move remaining 67% SL to breakeven
+  - Leg 2 (33% of position): close at entry + 2.5× ORB width; move remaining 33% SL to entry + 0.5× ORB
+  - Leg 3 (final 33%): trail with ATR stop, hard close 15:10
+  Implementation: size_calc.py split qty = 3 instead of 2 (qty must be divisible by 3; round down if not).
+- expected_impact: Holds more capital in winning trades through T2 while still securing T1 partial. Jeff Sun framework shows 3-layer system reduces realised loss on stopped positions from −1R to ~−0.6R–0.8R because a wider base stop absorbs more range noise. For our ORB: runner lot (Leg 3) has the best chance to reach 3–4× ORB width on strong breakout days, compounding cumulative AvgR.
+- risk: Minimum qty = 3 shares; at ₹100 R-budget and typical ORB stop of 0.5–1.5%, lot size is already 1–5 shares. If lot_size < 3, fall back to 2-leg (current) automatically. Dhan supports multiple GTT targets per order — implementation feasible.
+- cooldown_until: 2026-05-22
+- status: PENDING
+
+**Rationale**: Jeff Sun (SKILL.md Step 6): "Getting stopped out of your full position at your original stop is rarely just -1R due to slippage, spread. This system reduces realized loss from -1R to -0.6R to -0.8R even when all 3 hit." For ORB, the widest leg already has stop at ORL (the original ORB stop). The middle leg moves to breakeven after T1. The tightest leg closes at T1. This is a direct NSE adaptation of Jeff's 33/33/33 architecture applied to same-day intraday exits.
+
+**Accept**: Update TRADING-STRATEGY.md ORB exit section to 3-leg split. Update size_calc.py.
+**Reject**: Move to STRATEGY-PROPOSALS-REJECTED.md with dim:orb_exit_3leg.
+
+Awaiting human approval.
+
+---
+
+## 2026-05-08 · T-5 Earnings Avoidance for ORB Entries
+- dimension: orb_earnings_avoidance
+- evidence_n: 678 (ORB STRONG-22 v3, 56 days) — unknown how many trades fell on or near results days
+- current_rule: No earnings check in ORB entry gate. Only VIX, APPROVED-WATCHLIST, daily loss cap, and position limit are checked.
+- proposed_rule: Add earnings avoidance gate to ORB entries:
+  1. On the day a STRONG-22 stock announces quarterly results: SKIP all ORB entries for that ticker that day. (Opening range is dominated by pre-open auction gap, not institutional direction.)
+  2. Within T-5 trading days of known results date: flag ticker as "NEAR-RESULTS" in scan output; allow entry but reduce to Tier 1 R-budget (₹100 cap) automatically.
+  Implementation: Maintain `data/nse_results_calendar.json` (human updates at start of each results season: Jan/Apr/Jul/Oct). gate_check.py reads the file and applies the above logic.
+- expected_impact: Avoids ORB entries on results days where pre-open auction sets a gap-up/down range that is NOT a true intraday momentum signal. Removes a known source of random ORB failures (wide range from event risk, not from institutional conviction). T-5 warning flag allows the trader to consciously size down near high-uncertainty events.
+- risk: Requires manual maintenance of `data/nse_results_calendar.json` at season start. If not updated, rule silently falls back to no filter. Low operational burden — ~22 entries per season (one per STRONG-22 ticker).
+- cooldown_until: 2026-05-22
+- status: PENDING
+
+**Rationale**: Jeff Sun (SKILL.md Rule 5): "No new entries within T-5 of earnings. Leeway: T+6 or more is acceptable." For NSE intraday ORB, the direct-results-day risk is the most acute: the pre-open auction creates a synthetic "opening range" based on news, not real-time buying/selling pressure. Post-auction ORBs on results days have a fundamentally different statistical character from regular ORBs. STRONG-22 universe is all large-cap Nifty 50; their results dates are predictable and well-known. The T-5 warning flag (not a full skip) allows the trader to maintain participation while acknowledging elevated risk.
+
+**Accept**: Add earnings gate to gate_check.py, create data/nse_results_calendar.json template.
+**Reject**: Move to STRATEGY-PROPOSALS-REJECTED.md with dim:orb_earnings_avoidance.
+
+Awaiting human approval.
 
 ---
 
