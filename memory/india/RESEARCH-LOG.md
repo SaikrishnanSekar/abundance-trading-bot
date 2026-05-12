@@ -93,3 +93,53 @@ Re-evaluate at 15-min timeframe only if ORB sleeve shows positive live results f
 **No live action taken.** All proposals await human commit to TRADING-STRATEGY.md.
 
 ---
+
+## 2026-05-12 — ORB Pre-Market Setup Analysis (Tue)
+
+**Research method**: ORB sleeve pre-market scan for 4 validated tickers. NSE holiday check: 2026-05-12 is a regular trading day (no holiday). VIX status: requires live check via `bash scripts/vix.sh` before entry.
+
+**Date**: 2026-05-12 (Tuesday). Market hours: 09:15–15:15 IST.
+
+### ORB Trial Status
+- Trial trades completed: 0/5
+- Current R-budget per trade: ₹100 (Tier 1, trial constraint)
+- Max positions: 3 intraday
+
+### Preferred ORB Tickers — Watchlist Candidates
+
+| Ticker | Sector | 56-day WR | Avg R | Notes |
+|--------|--------|-----------|-------|-------|
+| BHARTIARTL | Telecom | 65.2% | 1.01 | Top WR; look for ORB long on gap-up open |
+| HDFCBANK | Banks | 60.6% | 1.38 | Strong Avg R; liquid, tight spread |
+| RELIANCE | Energy | 56.4% | 1.41 | Highest Avg R; large float, fast fills |
+| AXISBANK | Banks | 56.4% | 1.36 | Banks sector aligned with HDFCBANK |
+
+### ORB Setup Rules (for today)
+1. Opening range: first 3 × 5-min candles (09:15, 09:20, 09:25) → compute ORH / ORL
+2. Long entry: 5-min close > ORH × 1.001 AND volume ≥ 1.5× 20-bar rolling avg
+3. Short entry: 5-min close < ORL × 0.999 AND same volume condition
+4. Stop: other side of opening range
+5. Target: entry ± 2× (ORH − ORL)
+6. Entry window: 09:30–13:00 only; flat by 15:10
+7. First signal per ticker only; max 1 trade per ticker per day
+
+### Gate Pre-check (manual verify before each entry)
+- [ ] VIX < 20 (`bash scripts/vix.sh`)
+- [ ] Ticker in APPROVED-WATCHLIST.md (human must add below tickers)
+- [ ] Day P&L > -₹300
+- [ ] Open positions < 3
+- [ ] No KILL_SWITCH.md
+
+### Watchlist Recommendation for Human Approval
+**Propose adding to APPROVED-WATCHLIST.md**: BHARTIARTL, HDFCBANK, RELIANCE, AXISBANK
+Basis: All four pass real-data ORB validation (WR ≥ 56%, 56-day NSE backtest). These are the only ORB-approved tickers per TRADING-STRATEGY.md.
+
+### 2% Daily Target Gap Analysis
+- Capital: ₹20,000 → 2% target = **₹400/day**
+- Current ORB trial EV: 3 trades × (0.6 × 1.2R − 0.4 × 1.0R) × ₹100 = ~₹88/day (0.44%)
+- At full Tier 2 (₹200 R-budget post-trial): ~₹176/day (0.88%)
+- At Tier 3 for A+ setups (₹300 R-budget): ~₹264/day (1.32%)
+- Gap to 2%: requires either higher R-budget OR additional strategy sleeves (Gap Fill + BB Squeeze)
+- **Proposal filed separately in STRATEGY-PROPOSALS.md for 2% gap-bridge plan**
+
+---

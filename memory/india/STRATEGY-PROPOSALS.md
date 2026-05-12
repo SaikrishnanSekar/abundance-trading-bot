@@ -92,3 +92,66 @@ Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this
 Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.
 
 ---
+
+## 2026-05-12 · 2% Daily Profit Gap-Bridge Plan (multi-dimension)
+- dimension: daily_profit_2pct_bridge
+- evidence_n: 0 live trades (analysis-only — structural planning document)
+- current_rule: Monthly target ₹4,000–5,000 (~1% daily on ₹20k over 20 days). No explicit daily % target in TRADING-STRATEGY.md.
+- proposed_rule: Phased approach — 5 sequential human commits as evidence accumulates. No single auto-change.
+- expected_impact: Path to consistent ₹400+/day (2% on ₹20k) within 4–6 weeks.
+- risk: Each phase gated behind minimum-N live trades. Nothing auto-applied.
+- cooldown_until: 2026-05-26
+- status: PENDING
+
+### Gap Analysis
+
+| Scenario | EV/day | % of ₹20k |
+|----------|--------|-----------|
+| Current (ORB trial, Tier 1, 0 sleeves) | ~₹88 | 0.44% |
+| Phase 2: ORB at Tier 2 (post-trial) | ~₹176 | 0.88% |
+| Phase 3: + Gap Fill sleeve | ~₹264–308 | 1.3–1.5% |
+| Phase 4: + BB Squeeze | ~₹320–380 | 1.6–1.9% |
+| Phase 5: Tier 3 for A+ ORB setups | ~₹400+ | 2%+ |
+
+**Root cause of gap**: 3-position cap + Tier 1 ORB trial + no additional sleeves = max EV ~₹88/day. Closing gap requires completing the trial and activating pending sleeves.
+
+### Proposed Phased Path
+
+**Phase 1 — Complete ORB trial (0/5 trades) [no rule change — human watchlist approval needed daily]**
+- Run 5 ORB trades on BHARTIARTL / HDFCBANK / RELIANCE / AXISBANK
+- Human action: approve watchlist each trading day
+- Timeline: ~1 week
+
+**Phase 2 — Upgrade ORB to Tier 2 [human commit to TRADING-STRATEGY.md]**
+- Trigger: 5 ORB trades, WR ≥ 50%, PnL > 0
+- Rule change: ORB R-budget ₹100 → ₹200
+
+**Phase 3 — Accept Gap Fill Down-Long sleeve [already PENDING — dim:gap_fill_down_long]**
+- Adds gap-fade setups at 09:15 open; +1–2 trades/day
+- Human: commit TRADING-STRATEGY.md with Gap Fill rules from 2026-05-04 proposal
+
+**Phase 4 — Accept BB Squeeze sleeve [already PENDING — dim:bb_squeeze_trial]**
+- Adds high-precision squeeze setups; ~1/week
+- Human: commit TRADING-STRATEGY.md with BB Squeeze rules from 2026-05-04 proposal
+
+**Phase 5 — Tier 3 for A+ ORB setups [propose after 20 live ORB trades]**
+- Trigger: 20 trades, WR ≥ 58%, PnL > 0
+- Rule change: A+ setups eligible for ₹300 R-budget
+- Minimum-N: 20 trades (structural change threshold ✅)
+
+### Human Actions Required (in order)
+1. **Today**: Approve watchlist → BHARTIARTL, HDFCBANK, RELIANCE, AXISBANK
+2. **After 5 ORB trades**: Commit Phase 2 upgrade if WR ≥ 50%
+3. **Now or after Phase 2**: Accept/reject dim:gap_fill_down_long (pending since 2026-05-04)
+4. **Now or after Phase 2**: Accept/reject dim:bb_squeeze_trial (pending since 2026-05-04)
+5. **After 20 ORB trades**: Review Phase 5 Tier 3 proposal
+
+### Key constraints (unchanged through all phases)
+- Daily loss cap ₹300 unchanged
+- 3-position max unchanged
+- VIX < 20 gate unchanged
+- Kill switch unchanged
+
+Awaiting human review. No rule changes applied. Each phase requires its own explicit human commit to TRADING-STRATEGY.md.
+
+---
