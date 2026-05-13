@@ -4,6 +4,26 @@ Append-only. Pre-market routine writes a dated block each day.
 
 ---
 
+## 2026-05-13 - Pre-Market ORB Candidate Scan
+
+**VIX**: 19.28 CLEAR, but close to the 20 hard gate. Keep Tier 1 unless the ORB signal is A+.
+**Kill switch**: ABSENT
+**NSE holiday check**: 2026-05-13 is not listed as an NSE equity holiday.
+
+**Macro / index catalysts**:
+- News wrapper flags broad market weakness and elevated volatility; Bank Nifty weakness is the main risk pocket.
+- Nifty / Bank Nifty setup is risk-off unless open stabilizes above the opening range with VWAP support.
+- Avoid blind bank longs unless sector flow confirms after 09:30.
+
+**Strategy for today**:
+- Use only active ORB v3 rules: STRONG-22, 5-min opening range, width >= 1.5%, close beyond ORH/ORL buffer, volume >= 2.0x, VWAP aligned.
+- All 22 STRONG tickers have ATR% >= 0.8%, so all are pre-market eligible for ORB consideration.
+- Priority by validated ORB rank: SHRIRAMFIN, BHARTIARTL, HEROMOTOCO, INDUSINDBK, SUNPHARMA.
+
+**No trade action taken.**
+
+---
+
 ## 2026-05-12 - Advanced Intraday Strategy Research (8-10% monthly goal)
 
 **Goal**: Build an approval-ready path to 8-10% monthly net return without violating CORE risk rules.
