@@ -1,6 +1,6 @@
 # Moving Average Abundance Scan - India
 
-Generated: 2026-05-13 08:39:40 IST
+Generated: 2026-05-13 18:43:48 IST
 Mode: RESEARCH ONLY - no order authority
 Live data: Kotak Neo LTP
 Historical context: local completed-day bhavcopy cache
@@ -11,37 +11,39 @@ Rules:
 - Extended: aligned with 20DMA trend but more than 3% away from 20DMA.
 - Blocked-200: 200DMA is within 3% against the trade direction.
 
-Latest completed historical bar in cache: 2026-05-04
+Latest completed historical bar in cache: 2026-05-12
 
 | Symbol | Status | LTP | 20DMA | 200DMA | Dist20 | Dist200 | Last hist | Note |
 |---|---:|---:|---:|---:|---:|---:|---:|---|
-| HINDUNILVR | LONG-WATCH | 2262.00 | 2222.83 | 2403.44 | 1.76% | -5.88% | 2026-05-04 | above rising 20DMA; not extended |
-| DRREDDY | LONG-WATCH | 1270.00 | 1256.24 | 1257.88 | 1.10% | 0.96% | 2026-05-04 | above rising 20DMA; not extended |
-| HEROMOTOCO | SHORT-WATCH | 5082.50 | 5162.18 | 5381.23 | -1.54% | -5.55% | 2026-05-04 | below falling 20DMA; not extended |
-| INDUSINDBK | EXTENDED-LONG | 892.85 | 850.40 | 832.85 | 4.99% | 7.20% | 2026-05-04 | above rising 20DMA but >3% extended |
-| SUNPHARMA | EXTENDED-LONG | 1845.70 | 1705.28 | 1699.98 | 8.23% | 8.57% | 2026-05-04 | above rising 20DMA but >3% extended |
-| DIVISLAB | EXTENDED-LONG | 6644.00 | 6220.27 | 6303.45 | 6.81% | 5.40% | 2026-05-04 | above rising 20DMA but >3% extended |
-| ADANIPORTS | EXTENDED-LONG | 1688.20 | 1544.91 | 1446.78 | 9.27% | 16.69% | 2026-05-04 | above rising 20DMA but >3% extended |
-| BAJAJ-AUTO | EXTENDED-LONG | 10397.00 | 9593.90 | 9086.99 | 8.37% | 14.42% | 2026-05-04 | above rising 20DMA but >3% extended |
-| INFY | EXTENDED-SHORT | 1140.30 | 1263.32 | 1474.31 | -9.74% | -22.66% | 2026-05-04 | below falling 20DMA but >3% extended |
-| SHRIRAMFIN | NO-SETUP | 930.45 | 991.01 | 831.15 | -6.11% | 11.95% | 2026-05-04 | 20DMA trend/price alignment missing |
-| BHARTIARTL | NO-SETUP | 1756.80 | 1843.48 | 1964.18 | -4.70% | -10.56% | 2026-05-04 | 20DMA trend/price alignment missing |
-| TECHM | NO-SETUP | 1392.90 | 1454.80 | 1501.34 | -4.26% | -7.22% | 2026-05-04 | 20DMA trend/price alignment missing |
-| ULTRACEMCO | NO-SETUP | 11516.00 | 11673.40 | 12089.40 | -1.35% | -4.74% | 2026-05-04 | 20DMA trend/price alignment missing |
-| LT | NO-SETUP | 3856.50 | 3984.53 | 3847.35 | -3.21% | 0.24% | 2026-05-04 | 20DMA trend/price alignment missing |
-| BEL | NO-SETUP | 416.50 | 441.27 | 413.22 | -5.61% | 0.79% | 2026-05-04 | 20DMA trend/price alignment missing |
-| AXISBANK | NO-SETUP | 1260.10 | 1320.70 | 1224.27 | -4.59% | 2.93% | 2026-05-04 | 20DMA trend/price alignment missing |
-| BAJAJFINSV | NO-SETUP | 1744.80 | 1778.15 | 1976.43 | -1.88% | -11.72% | 2026-05-04 | 20DMA trend/price alignment missing |
-| HDFCBANK | NO-SETUP | 750.45 | 789.84 | 1103.70 | -4.99% | -32.01% | 2026-05-04 | 20DMA trend/price alignment missing |
-| SBIN | NO-SETUP | 974.60 | 1073.92 | 965.08 | -9.25% | 0.99% | 2026-05-04 | 20DMA trend/price alignment missing |
-| WIPRO | NO-SETUP | 189.57 | 202.89 | 237.18 | -6.56% | -20.07% | 2026-05-04 | 20DMA trend/price alignment missing |
-| TCS | NO-SETUP | 2300.30 | 2512.12 | 2961.36 | -8.43% | -22.32% | 2026-05-04 | 20DMA trend/price alignment missing |
-| KOTAKBANK | DATA-ANOMALY | 376.00 | 374.81 | 1488.78 | 0.32% | -74.74% | 2026-05-04 | 200DMA distorted by unadjusted history/corporate action |
+| INDUSINDBK | LONG-WATCH | 892.50 | 887.36 | 834.80 | 0.58% | 6.91% | 2026-05-12 | above rising 20DMA; not extended |
+| BHARTIARTL | SHORT-WATCH | 1789.20 | 1834.17 | 1959.78 | -2.45% | -8.70% | 2026-05-12 | below falling 20DMA; not extended |
+| ULTRACEMCO | SHORT-WATCH | 11573.00 | 11892.55 | 12071.85 | -2.69% | -4.13% | 2026-05-12 | below falling 20DMA; not extended |
+| HINDUNILVR | BASE-BUILD | 2267.30 | 2276.77 | 2397.74 | -0.42% | -5.44% | 2026-05-12 | near flat/transition 20DMA |
+| LT | BLOCKED-200 | 3915.80 | 4031.09 | 3860.69 | -2.86% | 1.43% | 2026-05-12 | 200DMA support too close |
+| SUNPHARMA | EXTENDED-LONG | 1824.80 | 1749.22 | 1704.76 | 4.32% | 7.04% | 2026-05-12 | above rising 20DMA but >3% extended |
+| DIVISLAB | EXTENDED-LONG | 6796.00 | 6452.55 | 6298.76 | 5.32% | 7.89% | 2026-05-12 | above rising 20DMA but >3% extended |
+| ADANIPORTS | EXTENDED-LONG | 1737.80 | 1639.92 | 1455.63 | 5.97% | 19.38% | 2026-05-12 | above rising 20DMA but >3% extended |
+| BAJAJ-AUTO | EXTENDED-LONG | 10262.00 | 9955.25 | 9153.29 | 3.08% | 12.11% | 2026-05-12 | above rising 20DMA but >3% extended |
+| SHRIRAMFIN | EXTENDED-SHORT | 920.55 | 996.06 | 840.42 | -7.58% | 9.53% | 2026-05-12 | below falling 20DMA but >3% extended |
+| HEROMOTOCO | EXTENDED-SHORT | 4995.00 | 5164.73 | 5407.48 | -3.29% | -7.63% | 2026-05-12 | below falling 20DMA but >3% extended |
+| TECHM | EXTENDED-SHORT | 1375.00 | 1452.95 | 1496.84 | -5.36% | -8.14% | 2026-05-12 | below falling 20DMA but >3% extended |
+| BEL | EXTENDED-SHORT | 428.25 | 441.63 | 413.90 | -3.03% | 3.47% | 2026-05-12 | below falling 20DMA but >3% extended |
+| AXISBANK | EXTENDED-SHORT | 1255.70 | 1318.28 | 1227.45 | -4.75% | 2.30% | 2026-05-12 | below falling 20DMA but >3% extended |
+| BAJAJFINSV | EXTENDED-SHORT | 1728.90 | 1800.83 | 1969.70 | -3.99% | -12.23% | 2026-05-12 | below falling 20DMA but >3% extended |
+| HDFCBANK | EXTENDED-SHORT | 749.60 | 786.93 | 1067.12 | -4.74% | -29.76% | 2026-05-12 | below falling 20DMA but >3% extended |
+| SBIN | EXTENDED-SHORT | 970.10 | 1072.15 | 971.73 | -9.52% | -0.17% | 2026-05-12 | below falling 20DMA but >3% extended |
+| WIPRO | EXTENDED-SHORT | 187.80 | 201.50 | 235.26 | -6.80% | -20.17% | 2026-05-12 | below falling 20DMA but >3% extended |
+| TCS | EXTENDED-SHORT | 2272.80 | 2472.86 | 2934.41 | -8.09% | -22.55% | 2026-05-12 | below falling 20DMA but >3% extended |
+| INFY | EXTENDED-SHORT | 1123.10 | 1217.71 | 1461.29 | -7.77% | -23.14% | 2026-05-12 | below falling 20DMA but >3% extended |
+| DRREDDY | NO-SETUP | 1265.30 | 1279.59 | 1258.76 | -1.12% | 0.52% | 2026-05-12 | 20DMA trend/price alignment missing |
+| KOTAKBANK | DATA-ANOMALY | 377.65 | 377.67 | 1433.98 | -0.01% | -73.66% | 2026-05-12 | 200DMA distorted by unadjusted history/corporate action |
 
 Summary:
-- LONG-WATCH: 2
-- SHORT-WATCH: 1
-- EXTENDED-LONG: 5
-- EXTENDED-SHORT: 1
-- NO-SETUP: 12
+- LONG-WATCH: 1
+- SHORT-WATCH: 2
+- BASE-BUILD: 1
+- BLOCKED-200: 1
+- EXTENDED-LONG: 4
+- EXTENDED-SHORT: 11
+- NO-SETUP: 1
 - DATA-ANOMALY: 1
