@@ -104,7 +104,7 @@ def split_days(bars: list[dict]) -> list[list[dict]]:
     buckets = defaultdict(list)
     for b in bars:
         buckets[datetime.fromisoformat(b["dt"]).date().isoformat()].append(b)
-    return [sorted(v, key=lambda x: x["ts"]) for k,v in sorted(buckets.items()) if len(v) >= 15]
+    return [sorted(v, key=lambda x: x.get("ts", x["dt"])) for k,v in sorted(buckets.items()) if len(v) >= 15]
 
 
 def hhmm(bar: dict) -> int:
