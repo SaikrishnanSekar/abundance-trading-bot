@@ -62,10 +62,38 @@ def _send_telegram(text):
 sys.path.insert(0, str(Path(__file__).parent))
 from scan_orb_live import (
     fetch_data, load_live_feed, calc_rsi,
-    preload_daily_context, NIFTY_50, _ticker_sector
+    preload_daily_context, NIFTY_50, NIFTY_NEXT_50, MIDCAP_50_LIQUID,
+    _ticker_sector,
 )
 
 IST = timezone(timedelta(hours=5, minutes=30))
+
+# ── Universe config — edit here to pick which groups to scan ──────────────────
+# Set True/False per group. Changes take effect on next scan run.
+SCAN_GROUPS = {
+    "N50":   True,   # Nifty 50        (50 stocks)  — always liquid, core universe
+    "NXT50": True,   # Nifty Next 50   (50 stocks)  — liquid large-caps outside N50
+    "MID50": False,  # Nifty Midcap 50 (50 stocks)  — higher beta; set True to enable
+}
+
+# Min avg daily volume (shares) for BUY NOW to fire for each group.
+# Stocks below this threshold are demoted to WATCHING even if all gates pass.
+MIN_VOL_FOR_ENTRY = {
+    "N50":   0,          # no filter — all N50 stocks are liquid
+    "NXT50": 300_000,    # ~3L shares/day minimum
+    "MID50": 500_000,    # ~5L shares/day minimum
+}
+
+# Build universe and group lookup from config above
+_TICKER_GROUP: dict[str, str] = {}
+for _grp, _enabled in SCAN_GROUPS.items():
+    if not _enabled:
+        continue
+    _list = {"N50": NIFTY_50, "NXT50": NIFTY_NEXT_50, "MID50": MIDCAP_50_LIQUID}[_grp]
+    for _t in _list:
+        _TICKER_GROUP.setdefault(_t, _grp)   # N50 wins if a ticker appears in multiple lists
+
+UNIVERSE = list(_TICKER_GROUP.keys())
 
 
 # ── Utility ───────────────────────────────────────────────────────────────────
@@ -446,17 +474,20 @@ def scan():
     hhmm      = now_ist.hour * 100 + now_ist.minute
     in_window = _in_entry_window()
 
+    enabled_grps = "+".join(g for g, on in SCAN_GROUPS.items() if on)
     print("=" * 80)
-    print(f"  MULTI-STRATEGY SCAN  ·  NIFTY 50  ·  {now_ist.strftime('%Y-%m-%d %H:%M')} IST")
+    print(f"  MULTI-STRATEGY SCAN  ·  {len(UNIVERSE)} tickers [{enabled_grps}]"
+          f"  ·  {now_ist.strftime('%Y-%m-%d %H:%M')} IST")
     print("=" * 80)
 
-    avg_day_vols, breadth, daily_ctx = preload_daily_context(today_str)
+    avg_day_vols, breadth, daily_ctx = preload_daily_context(today_str, universe=UNIVERSE)
     live_feed, feed_fresh = load_live_feed()
 
     p20 = breadth["p20"]
     regime = "BULLISH" if p20 >= 60 else ("NEUTRAL" if p20 >= 40 else "BEARISH")
     feed_tag = f"LIVE ({len(live_feed)} tickers)" if feed_fresh else "STALE"
     entry_tag = "OPEN" if in_window else f"CLOSED at 13:00 (now {now_ist.strftime('%H:%M')})"
+    grp_tag = "+".join(g for g, on in SCAN_GROUPS.items() if on)
 
     print(f"  Regime: {regime} ({p20:.0f}% > 20d SMA)  |  Feed: {feed_tag}  |  Entry window: {entry_tag}")
     print()
@@ -471,12 +502,12 @@ def scan():
     historical = []   # triggered earlier today
     no_signal  = []   # nothing interesting
 
-    print(f"  Scanning {len(NIFTY_50)} tickers", end="", flush=True)
+    print(f"  Scanning {len(UNIVERSE)} tickers  [{grp_tag}]", end="", flush=True)
 
-    confluence         = []  # tickers with both BB squeeze + ORB entry
+    confluence          = []  # tickers with both BB squeeze + ORB entry
     gap_fill_candidates = []  # collected for market-wide gap filter (routed after loop)
 
-    for ticker in NIFTY_50:
+    for ticker in UNIVERSE:
         print(".", end="", flush=True)
         bars = fetch_data(ticker)
         if not bars:
@@ -486,8 +517,11 @@ def scan():
         fd         = live_feed.get(ticker, {}) if feed_fresh else {}
         avg_d      = avg_day_vols.get(ticker, 0)
         sector     = _ticker_sector(ticker)
+        group      = _TICKER_GROUP.get(ticker, "N50")
+        min_vol    = MIN_VOL_FOR_ENTRY.get(group, 0)
+        vol_liquid = avg_d >= min_vol  # False → demote to WATCHING regardless of gates
 
-        base = {"ticker": ticker, "sector": sector}
+        base = {"ticker": ticker, "sector": sector, "group": group}
 
         # ── ORB ──
         orb = check_orb(today_bars, bars, fd, avg_d, day_fraction)
@@ -495,8 +529,12 @@ def scan():
         if orb:
             row = {**base, **orb}
             if orb_entry:
-                if in_window:
+                if in_window and vol_liquid:
                     buy_now.append(row)
+                elif in_window and not vol_liquid:
+                    row = dict(row)
+                    row["notes"] = row.get("notes","") + f" | SKIP: thin({avg_d/1e5:.1f}L<{min_vol/1e5:.0f}L)"
+                    watching.append(row)
                 else:
                     historical.append({**row, "note_time": "post-window"})
             elif "FAIL" in orb["status"]:
@@ -566,11 +604,15 @@ def scan():
               f"Gap Fill LONG suspended (short-covering dominates, fills unreliable)")
 
     for row in gap_fill_candidates:
-        status   = row.get("status", "")
-        fill_pct = row.get("fill_pct", 0)
-        vol_ok   = row.get("vol_ok", True)
-        rsi_ok   = row.get("rsi_ok", True)
-        vwap_ok  = row.get("vwap_ok", True)
+        status     = row.get("status", "")
+        fill_pct   = row.get("fill_pct", 0)
+        vol_ok     = row.get("vol_ok", True)
+        rsi_ok     = row.get("rsi_ok", True)
+        vwap_ok    = row.get("vwap_ok", True)
+        grp        = row.get("group", "N50")
+        avg_d_row  = avg_day_vols.get(row.get("ticker",""), 0)
+        min_v      = MIN_VOL_FOR_ENTRY.get(grp, 0)
+        vol_liquid = avg_d_row >= min_v
 
         if status in ("OPEN", "FILLING", "FILLING (50%+)"):
             skip = []
@@ -579,6 +621,7 @@ def scan():
             if not vol_ok:           skip.append("vol-LOW")
             if not rsi_ok:           skip.append("RSI<50")
             if not vwap_ok:          skip.append("below-VWAP")
+            if not vol_liquid:       skip.append(f"thin({avg_d_row/1e5:.1f}L<{min_v/1e5:.0f}L)")
 
             if skip:
                 row = dict(row)
@@ -602,15 +645,15 @@ def scan():
         if not rows:
             print("  (none)")
             return
-        hdr = f"  {'Ticker':<12} {'Sector':<10} {'Strat':<12} {'Dir':<6} {'Price':>8}"
+        hdr = f"  {'Ticker':<12} {'Grp':<6} {'Sector':<10} {'Strat':<12} {'Dir':<6} {'Price':>8}"
         if show_entry:
             hdr += f" {'Entry':>8} {'T1':>8} {'T2':>9} {'SL':>8}"
         hdr += f"  Notes"
         print(hdr)
-        print("  " + "-" * 110)
+        print("  " + "-" * 118)
         for r in rows:
-            t2str = fmt_price(r.get("t1"))   # this is actually T1 in signal
-            line = (f"  {r['ticker']:<12} {r['sector']:<10} {r['strategy']:<12}"
+            grp_col = r.get("group", "N50")
+            line = (f"  {r['ticker']:<12} {grp_col:<6} {r['sector']:<10} {r['strategy']:<12}"
                     f" {r.get('direction','?'):<6} {fmt_price(r.get('price'))}")
             if show_entry:
                 line += (f" {fmt_price(r.get('entry'))}"

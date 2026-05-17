@@ -20,8 +20,39 @@ NIFTY_50 = [
     "TECHM", "TITAN", "TRENT", "ULTRACEMCO", "WIPRO",
 ]
 
+# Nifty Next 50 — stocks ranked 51-100 by free-float market cap (NSE index)
+# Rebalanced quarterly; verify against NSE factsheet after each rebalancing.
+NIFTY_NEXT_50 = [
+    "ADANIENT",   "ADANIGREEN",  "AMBUJACEM",  "BAJAJHLDNG", "BANKBARODA",
+    "BERGEPAINT", "BOSCHLTD",    "CANBK",      "CHOLAFIN",   "COLPAL",
+    "CONCOR",     "DABUR",       "DLF",        "DMART",      "GAIL",
+    "GODREJCP",   "HAVELLS",     "INDHOTEL",   "INDUSTOWER", "IOC",
+    "IRCTC",      "IRFC",        "LICI",       "LODHA",      "LUPIN",
+    "MARICO",     "MUTHOOTFIN",  "NAUKRI",     "NYKAA",      "OFSS",
+    "PERSISTENT", "PIDILITIND",  "PNB",        "RECLTD",     "SAIL",
+    "SRF",        "TATAPOWER",   "TIINDIA",    "TORNTPHARM", "TORNTPOWER",
+    "TVSMOTOR",   "UNIONBANK",   "UPL",        "VEDL",       "VOLTAS",
+    "ZOMATO",     "JSWENERGY",   "ZYDUSLIFE",  "PEL",        "PAYTM",
+]
+
+# Nifty Midcap 50 — liquid midcap universe (NSE Midcap 50 index)
+# Verify against NSE factsheet quarterly; remove any that move to Nifty 100.
+MIDCAP_50_LIQUID = [
+    "ABCAPITAL",  "APLAPOLLO",   "ASTRAL",     "AUROPHARMA", "BALKRISIND",
+    "BANKINDIA",  "BATAINDIA",   "BHARATFORG", "BIOCON",     "COFORGE",
+    "CROMPTON",   "DELHIVERY",   "FEDERALBNK", "GMRINFRA",   "GODREJPROP",
+    "IDFCFIRSTB", "INDIAMART",   "JKCEMENT",   "JUBLFOOD",   "KALYANKJIL",
+    "KPITTECH",   "LTTS",        "MANAPPURAM", "MAXHEALTH",  "MPHASIS",
+    "NHPC",       "OBEROIRLTY",  "PAGEIND",    "PIIND",      "POLICYBZR",
+    "POLYCAB",    "RBLBANK",     "SJVN",       "SUNDRMFAST", "SUPREMEIND",
+    "TATACHEM",   "TATACOMM",    "VGUARD",     "ABFRL",      "CESC",
+    "DIXON",      "HUDCO",       "INDIANB",    "IREDA",      "JBCHEPHARM",
+    "KAYNES",     "MOTILALOFS",  "NUVAMA",     "PRESTIGE",   "SOLARINDS",
+]
+
 # NSE sector map — used for sector snapshot in scan output
 SECTOR_MAP = {
+    # Nifty 50
     "BANKING":  ["HDFCBANK", "ICICIBANK", "AXISBANK", "KOTAKBANK", "INDUSINDBK", "SBIN"],
     "NBFC":     ["BAJAJFINSV", "BAJFINANCE", "SHRIRAMFIN"],
     "IT":       ["INFY", "TCS", "WIPRO", "HCLTECH", "TECHM"],
@@ -35,7 +66,31 @@ SECTOR_MAP = {
     "TELECOM":  ["BHARTIARTL"],
     "CONSUMER": ["TITAN", "TRENT", "ASIANPAINT"],
     "INSURE":   ["SBILIFE", "HDFCLIFE"],
-    "OTHER":    ["TATAMOTORS"],
+    # Nifty Next 50 additions
+    "PSU-BNK":  ["BANKBARODA", "CANBK", "PNB", "UNIONBANK", "SAIL", "IOC",
+                 "CONCOR", "RECLTD", "GAIL", "IRFC", "LICI", "BANKINDIA", "INDIANB"],
+    "ADANI":    ["ADANIENT", "ADANIGREEN"],
+    "REALTY":   ["DLF", "LODHA", "GODREJPROP", "OBEROIRLTY", "PRESTIGE"],
+    "CEMENT2":  ["AMBUJACEM", "JKCEMENT"],
+    "AUTO2":    ["TVSMOTOR", "TIINDIA", "BALKRISIND", "BHARATFORG", "SUNDRMFAST"],
+    "PHARMA2":  ["LUPIN", "TORNTPHARM", "AUROPHARMA", "BIOCON", "ZYDUSLIFE", "JBCHEPHARM", "PIIND"],
+    "FMCG2":    ["COLPAL", "DABUR", "MARICO", "GODREJCP", "BATAINDIA", "PAGEIND", "ABFRL"],
+    "IT2":      ["OFSS", "PERSISTENT", "MPHASIS", "COFORGE", "KPITTECH", "LTTS", "INDIAMART"],
+    "POWER":    ["TATAPOWER", "TORNTPOWER", "JSWENERGY", "NHPC", "SJVN", "IREDA", "CESC"],
+    "NBFC2":    ["CHOLAFIN", "MUTHOOTFIN", "BAJAJHLDNG", "MANAPPURAM", "ABCAPITAL", "MOTILALOFS", "NUVAMA"],
+    "TELECOM2": ["INDUSTOWER"],
+    "ELEC":     ["HAVELLS", "VOLTAS", "CROMPTON", "POLYCAB", "VGUARD", "DIXON", "KAYNES", "APLAPOLLO"],
+    "HOTEL":    ["INDHOTEL"],
+    "CHEM":     ["SRF", "UPL", "PIDILITIND", "TATACHEM", "SOLARINDS", "SUPREMEIND", "ASTRAL"],
+    "METALS2":  ["VEDL", "ADANIENT"],
+    "FINTECH":  ["PAYTM", "POLICYBZR", "NAUKRI", "NYKAA"],
+    "INFRA2":   ["GMRINFRA", "HUDCO", "TATACOMM", "DELHIVERY"],
+    "FOOD":     ["DMART", "JUBLFOOD"],
+    "BANK2":    ["FEDERALBNK", "IDFCFIRSTB", "RBLBANK"],
+    "RETAIL":   ["KALYANKJIL"],
+    "BOSCH":    ["BOSCHLTD"],
+    "BERGEP":   ["BERGEPAINT"],
+    "OTHER":    ["TATAMOTORS", "ABFRL"],
 }
 _SECTOR_LOOKUP = {t: s for s, tickers in SECTOR_MAP.items() for t in tickers}
 
@@ -56,23 +111,25 @@ FEED_MAX_AGE = 60   # seconds
 
 # ── Single-pass cache preload ─────────────────────────────────────────────────
 
-def preload_daily_context(today_str):
-    """One pass through history cache for all tickers. Returns:
-    {
-        "avg_vols":  {ticker: 20d_avg_daily_volume},
-        "breadth":   {"p20": float, "p50": float, "n": int},
-        "ctx":       {ticker: {"atr14": float, "ma50": float,
-                                "ext": float, "adr_pct": float}},
-    }
-    ext = (last_close - ma50) / atr14  — positive = above, negative = below
-    adr_pct = atr14 / last_close * 100 — Jeff Sun's ADR% momentum proxy
+def preload_daily_context(today_str, universe=None):
+    """One pass through history cache for all tickers. Returns avg_vols, breadth, ctx.
+
+    universe — list of tickers to compute avg_vols/ctx for (defaults to NIFTY_50).
+    Breadth (% above 20/50d SMA) is always computed on NIFTY_50 regardless of universe
+    so the market-health signal stays consistent.
     """
     cache_dir = Path(__file__).parent / "data" / "history_cache"
+    if universe is None:
+        universe = NIFTY_50
     avg_vols = {}
     ctx      = {}
     above_20 = above_50 = breadth_n = 0
 
-    for ticker in NIFTY_50:
+    # Full scan set = universe for avg_vols/ctx, always include NIFTY_50 for breadth
+    breadth_set = set(NIFTY_50)
+    scan_set    = set(universe) | breadth_set
+
+    for ticker in scan_set:
         f = cache_dir / f"{ticker}_5min_v8.json"
         if not f.exists():
             continue
@@ -93,10 +150,11 @@ def preload_daily_context(today_str):
                     if b["low"]  < e["l"]: e["l"] = b["low"]
                     e["c"] = b["close"]   # last bar of day wins
 
-            # 20-day average daily volume
-            recent_vol = sorted(vol_by_day.items())[-20:]
-            if recent_vol:
-                avg_vols[ticker] = sum(v for _, v in recent_vol) / len(recent_vol)
+            # 20-day average daily volume (only for universe stocks, not breadth-only extras)
+            if ticker in set(universe):
+                recent_vol = sorted(vol_by_day.items())[-20:]
+                if recent_vol:
+                    avg_vols[ticker] = sum(v for _, v in recent_vol) / len(recent_vol)
 
             # Daily OHLC bars sorted
             skeys  = sorted(ohlc_by_day.keys())
@@ -105,8 +163,8 @@ def preload_daily_context(today_str):
             if not closes:
                 continue
 
-            # Market breadth: % above 20d / 50d SMA
-            if len(closes) >= 20:
+            # Market breadth: only Nifty 50 stocks count (market-health signal)
+            if ticker in breadth_set and len(closes) >= 20:
                 ma20 = sum(closes[-20:]) / 20
                 breadth_n += 1
                 if closes[-1] > ma20:

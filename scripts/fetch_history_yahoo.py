@@ -34,6 +34,40 @@ NIFTY_50 = [
     "TECHM", "TITAN", "TRENT", "ULTRACEMCO", "WIPRO",
 ]
 
+NIFTY_NEXT_50 = [
+    "ADANIENT",   "ADANIGREEN",  "AMBUJACEM",  "BAJAJHLDNG", "BANKBARODA",
+    "BERGEPAINT", "BOSCHLTD",    "CANBK",      "CHOLAFIN",   "COLPAL",
+    "CONCOR",     "DABUR",       "DLF",        "DMART",      "GAIL",
+    "GODREJCP",   "HAVELLS",     "INDHOTEL",   "INDUSTOWER", "IOC",
+    "IRCTC",      "IRFC",        "LICI",       "LODHA",      "LUPIN",
+    "MARICO",     "MUTHOOTFIN",  "NAUKRI",     "NYKAA",      "OFSS",
+    "PERSISTENT", "PIDILITIND",  "PNB",        "RECLTD",     "SAIL",
+    "SRF",        "TATAPOWER",   "TIINDIA",    "TORNTPHARM", "TORNTPOWER",
+    "TVSMOTOR",   "UNIONBANK",   "UPL",        "VEDL",       "VOLTAS",
+    "ZOMATO",     "JSWENERGY",   "ZYDUSLIFE",  "PEL",        "PAYTM",
+]
+
+MIDCAP_50_LIQUID = [
+    "ABCAPITAL",  "APLAPOLLO",   "ASTRAL",     "AUROPHARMA", "BALKRISIND",
+    "BANKINDIA",  "BATAINDIA",   "BHARATFORG", "BIOCON",     "COFORGE",
+    "CROMPTON",   "DELHIVERY",   "FEDERALBNK", "GMRINFRA",   "GODREJPROP",
+    "IDFCFIRSTB", "INDIAMART",   "JKCEMENT",   "JUBLFOOD",   "KALYANKJIL",
+    "KPITTECH",   "LTTS",        "MANAPPURAM", "MAXHEALTH",  "MPHASIS",
+    "NHPC",       "OBEROIRLTY",  "PAGEIND",    "PIIND",      "POLICYBZR",
+    "POLYCAB",    "RBLBANK",     "SJVN",       "SUNDRMFAST", "SUPREMEIND",
+    "TATACHEM",   "TATACOMM",    "VGUARD",     "ABFRL",      "CESC",
+    "DIXON",      "HUDCO",       "INDIANB",    "IREDA",      "JBCHEPHARM",
+    "KAYNES",     "MOTILALOFS",  "NUVAMA",     "PRESTIGE",   "SOLARINDS",
+]
+
+# Deduplicated full universe across all groups
+_seen = set()
+FULL_UNIVERSE = []
+for _t in NIFTY_50 + NIFTY_NEXT_50 + MIDCAP_50_LIQUID:
+    if _t not in _seen:
+        _seen.add(_t)
+        FULL_UNIVERSE.append(_t)
+
 
 def fetch_yahoo_5min(ticker, retries=3):
     url = f"https://query2.finance.yahoo.com/v8/finance/chart/{ticker}.NS?interval=5m&range=60d"
@@ -79,19 +113,36 @@ def merge(existing, new_bars):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--tickers", nargs="*", default=NIFTY_50)
+    parser = argparse.ArgumentParser(
+        description="Nightly 5-min history accumulator (Yahoo Finance, no auth)."
+    )
+    parser.add_argument("--tickers", nargs="*", default=None,
+                        help="Override ticker list. Default: full universe (N50+NXT50+MID50).")
+    parser.add_argument("--groups", nargs="*", choices=["N50", "NXT50", "MID50"],
+                        help="Restrict to these groups only, e.g. --groups N50 NXT50")
     parser.add_argument("--delay", type=float, default=1.5,
                         help="Seconds between requests (default 1.5)")
     args = parser.parse_args()
 
+    if args.tickers:
+        tickers = args.tickers
+    elif args.groups:
+        group_map = {"N50": NIFTY_50, "NXT50": NIFTY_NEXT_50, "MID50": MIDCAP_50_LIQUID}
+        seen, tickers = set(), []
+        for g in args.groups:
+            for t in group_map[g]:
+                if t not in seen:
+                    seen.add(t); tickers.append(t)
+    else:
+        tickers = FULL_UNIVERSE
+
     now_ist = datetime.now(IST)
     print(f"Yahoo 5-min accumulator | {now_ist.strftime('%Y-%m-%d %H:%M')} IST")
-    print(f"Tickers: {len(args.tickers)} | Delay: {args.delay}s/ticker")
+    print(f"Tickers: {len(tickers)} | Delay: {args.delay}s/ticker")
     print()
 
     ok = skipped = errors = 0
-    for ticker in args.tickers:
+    for ticker in tickers:
         cache_file = CACHE_DIR / f"{ticker}_5min_v8.json"
 
         # Load existing
