@@ -750,8 +750,15 @@ def scan():
         for r in squeeze_watch:
             _tg_lines.append(f"  {r['ticker']} ({r.get('n_sq',0)}-bar) {r.get('notes','')}")
 
-    _tg_lines.append(f"\n_Next scan in ~10 min_")
-    _send_telegram("\n".join(_tg_lines))
+    # Only send Telegram during market hours (Mon-Fri, 09:30-13:15 IST)
+    # Prevents spurious messages when the script is run manually outside market hours
+    tg_ok = (now_ist.weekday() < 5) and (930 <= hhmm <= 1315)
+    if tg_ok:
+        _tg_lines.append(f"\n_Next scan in ~10 min_")
+        _send_telegram("\n".join(_tg_lines))
+    else:
+        dow = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][now_ist.weekday()]
+        print(f"\n  [Telegram suppressed — outside market hours: {dow} {now_ist.strftime('%H:%M')} IST]")
 
 
 if __name__ == "__main__":
