@@ -58,3 +58,23 @@ Every future selection change must beat, out-of-sample:
 - net expectancy > 0 after 0.30% costs.
 
 Full tables: `backtests/BASELINE-5DAY-PROFILE.md`.
+
+---
+
+## Addendum (same day) — Phase 3 walk-forward signal study
+
+Data refreshed through 2026-07-17. Study: 9 candidate signals + top combos,
+Nifty 50, 16,688 symbol-days, train (2025) / test (2026) split
+(`backtests/phase3_signal_study.py`, full table in
+`backtests/PHASE3-SIGNAL-STUDY.md`).
+
+**Result: NO signal confirmed out-of-sample.** Momentum, relative strength,
+volume surge, ATR-capability, 200DMA trend, pullback, RSI(2) dip, compression —
+none lifts the ~29% base rate on test with p < 0.05 and positive net EV.
+20-day-high breakout is significantly WORSE than base (−6.4pt, p=0.0003):
+daily-bar breakout chasing actively hurts on this universe/horizon.
+
+Standing conclusion strengthens: on NSE large caps, the 3–4%-in-5-days profile
+is not selectable from daily bars with simple deterministic filters. The
+evidence-backed path to the weekly return goal remains the intraday ORB sleeve
+plus journal-driven evidence accumulation (N≥30) for anything new.

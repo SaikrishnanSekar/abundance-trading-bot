@@ -14,6 +14,7 @@ BHAV_DIR = ROOT / "data" / "bhavcopy"
 
 # NSE UDiFF bhavcopy column names
 _COLS = {"open": "OpnPric", "high": "HghPric", "low": "LwPric", "close": "ClsPric"}
+_VOL_COL = "TtlTradgVol"
 
 
 def _file_date_iso(path: Path) -> str:
@@ -81,12 +82,14 @@ def load_universe_series(symbols: list[str]) -> dict[str, list[dict]]:
                 sym = row.get("TckrSymb", "").strip().upper()
                 if sym in want and row.get("SctySrs", "").strip().upper() == "EQ":
                     try:
+                        vol_raw = row.get(_VOL_COL, "")
                         series[sym].append({
                             "date": d,
                             "open": float(row[_COLS["open"]]),
                             "high": float(row[_COLS["high"]]),
                             "low": float(row[_COLS["low"]]),
                             "close": float(row[_COLS["close"]]),
+                            "volume": float(vol_raw) if vol_raw else 0.0,
                         })
                     except (KeyError, ValueError):
                         pass

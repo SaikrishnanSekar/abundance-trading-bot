@@ -188,3 +188,4 @@ Re-evaluate at 15-min timeframe only if ORB sleeve shows positive live results f
 - Baseline backtest (real bhavcopy, 15mo, STRONG-22): LONG-WATCH hits >=3%/5d only 25.7% vs 28.1% base rate - NO selection lift. Net EV after costs: negative.
 - Honest report: backtests/HONEST-REPORT-2026-07-18.md. FINDING logged in STRATEGY-PROPOSALS.md - keep MA-abundance research-only.
 - No live action. Market closed (Saturday).
+- Addendum: bhavcopy refreshed to 2026-07-17. Phase-3 walk-forward study (9 signals, N50, 16,688 symbol-days): NO signal beats 29% base rate out-of-sample; 20d-high breakout significantly WORSE (-6.4pt, p=0.0003). No proposal - correct output is silence. Baseline re-run on extended data: LONG-WATCH 25.3%, unchanged conclusion.
