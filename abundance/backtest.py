@@ -33,8 +33,13 @@ def _bars_until(bars: list[dict], d: str) -> list[dict]:
 
 def run(series: dict[str, list[dict]], th: dict | None = None) -> dict:
     """Simulate every decision day once for baseline and once for the ruleset."""
+    from .dhan_history import load_index
     dates = _all_dates(series)
-    idx_levels_by_date = composite_index(series)
+    nifty = load_index("_NIFTY")
+    if nifty and nifty[0]["date"] <= dates[0]:  # real index must cover the span
+        idx_levels_by_date = {b["date"]: b["close"] for b in nifty}
+    else:
+        idx_levels_by_date = composite_index(series)
     idx_dates = sorted(idx_levels_by_date)
 
     baseline: list[dict] = []
@@ -107,7 +112,16 @@ def main():
     print_utf8_safe()
     ap = argparse.ArgumentParser()
     ap.add_argument("--days", type=int, default=260)
+    ap.add_argument("--fetch", action="store_true",
+                    help="fetch data first: Dhan (if creds), else bhavcopy")
     a = ap.parse_args()
+
+    if a.fetch:
+        from .data import prefetch
+        from .dhan_history import fetch as dhan_fetch
+        if dhan_fetch(days=max(400, a.days + 140)) == 0:
+            print("falling back to bhavcopy prefetch (~260 files, first run is slow)...")
+            prefetch(a.days)
 
     series, source = load_best_available(NIFTY50, a.days)
     if not series:

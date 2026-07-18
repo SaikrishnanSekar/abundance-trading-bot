@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from . import RULESET_VERSION
 from .config import MAX_PICKS_PER_DAY, NIFTY50
 from .data import load_best_available, prefetch, print_utf8_safe
+from .dhan_history import fetch as dhan_fetch, load_index
 from .indicators import pct_return
 from .journal import connect, record
 from .notify import send
@@ -27,13 +28,26 @@ MIN_HISTORY = 21
 def build_recommendations(series: dict[str, list[dict]]) -> tuple[list[dict], dict]:
     """Evaluate every symbol on the NEWEST common date. Returns (picks, regime)."""
     latest = max(bars[-1]["date"] for bars in series.values())
-    idx = composite_index(series)
+    # Regime index: real NIFTY (Dhan cache) when available, else the
+    # equal-weight universe composite.
+    nifty = load_index("_NIFTY")
+    if nifty:
+        idx = {b["date"]: b["close"] for b in nifty}
+        idx_source = "nifty"
+    else:
+        idx = composite_index(series)
+        idx_source = "composite"
     idx_dates = sorted(d for d in idx if d <= latest)
     idx_levels = [idx[d] for d in idx_dates]
     ok, level, ema_level = regime_ok(idx_levels)
     idx_ret20 = pct_return(idx_levels, 20)
-    regime = {"date": latest, "regime_ok": ok, "composite": level,
-              "composite_ema": ema_level, "composite_ret_20d": idx_ret20,
+    # India VIX: recorded for attribution when fresh; never gated on here
+    # (the live bot owns VIX gating). Stale/missing → None, not guessed.
+    vix_bars = load_index("_INDIAVIX")
+    vix = vix_bars[-1]["close"] if (vix_bars and vix_bars[-1]["date"] == latest) else None
+    regime = {"date": latest, "regime_ok": ok, "index_source": idx_source,
+              "index_level": level, "index_ema": ema_level,
+              "index_ret_20d": idx_ret20, "india_vix": vix,
               "ruleset_version": RULESET_VERSION}
 
     picks: list[dict] = []
@@ -81,7 +95,10 @@ def main():
     a = ap.parse_args()
 
     if not a.no_fetch:
-        prefetch(a.fetch_days, progress=False)
+        # Dhan first (1 call/symbol, includes real NIFTY + VIX); bhavcopy only
+        # when Dhan creds are absent or the fetch returned nothing.
+        if dhan_fetch(days=120) == 0:
+            prefetch(a.fetch_days, progress=False)
     series, source = load_best_available(NIFTY50, 260)
     if not series:
         msg = "==> ABUNDANCE SCAN\nERROR: no market data available (NSE fetch failed and no cache). No picks fabricated."

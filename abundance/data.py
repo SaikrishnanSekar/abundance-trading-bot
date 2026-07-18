@@ -141,7 +141,13 @@ def load_5min_cache_daily() -> dict[str, list[Bar]]:
 
 
 def load_best_available(symbols: list[str], n_trading_days: int = 260) -> tuple[dict[str, list[Bar]], str]:
-    """Prefer bhavcopy; fall back to the 5-min cache. Returns (series, source)."""
+    """Source priority: Dhan daily cache (deepest, includes real index) →
+    bhavcopy → 5-min cache. Returns (series, source)."""
+    from .dhan_history import load_daily  # local import avoids cycle
+    dhan = load_daily()
+    if dhan and max(len(b) for b in dhan.values()) >= 30:
+        return ({s: b[-n_trading_days:] for s, b in dhan.items() if s in symbols} or dhan,
+                "dhan_daily")
     series = load_bhavcopy_series(symbols, n_trading_days)
     # Require a real span, not a stray file or two
     if series and max(len(b) for b in series.values()) >= 30:
