@@ -181,3 +181,10 @@ Re-evaluate at 15-min timeframe only if ORB sleeve shows positive live results f
 **No live action taken.** All proposals await human commit to TRADING-STRATEGY.md.
 
 ---
+
+## 2026-07-18 (Sat) - 5-day profile baseline + journal launch
+
+- Built deterministic trade journal (journal/) + evidence-gated feedback loop. 32 tests green, test_system.bat smoke PASS. Data-collection mode until N>=30 closed.
+- Baseline backtest (real bhavcopy, 15mo, STRONG-22): LONG-WATCH hits >=3%/5d only 25.7% vs 28.1% base rate - NO selection lift. Net EV after costs: negative.
+- Honest report: backtests/HONEST-REPORT-2026-07-18.md. FINDING logged in STRATEGY-PROPOSALS.md - keep MA-abundance research-only.
+- No live action. Market closed (Saturday).

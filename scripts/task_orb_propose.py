@@ -160,12 +160,12 @@ if not sec_id:
 
 # ── VIX gate ─────────────────────────────────────────────────────────────────
 vix = 99.0
-for ln in run_shell("bash scripts/vix.sh").splitlines():
-    if "INDIA_VIX=" in ln:
-        try:
-            vix = float(ln.split("=")[1].strip())
-        except Exception:
-            pass
+for ln in run_shell(f"{sys.executable} scripts/_nse_fetch.py vix").splitlines():
+    try:
+        if ln.strip() and ln.strip() != "NA":
+            vix = float(ln.strip())
+    except Exception:
+        pass
 if vix >= 20:
     send_telegram(f"ORB SIGNAL BLOCKED: VIX {vix:.2f} >= 20")
     sys.exit(0)
@@ -253,6 +253,16 @@ pending = {
 }
 PENDING_FILE.write_text(json.dumps(pending, indent=2), encoding="utf-8")
 print(f"PENDING-TRADE written: {pending}")
+
+# Journal the recommendation at generation time (append-only, idempotent,
+# failure-safe — a journal error never blocks the proposal).
+try:
+    from journal.record import journal_safely, log_orb_proposal
+    rec_id = journal_safely(log_orb_proposal, pending, now)
+    if rec_id:
+        print(f"[journal] recorded {rec_id}")
+except Exception as e:
+    print(f"[journal] WARNING: import failed ({e}) — proposal continues.")
 
 # ── Send Telegram proposal ───────────────────────────────────────────────────
 stop_pct = abs(close_px - stop_price) / close_px * 100

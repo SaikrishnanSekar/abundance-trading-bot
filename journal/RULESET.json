@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "effective_date": "2026-07-18",
+  "description": "Baseline ruleset at journal launch. Swing profile: MA-abundance LONG-WATCH/SHORT-WATCH (price vs rising/falling 20DMA, <=3% extension, 200DMA not blocking within 3%). Intraday: ORB v3 STRONG-22 (vol>=2.0x, VWAP align, width gate >=1.5%). Every journal record carries this version so evidence is never contaminated across rule changes. Bump the version (and append to history) ONLY on human-approved rule changes via STRATEGY-PROPOSALS.md.",
+  "exit_policy_5day": {
+    "target_pct": 3.0,
+    "stop_pct": -2.0,
+    "time_stop_days": 5
+  },
+  "history": [
+    {
+      "version": "1.0.0",
+      "date": "2026-07-18",
+      "change": "Initial journal launch — baseline rules as of this date."
+    }
+  ]
+}

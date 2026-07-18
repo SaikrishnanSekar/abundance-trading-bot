@@ -29,3 +29,10 @@ data/bhavcopy/
 
 # Runtime session tokens (never commit)
 data/.kotak_session.json
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Runtime logs
+logs/

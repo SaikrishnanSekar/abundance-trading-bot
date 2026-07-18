@@ -224,6 +224,29 @@ Awaiting human approval.
 
 ---
 
+## 2026-07-18 - 5-Day Profile Baseline + Trade Journal Launch (FINDING)
+- dimension: five_day_profile_baseline
+- evidence_n: 2,202 signal-days + 6,377 control symbol-days (real bhavcopy, 15 months)
+- current_rule: MA-abundance LONG-WATCH/SHORT-WATCH is research-only; no swing sleeve active.
+- proposed_rule: No change. FINDING: keep MA-abundance research-only. Do NOT activate a swing sleeve on it.
+- expected_impact: Prevents deploying a negative-EV setup. Journal now collects per-signal evidence for future tuning.
+- risk: N/A - informational.
+- cooldown_until: 2026-08-01
+- status: FINDING — informational, no human approval needed
+
+**Evidence** (backtests/baseline_5day_profile.py, real NSE data 2025-02-11..2026-05-05):
+LONG-WATCH hits >=3% in 5d only 25.7% (CI 23.5-28.1) vs 28.1% unconditional base rate —
+zero selection lift. Net expectancy after 0.30% costs: -0.32% to -0.47%/trade. Full honest
+report: backtests/HONEST-REPORT-2026-07-18.md.
+
+**Infrastructure shipped**: deterministic trade journal (journal/ package, append-only JSONL,
+ruleset-versioned) hooked into MA-abundance scan + ORB proposals; outcome capture from bhavcopy;
+weekly rollup; evidence-gated feedback loop (N>=30 / z-test / walk-forward / human-approval /
+regression gates). 32 unit tests + test_system.bat smoke. Feedback loop is in DATA-COLLECTION
+MODE until 30 closed recommendations exist.
+
+---
+
 ## 2026-05-06 · VWAP Cross-Momentum (REJECTED — do not trial)
 - dimension: vwap_cross_momentum
 - evidence_n: 347-114 trades across 5 iterations (backtests/strategy_vwap_reversal.py)

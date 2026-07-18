@@ -24,6 +24,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from scripts import _kotak  # noqa: E402
+from journal.selection import classify, sma  # noqa: E402 — shared with backtests
+from journal.record import journal_safely, log_ma_abundance  # noqa: E402
 
 IST = timezone(timedelta(hours=5, minutes=30))
 WATCHLIST = ROOT / "memory" / "india" / "APPROVED-WATCHLIST.md"
@@ -75,12 +77,6 @@ def completed_daily_bars(symbol: str, limit: int = 220) -> list[Bar]:
                 break
     rows.reverse()
     return rows
-
-
-def sma(values: list[float], period: int) -> float | None:
-    if len(values) < period:
-        return None
-    return sum(values[-period:]) / period
 
 
 def fmt(value: float | None, digits: int = 2) -> str:
@@ -169,36 +165,6 @@ def kotak_quotes(symbols: list[str]) -> tuple[dict[str, float], list[str]]:
                     failed.append(sym)
 
     return prices, failed
-
-
-def classify(
-    ltp: float,
-    sma20_now: float,
-    sma20_prev: float,
-    sma200: float,
-) -> tuple[str, str]:
-    dist20 = (ltp - sma20_now) / sma20_now * 100
-    dist200 = (ltp - sma200) / sma200 * 100
-    rising20 = sma20_now > sma20_prev
-    falling20 = sma20_now < sma20_prev
-
-    if rising20 and ltp > sma20_now:
-        if dist20 > 3.0:
-            return "EXTENDED-LONG", "above rising 20DMA but >3% extended"
-        if ltp < sma200 and abs(dist200) <= 3.0:
-            return "BLOCKED-200", "200DMA overhead resistance too close"
-        return "LONG-WATCH", "above rising 20DMA; not extended"
-
-    if falling20 and ltp < sma20_now:
-        if dist20 < -3.0:
-            return "EXTENDED-SHORT", "below falling 20DMA but >3% extended"
-        if ltp > sma200 and abs(dist200) <= 3.0:
-            return "BLOCKED-200", "200DMA support too close"
-        return "SHORT-WATCH", "below falling 20DMA; not extended"
-
-    if abs(dist20) <= 1.0:
-        return "BASE-BUILD", "near flat/transition 20DMA"
-    return "NO-SETUP", "20DMA trend/price alignment missing"
 
 
 def run_scan() -> str:
@@ -322,6 +288,15 @@ def run_scan() -> str:
 
     output = "\n".join(lines) + "\n"
     OUT_FILE.write_text(output, encoding="utf-8")
+
+    # Journal every actionable recommendation at generation time (append-only;
+    # deterministic ids make re-runs idempotent; failures never break the scan).
+    for r in rows:
+        if r["status"] in ("LONG-WATCH", "SHORT-WATCH"):
+            rec_id = journal_safely(log_ma_abundance, r, now)
+            if rec_id:
+                print(f"[journal] recorded {rec_id}")
+
     return output
 
 
