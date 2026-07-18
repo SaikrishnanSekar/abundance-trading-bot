@@ -10,7 +10,22 @@
     "LT":          { "securityId": "11483", "lotSize": 1 },
     "ITC":         { "securityId": "1660",  "lotSize": 1 },
     "AXISBANK":    { "securityId": "5900",  "lotSize": 1 },
-    "KOTAKBANK":   { "securityId": "1922",  "lotSize": 1 }
+    "KOTAKBANK":   { "securityId": "1922",  "lotSize": 1 },
+    "SHRIRAMFIN":  { "securityId": "4306",  "lotSize": 1 },
+    "BHARTIARTL":  { "securityId": "10604", "lotSize": 1 },
+    "HEROMOTOCO":  { "securityId": "1348",  "lotSize": 1 },
+    "INDUSINDBK":  { "securityId": "5258",  "lotSize": 1 },
+    "SUNPHARMA":   { "securityId": "3351",  "lotSize": 1 },
+    "DIVISLAB":    { "securityId": "10940", "lotSize": 1 },
+    "TECHM":       { "securityId": "13538", "lotSize": 1 },
+    "ADANIPORTS":  { "securityId": "15083", "lotSize": 1 },
+    "HINDUNILVR":  { "securityId": "1394",  "lotSize": 1 },
+    "ULTRACEMCO":  { "securityId": "11532", "lotSize": 1 },
+    "BEL":         { "securityId": "383",   "lotSize": 1 },
+    "BAJAJ-AUTO":  { "securityId": "16669", "lotSize": 1 },
+    "BAJAJFINSV":  { "securityId": "16675", "lotSize": 1 },
+    "DRREDDY":     { "securityId": "881",   "lotSize": 1 },
+    "WIPRO":       { "securityId": "3787",  "lotSize": 1 }
   },
   "NSE_INDEX": {
     "NIFTY":       { "securityId": "13",    "note": "Nifty 50 index" },

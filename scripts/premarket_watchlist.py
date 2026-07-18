@@ -85,13 +85,12 @@ def check_kill_switch():
 
 def check_vix():
     try:
+        import sys
         result = __import__('subprocess').run(
-            ["bash", "scripts/vix.sh"], capture_output=True, text=True, cwd=str(ROOT)
+            [sys.executable, "scripts/_nse_fetch.py", "vix"], capture_output=True, text=True, cwd=str(ROOT)
         )
-        for line in result.stdout.splitlines():
-            if "INDIA_VIX=" in line:
-                vix = float(line.split("=")[1].strip())
-                return vix
+        if result.returncode == 0:
+            return float(result.stdout.strip())
     except Exception:
         pass
     return None

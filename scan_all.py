@@ -54,9 +54,9 @@ def _send_telegram(text):
     )
     try:
         with urllib.request.urlopen(req, timeout=10):
-            pass
+            print(f"  [Telegram sent OK — {len(text)} chars]")
     except Exception as e:
-        print(f"Telegram error: {e}")
+        print(f"  [Telegram ERROR: {e}]")
 
 # Pull shared helpers from scan_orb_live
 sys.path.insert(0, str(Path(__file__).parent))
