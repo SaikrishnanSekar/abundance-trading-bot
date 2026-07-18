@@ -58,12 +58,14 @@ def _row_for_symbol(path: Path, symbol: str, date_iso: str) -> dict | None:
             if (row.get("TckrSymb", "").strip().upper() == symbol
                     and row.get("SctySrs", "").strip().upper() == "EQ"):
                 try:
+                    vol_raw = row.get(_VOL_COL, "")
                     return {
                         "date": date_iso,
                         "open": float(row[_COLS["open"]]),
                         "high": float(row[_COLS["high"]]),
                         "low": float(row[_COLS["low"]]),
                         "close": float(row[_COLS["close"]]),
+                        "volume": float(vol_raw) if vol_raw else 0.0,
                     }
                 except (KeyError, ValueError):
                     return None

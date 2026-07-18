@@ -24,6 +24,7 @@ everything here keeps working from the code alone.
 |---|---|
 | `journal/india/recommendations.jsonl` | Append-only recommendation records |
 | `journal/india/outcomes.jsonl` | Append-only outcome records |
+| `journal/india/tracking.jsonl` | Append-only EOD tracking + root-cause records |
 | `journal/RULESET.json` | Current ruleset version + history |
 | `journal/reports/WEEKLY-*.md` | Weekly rollups |
 | `journal/reports/TUNING-PROPOSAL-*.md` | Draft proposals (gates 1–2 passed) |
@@ -42,11 +43,18 @@ test_system.bat                   smoke test — run anytime
 Or directly: `python -m journal.capture_outcomes`, `python -m journal.weekly_report`,
 `python -m journal.feedback_loop`.
 
+**Tracking**: `python -m journal.track` (part of the nightly .bat) appends one
+EOD record per open recommendation: current price, signed move, progress in the
+stop→target band, a mechanical verdict (ON-TRACK / NEUTRAL± / AGAINST), and a
+deterministic **root cause** — market-driven vs stock-specific (vs equal-weight
+N50 breadth), overnight-gap vs intraday origin, volume participation, 20DMA
+integrity.
+
 **Dashboard**: `python -m journal.dashboard` regenerates `dashboard.html` (repo
-root) — a static three-tab control room (how it works / daily recommendations /
-journal + feedback gates). Both .bat launchers regenerate it automatically, so
-it is always current after the nightly run. Open it in any browser; no server
-needed.
+root) — a static four-tab control room (how it works / daily recommendations /
+live tracking / journal + feedback gates). Both .bat launchers regenerate it
+automatically, so it is always current after the nightly run. Open it in any
+browser; no server needed.
 
 ### Task Scheduler setup (DONE — registered 2026-07-19; commands kept for a fresh machine)
 

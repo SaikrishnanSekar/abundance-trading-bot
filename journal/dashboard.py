@@ -23,6 +23,7 @@ from .core import load_records
 from .gates import GATE1_MIN_N
 from .record import OUTCOMES_FILE, RECS_FILE, current_ruleset
 from .stats import rollup
+from .track import TRACKING_FILE
 
 IST = timezone(timedelta(hours=5, minutes=30))
 ROOT = Path(__file__).resolve().parent.parent
@@ -338,6 +339,102 @@ gate is likely to pass.</p>
     return "\n".join(parts)
 
 
+def _track_row(t, rec, outcome):
+    side = f'<span class="badge b-{"long" if t["side"]=="LONG" else "short"}">{t["side"]}</span>'
+    mv = t["move_pct"]
+    mv_html = f'<span class="{"ok-txt" if mv>0 else "bad-txt" if mv<0 else "mut"} mono">{mv:+.2f}%</span>'
+    v = t["verdict"]
+    v_cls = ("b-yes" if v == "ON-TRACK" else "b-no" if v == "AGAINST" else "b-warn")
+    pw = int(t["progress"] * 100)
+    if outcome:
+        status = (f'<span class="badge b-closed">{E(outcome["exit_reason"])}</span> '
+                  f'<span class="mono">{outcome["realized_pct"]:+.2f}%</span>')
+    else:
+        status = f'{t["days_elapsed"]}/{t["days_window"]}d'
+    return (f'<tr><td><b>{E(t["ticker"])}</b></td><td>{side}</td>'
+            f'<td class="mono">{E(rec.get("entry_date",""))}</td>'
+            f'<td class="num">{t["entry_price"]:.2f}</td>'
+            f'<td class="num">{t["current_price"]:.2f}</td>'
+            f'<td class="num">{mv_html}</td>'
+            f'<td><div class="bar" style="min-width:90px" title="{pw}% of the '
+            f'stop-to-target band"><i style="width:{pw}%"></i></div></td>'
+            f'<td><span class="badge {v_cls}">{E(v)}</span></td>'
+            f'<td class="mono" style="white-space:nowrap">{status}</td></tr>'
+            f'<tr><td></td><td colspan="8" class="note" style="border-bottom:'
+            f'1px solid var(--line)">&#8627; <b>root cause</b> '
+            f'({E(t["date"])}): {E(t["root_cause"])}</td></tr>')
+
+
+def tab_track(recs, closed_by_id, tracking):
+    # latest tracking record per recommendation
+    latest: dict[str, dict] = {}
+    for t in tracking:
+        cur = latest.get(t["rec_id"])
+        if cur is None or t["date"] > cur["date"]:
+            latest[t["rec_id"]] = t
+    recs_by_id = {r["id"]: r for r in recs}
+    open_rows = [t for rid, t in latest.items() if rid not in closed_by_id]
+    closed_rows = [t for rid, t in latest.items() if rid in closed_by_id]
+    open_rows.sort(key=lambda t: t["date"], reverse=True)
+    closed_rows.sort(key=lambda t: t["date"], reverse=True)
+
+    parts = ["""
+<h2>Live tracking &mdash; is each recommendation trending the right way?</h2>
+<p class="note">Every open recommendation vs its latest completed-day price.
+<b>Progress</b> shows where price sits in the stop&rarr;target band (empty = at
+stop, full = at target). The <b>verdict</b> is mechanical: ON-TRACK &ge; 40% of
+the way to target, AGAINST &le; half-way to the stop, NEUTRAL&plusmn; by today's
+drift. Each row carries its end-of-day <b>root cause</b> &mdash; attributed
+deterministically from data (market vs stock-specific, gap vs intraday, volume,
+20DMA integrity) and appended to the journal every evening by the scheduled
+20:30 task.</p>"""]
+
+    if open_rows:
+        parts.append("""
+<h3>Open positions in their 5-day window</h3>
+<table>
+<tr><th>Ticker</th><th>Side</th><th>Entry date</th><th class="num">Entry</th>
+<th class="num">Current</th><th class="num">Move</th><th>Progress to target</th>
+<th>Verdict</th><th>Day</th></tr>""")
+        for t in open_rows:
+            parts.append(_track_row(t, recs_by_id.get(t["rec_id"], {}), None))
+        parts.append("</table>")
+    else:
+        parts.append("""
+<div class="empty">No open recommendations being tracked right now.<br>
+Rows appear here automatically once a scan journals a recommendation and the
+first end-of-day tracking pass runs (nightly 20:30 IST).</div>""")
+
+    if closed_rows:
+        parts.append("""
+<h3>Recently closed &mdash; final state and root cause</h3>
+<table>
+<tr><th>Ticker</th><th>Side</th><th>Entry date</th><th class="num">Entry</th>
+<th class="num">Last</th><th class="num">Move</th><th>Progress</th>
+<th>Verdict</th><th>Exit</th></tr>""")
+        for t in closed_rows[:15]:
+            parts.append(_track_row(t, recs_by_id.get(t["rec_id"], {}),
+                                    closed_by_id.get(t["rec_id"])))
+        parts.append("</table>")
+
+    parts.append("""
+<h3>How the root cause is decided (no judgement calls, no AI)</h3>
+<ul class="note">
+<li><b>market-driven</b> &mdash; the stock moved with Nifty-50 equal-weight
+breadth and the market explains &ge; 50% of the move; <b>stock-specific</b>
+otherwise (divergence from the index is the tell).</li>
+<li><b>overnight gap vs intraday</b> &mdash; whether the latest day's move came
+from the open (news/positioning overnight) or was built during the session
+(live buying/selling pressure).</li>
+<li><b>volume</b> &mdash; participation vs the 20-day average: high (&ge;1.5&times;)
+validates the move; thin (&lt;0.7&times;) marks it as drift.</li>
+<li><b>20DMA integrity</b> &mdash; whether price is still on the signal's side of
+its 20-day average; &ldquo;trend broken&rdquo; on a losing position is the
+classic thesis-break flag.</li>
+</ul>""")
+    return "\n".join(parts)
+
+
 def tab3(recs, outcomes, closed, rs):
     closed_current = [o for o in closed if o.get("ruleset_version") == rs["version"]]
     n = len(closed_current)
@@ -429,6 +526,7 @@ def main() -> int:
     closed = [o for o in outcomes if o.get("status") == "closed"]
     closed_by_id = {o["rec_id"]: o for o in closed}
     wl_day, wl_rows = parse_watchlist()
+    tracking = load_records(TRACKING_FILE)
     latest_bhav = bhav.latest_date()
 
     doc = f"""<!DOCTYPE html>
@@ -445,13 +543,15 @@ def main() -> int:
   <nav>
     <button class="on" onclick="show('t1',this)">How It Works &amp; Control</button>
     <button onclick="show('t2',this)">Daily Recommendations</button>
-    <button onclick="show('t3',this)">Journal &amp; Feedback Loop</button>
+    <button onclick="show('t3',this)">Live Tracking</button>
+    <button onclick="show('t4',this)">Journal &amp; Feedback Loop</button>
   </nav>
 </header>
 <main>
 <section class="tab on" id="t1">{tab1(rs, latest_bhav, KILL_SWITCH.exists())}</section>
 <section class="tab" id="t2">{tab2(recs, closed_by_id, wl_day, wl_rows, load_pending())}</section>
-<section class="tab" id="t3">{tab3(recs, outcomes, closed, rs)}</section>
+<section class="tab" id="t3">{tab_track(recs, closed_by_id, tracking)}</section>
+<section class="tab" id="t4">{tab3(recs, outcomes, closed, rs)}</section>
 </main>
 <footer>Static file generated by <span class="mono">python -m journal.dashboard</span>
 &mdash; deterministic, read-only, no LLM at runtime. Regenerates nightly (20:30) and

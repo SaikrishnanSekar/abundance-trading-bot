@@ -89,11 +89,12 @@ li{margin:3px 0}
   <h1><span class="tick">&#9632;</span> Abundance Trading &mdash; Control Room</h1>
   <div class="sub">India &middot; Dhan (live, human-gated) &middot; ruleset
     <b>1.0.0</b> &middot; data through <b>2026-07-17</b>
-    &middot; generated 2026-07-19 00:15 IST</div>
+    &middot; generated 2026-07-19 00:23 IST</div>
   <nav>
     <button class="on" onclick="show('t1',this)">How It Works &amp; Control</button>
     <button onclick="show('t2',this)">Daily Recommendations</button>
-    <button onclick="show('t3',this)">Journal &amp; Feedback Loop</button>
+    <button onclick="show('t3',this)">Live Tracking</button>
+    <button onclick="show('t4',this)">Journal &amp; Feedback Loop</button>
   </nav>
 </header>
 <main>
@@ -232,6 +233,35 @@ gate is likely to pass.</p>
 <tr><td class="num">22</td><td><b>INFY</b></td><td class="num">1160.90</td><td class="num">1210.00</td><td class="num">1153.60</td><td class="num">28.84</td><td class="num">2.5%</td><td><span class="badge b-yes">likely ok</span></td></tr>
 </table></section>
 <section class="tab" id="t3">
+<h2>Live tracking &mdash; is each recommendation trending the right way?</h2>
+<p class="note">Every open recommendation vs its latest completed-day price.
+<b>Progress</b> shows where price sits in the stop&rarr;target band (empty = at
+stop, full = at target). The <b>verdict</b> is mechanical: ON-TRACK &ge; 40% of
+the way to target, AGAINST &le; half-way to the stop, NEUTRAL&plusmn; by today's
+drift. Each row carries its end-of-day <b>root cause</b> &mdash; attributed
+deterministically from data (market vs stock-specific, gap vs intraday, volume,
+20DMA integrity) and appended to the journal every evening by the scheduled
+20:30 task.</p>
+
+<div class="empty">No open recommendations being tracked right now.<br>
+Rows appear here automatically once a scan journals a recommendation and the
+first end-of-day tracking pass runs (nightly 20:30 IST).</div>
+
+<h3>How the root cause is decided (no judgement calls, no AI)</h3>
+<ul class="note">
+<li><b>market-driven</b> &mdash; the stock moved with Nifty-50 equal-weight
+breadth and the market explains &ge; 50% of the move; <b>stock-specific</b>
+otherwise (divergence from the index is the tell).</li>
+<li><b>overnight gap vs intraday</b> &mdash; whether the latest day's move came
+from the open (news/positioning overnight) or was built during the session
+(live buying/selling pressure).</li>
+<li><b>volume</b> &mdash; participation vs the 20-day average: high (&ge;1.5&times;)
+validates the move; thin (&lt;0.7&times;) marks it as drift.</li>
+<li><b>20DMA integrity</b> &mdash; whether price is still on the signal's side of
+its 20-day average; &ldquo;trend broken&rdquo; on a losing position is the
+classic thesis-break flag.</li>
+</ul></section>
+<section class="tab" id="t4">
 <h2>The journal</h2>
 <p>An <b>append-only</b> ledger (<span class="mono">journal/india/*.jsonl</span>).
 Records are immutable &mdash; the code has no update or delete path. Every record
