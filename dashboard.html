@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abundance Trading &mdash; Control Room</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#161b22; --panel2:#1c2129; --line:#2d333b;
+  --text:#e6edf3; --muted:#8b949e; --accent:#e8b64c; --accent2:#f0c869;
+  --green:#3fb950; --red:#f85149; --blue:#58a6ff; --amber:#d29922;
+  --mono:'Consolas','SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);
+  font:15px/1.6 -apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+header{padding:26px 32px 0;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#131a24 0%,var(--bg) 100%)}
+h1{font-size:21px;font-weight:650;letter-spacing:.2px}
+h1 .tick{color:var(--accent);font-family:var(--mono)}
+.sub{color:var(--muted);font-size:13px;margin:4px 0 18px}
+.sub b{color:var(--text);font-weight:600}
+nav{display:flex;gap:4px}
+nav button{appearance:none;border:none;background:none;color:var(--muted);
+  font:600 14px inherit;padding:10px 18px;cursor:pointer;
+  border-bottom:2px solid transparent;border-radius:6px 6px 0 0}
+nav button:hover{color:var(--text);background:var(--panel)}
+nav button.on{color:var(--accent);border-bottom-color:var(--accent)}
+main{max-width:1080px;margin:0 auto;padding:28px 32px 80px}
+section.tab{display:none}section.tab.on{display:block}
+h2{font-size:17px;font-weight:650;margin:30px 0 12px;color:var(--accent2)}
+h2:first-child{margin-top:4px}
+h3{font-size:14px;font-weight:650;margin:18px 0 8px}
+p{margin:8px 0;color:var(--text)}
+p.note,li.note{color:var(--muted);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;margin:14px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px}
+.card .k{font-size:12px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.7px}
+.card .v{font-size:24px;font-weight:700;font-family:var(--mono);margin-top:4px}
+.card .d{font-size:12.5px;color:var(--muted);margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+th{color:var(--muted);text-align:left;font-weight:600;font-size:12px;
+  text-transform:uppercase;letter-spacing:.6px;padding:8px 10px;
+  border-bottom:1px solid var(--line)}
+td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num,th.num{text-align:right;font-family:var(--mono)}
+tr:hover td{background:var(--panel)}
+.badge{display:inline-block;padding:1px 9px;border-radius:20px;font-size:12px;
+  font-weight:650;font-family:var(--mono)}
+.b-long{background:rgba(63,185,80,.15);color:var(--green)}
+.b-short{background:rgba(248,81,73,.15);color:var(--red)}
+.b-open{background:rgba(88,166,255,.15);color:var(--blue)}
+.b-closed{background:rgba(139,148,158,.18);color:var(--muted)}
+.b-yes{background:rgba(63,185,80,.15);color:var(--green)}
+.b-no{background:rgba(248,81,73,.15);color:var(--red)}
+.b-warn{background:rgba(210,153,34,.15);color:var(--amber)}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+.flow .step{background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;padding:10px 14px;font-size:13px}
+.flow .step b{display:block;font-size:13.5px;color:var(--accent2)}
+.flow .arrow{color:var(--muted);font-size:16px}
+.gatelist{counter-reset:g;margin:14px 0;display:grid;gap:10px}
+.gate{background:var(--panel);border:1px solid var(--line);border-left:3px solid
+  var(--accent);border-radius:8px;padding:12px 16px}
+.gate b{color:var(--accent2)}
+.gate .st{float:right;font-family:var(--mono);font-size:12.5px}
+.bar{background:var(--panel2);border:1px solid var(--line);border-radius:20px;
+  height:14px;overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),
+  var(--accent2));border-radius:20px}
+.callout{border:1px solid var(--line);border-left:3px solid var(--red);
+  background:var(--panel);border-radius:8px;padding:12px 16px;margin:14px 0;
+  font-size:13.5px}
+.callout.ok{border-left-color:var(--green)}
+.callout.info{border-left-color:var(--blue)}
+code,.mono{font-family:var(--mono);font-size:12.5px;background:var(--panel2);
+  padding:1px 6px;border-radius:5px}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:26px;
+  text-align:center;color:var(--muted);margin:14px 0}
+footer{max-width:1080px;margin:0 auto;padding:0 32px 40px;color:var(--muted);
+  font-size:12px;border-top:1px solid var(--line);padding-top:14px}
+ul{margin:8px 0 8px 22px}
+li{margin:3px 0}
+.ok-txt{color:var(--green)}.bad-txt{color:var(--red)}.mut{color:var(--muted)}
+</style></head>
+<body>
+<header>
+  <h1><span class="tick">&#9632;</span> Abundance Trading &mdash; Control Room</h1>
+  <div class="sub">India &middot; Dhan (live, human-gated) &middot; ruleset
+    <b>1.0.0</b> &middot; data through <b>2026-07-17</b>
+    &middot; generated 2026-07-19 00:15 IST</div>
+  <nav>
+    <button class="on" onclick="show('t1',this)">How It Works &amp; Control</button>
+    <button onclick="show('t2',this)">Daily Recommendations</button>
+    <button onclick="show('t3',this)">Journal &amp; Feedback Loop</button>
+  </nav>
+</header>
+<main>
+<section class="tab on" id="t1">
+<h2>What this system is</h2>
+<p>A dual-loop trading assistant for a live Dhan account (&#8377;50,000, NSE intraday
+MIS + research-only swing scans). <b>It never trades on its own.</b> Deterministic
+Python scanners generate recommendations; every live entry needs an explicit
+human <span class="mono">Y</span> over Telegram; strategy rules can only change through a written
+proposal that a human commits.</p>
+
+<h2>The daily pipeline</h2>
+<div class="flow">
+  <div class="step"><b>08:45 Pre-market</b>watchlist builder: VIX gate, kill-switch
+    check, PDH/PDL/ATR levels &rarr; APPROVED-WATCHLIST.md</div>
+  <div class="arrow">&rarr;</div>
+  <div class="step"><b>09:30 ORB scan</b>opening-range breakouts on STRONG-22
+    (width &ge;1.5%, volume, VWAP)</div>
+  <div class="arrow">&rarr;</div>
+  <div class="step"><b>Proposal</b>Telegram message with entry/stop/targets/size
+    &rarr; human replies Y or N</div>
+  <div class="arrow">&rarr;</div>
+  <div class="step"><b>Execution</b>only after Y; stop-loss placed immediately;
+    all MIS flat by 15:15 IST</div>
+  <div class="arrow">&rarr;</div>
+  <div class="step"><b>20:30 Journal</b>outcome capture from NSE bhavcopy;
+    every recommendation graded automatically</div>
+</div>
+<p class="note">In parallel, the MA-abundance scanner (research-only) classifies the
+watchlist against 20/200-day moving averages; its LONG-WATCH / SHORT-WATCH calls
+are journaled with their exact signal values &mdash; see the other two tabs.</p>
+
+<h2>Control &amp; safety rails</h2>
+<div class="cards">
+  <div class="card"><div class="k">Kill switch</div><div class="v"><span class="badge b-yes">clear</span></div>
+    <div class="d">Presence of <span class="mono">memory/KILL_SWITCH.md</span> halts every routine.</div></div>
+  <div class="card"><div class="k">VIX gate</div><div class="v">&lt; 20</div>
+    <div class="d">No new entries when India VIX &ge; 20.</div></div>
+  <div class="card"><div class="k">Position caps</div><div class="v">3 / 20%</div>
+    <div class="d">Max 3 open intraday positions; max 20% of margin per position.</div></div>
+  <div class="card"><div class="k">Daily loss cap</div><div class="v">-1.5%</div>
+    <div class="d">&#8377;750 on &#8377;50k &mdash; then no new entries that session.</div></div>
+  <div class="card"><div class="k">Equity kill</div><div class="v">-15%</div>
+    <div class="d">Flatten all; nothing new until human lifts it by commit.</div></div>
+  <div class="card"><div class="k">Square-off</div><div class="v">15:15</div>
+    <div class="d">All MIS closed before Dhan's 15:20 auto square-off.</div></div>
+</div>
+
+<h2>Authority matrix (who may do what)</h2>
+<table>
+<tr><th>Action</th><th>Autonomous</th><th>Proposal only</th><th>Never</th></tr>
+<tr><td>Tighten a stop within spec / flag thesis-break / halt on daily loss</td>
+  <td><span class="badge b-yes">yes</span></td><td></td><td></td></tr>
+<tr><td>Place a NEW entry</td><td></td>
+  <td><span class="badge b-warn">via Telegram Y</span></td><td></td></tr>
+<tr><td>Change strategy rules, sleeves, universe tiers</td><td></td>
+  <td><span class="badge b-warn">STRATEGY-PROPOSALS.md</span></td><td></td></tr>
+<tr><td>Loosen a stop / move it in the loss direction</td><td></td><td></td>
+  <td><span class="badge b-no">never</span></td></tr>
+<tr><td>Edit TRADING-STRATEGY.md / sell options / average down</td><td></td><td></td>
+  <td><span class="badge b-no">never</span></td></tr>
+</table>
+
+<h2>The honest numbers (read this before expecting 3&ndash;4%/week)</h2>
+<div class="callout">
+On 15+ months of real NSE data, <b>any</b> Nifty-50 large cap touches +3% within
+5 trading days only ~<b>28%</b> of the time, and no daily-bar filter tested
+(momentum, relative strength, volume, ATR, breakout, dip-buy&hellip;) beats that
+out-of-sample. A weekly 3&ndash;4% return is a <i>target profile to select
+for</i>, not a promise &mdash; currently only the intraday ORB sleeve has
+positive real-data expectancy (63.8% win rate in backtest, zero live trades
+logged yet). Full evidence: <span class="mono">backtests/HONEST-REPORT-2026-07-18.md</span>.
+</div>
+
+<h2>Running it</h2>
+<table>
+<tr><th>Entry point</th><th>When</th><th>What</th></tr>
+<tr><td class="mono">scripts\run_premarket.bat</td><td>08:45 IST Mon&ndash;Fri</td>
+  <td>watchlist + gates</td></tr>
+<tr><td class="mono">scripts\run_orb_scan.bat</td><td>09:30 IST</td>
+  <td>ORB scan &rarr; Telegram proposal</td></tr>
+<tr><td class="mono">scripts\run_journal_update.bat</td><td>20:30 IST Mon&ndash;Fri
+  <span class="badge b-yes">scheduled</span></td>
+  <td>bhavcopy outcome capture + this dashboard</td></tr>
+<tr><td class="mono">scripts\run_weekly_report.bat</td><td>Sat 09:00
+  <span class="badge b-yes">scheduled</span></td>
+  <td>weekly rollup + feedback loop + this dashboard</td></tr>
+<tr><td class="mono">test_system.bat</td><td>anytime</td>
+  <td>32 unit tests + full pipeline smoke test</td></tr>
+</table>
+<p class="note">Ruleset version <b>1.0.0</b> (effective 2026-07-18).
+Latest market data: 2026-07-17. Zero LLM calls anywhere in the
+runtime path &mdash; everything on this page regenerates from deterministic Python.</p>
+</section>
+<section class="tab" id="t2">
+<h2>Journaled recommendations</h2>
+<p class="note">Every actionable signal the scanners produce is recorded here
+automatically at generation time &mdash; ticker, entry, exact filter values, exit
+policy &mdash; then graded against real market data when its window closes.
+Nothing on this tab is typed by hand.</p>
+
+<div class="empty">No recommendations journaled yet.<br>
+They appear here automatically the next time the MA-abundance scan or the ORB
+proposer runs on a trading day. The journal launched 2026-07-18; scans populate
+it from the next session onward.</div>
+
+<h2>Approved watchlist &mdash; 2026-06-01</h2>
+<p class="note">The only tickers the bot may propose today (ORB v3, STRONG-22
+ranked by backtested edge). ATR% forecasts whether the 1.5% opening-range width
+gate is likely to pass.</p>
+<table>
+<tr><th class="num">Rank</th><th>Ticker</th><th class="num">Prev close</th>
+<th class="num">PDH</th><th class="num">PDL</th><th class="num">ATR</th>
+<th class="num">ATR%</th><th>Width-gate outlook</th></tr>
+<tr><td class="num">1</td><td><b>SHRIRAMFIN</b></td><td class="num">947.15</td><td class="num">975.55</td><td class="num">942.90</td><td class="num">28.71</td><td class="num">3.0%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">2</td><td><b>BHARTIARTL</b></td><td class="num">1829.00</td><td class="num">1860.00</td><td class="num">1818.50</td><td class="num">37.90</td><td class="num">2.1%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">3</td><td><b>HEROMOTOCO</b></td><td class="num">4903.00</td><td class="num">5140.00</td><td class="num">4875.50</td><td class="num">137.36</td><td class="num">2.8%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">4</td><td><b>INDUSINDBK</b></td><td class="num">914.35</td><td class="num">940.20</td><td class="num">910.35</td><td class="num">20.06</td><td class="num">2.2%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">5</td><td><b>SUNPHARMA</b></td><td class="num">1799.20</td><td class="num">1852.80</td><td class="num">1785.30</td><td class="num">41.79</td><td class="num">2.3%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">6</td><td><b>DIVISLAB</b></td><td class="num">6667.00</td><td class="num">6849.00</td><td class="num">6590.00</td><td class="num">161.04</td><td class="num">2.4%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">7</td><td><b>TECHM</b></td><td class="num">1483.90</td><td class="num">1496.60</td><td class="num">1460.10</td><td class="num">42.18</td><td class="num">2.8%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">8</td><td><b>ADANIPORTS</b></td><td class="num">1804.60</td><td class="num">1840.70</td><td class="num">1796.40</td><td class="num">43.37</td><td class="num">2.4%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">9</td><td><b>HINDUNILVR</b></td><td class="num">2153.50</td><td class="num">2207.80</td><td class="num">2118.10</td><td class="num">44.08</td><td class="num">2.0%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">10</td><td><b>ULTRACEMCO</b></td><td class="num">11482.00</td><td class="num">11779.00</td><td class="num">11338.00</td><td class="num">238.00</td><td class="num">2.1%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">11</td><td><b>LT</b></td><td class="num">4076.50</td><td class="num">4128.00</td><td class="num">4045.00</td><td class="num">66.04</td><td class="num">1.6%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">12</td><td><b>BEL</b></td><td class="num">410.75</td><td class="num">419.10</td><td class="num">409.90</td><td class="num">9.90</td><td class="num">2.4%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">13</td><td><b>BAJAJ-AUTO</b></td><td class="num">10460.00</td><td class="num">10750.00</td><td class="num">10388.50</td><td class="num">252.64</td><td class="num">2.4%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">14</td><td><b>KOTAKBANK</b></td><td class="num">384.20</td><td class="num">392.55</td><td class="num">381.25</td><td class="num">8.34</td><td class="num">2.2%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">15</td><td><b>AXISBANK</b></td><td class="num">1286.60</td><td class="num">1312.60</td><td class="num">1277.40</td><td class="num">26.01</td><td class="num">2.0%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">16</td><td><b>BAJAJFINSV</b></td><td class="num">1783.60</td><td class="num">1817.60</td><td class="num">1776.90</td><td class="num">34.20</td><td class="num">1.9%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">17</td><td><b>HDFCBANK</b></td><td class="num">744.55</td><td class="num">760.50</td><td class="num">737.75</td><td class="num">16.12</td><td class="num">2.2%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">18</td><td><b>DRREDDY</b></td><td class="num">1303.50</td><td class="num">1328.60</td><td class="num">1297.50</td><td class="num">31.84</td><td class="num">2.4%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">19</td><td><b>SBIN</b></td><td class="num">964.40</td><td class="num">973.70</td><td class="num">960.30</td><td class="num">20.57</td><td class="num">2.1%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">20</td><td><b>WIPRO</b></td><td class="num">204.25</td><td class="num">211.00</td><td class="num">203.65</td><td class="num">4.90</td><td class="num">2.4%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">21</td><td><b>TCS</b></td><td class="num">2258.90</td><td class="num">2334.00</td><td class="num">2235.00</td><td class="num">50.77</td><td class="num">2.2%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+<tr><td class="num">22</td><td><b>INFY</b></td><td class="num">1160.90</td><td class="num">1210.00</td><td class="num">1153.60</td><td class="num">28.84</td><td class="num">2.5%</td><td><span class="badge b-yes">likely ok</span></td></tr>
+</table></section>
+<section class="tab" id="t3">
+<h2>The journal</h2>
+<p>An <b>append-only</b> ledger (<span class="mono">journal/india/*.jsonl</span>).
+Records are immutable &mdash; the code has no update or delete path. Every record
+carries the <b>ruleset version</b> that produced it
+(currently <b>1.0.0</b>), so evidence never mixes across rule changes.</p>
+<ul class="note">
+<li><b>At generation time</b>: ticker, timestamp, entry price, the exact filter
+values that caused selection, target/stop/time-stop, regime snapshot.</li>
+<li><b>After the window closes</b>: max favorable/adverse excursion, exit reason
+(target / stop / time-stop), realized return &mdash; computed from official NSE
+bhavcopy. Missing data &rArr; the record stays open. Never estimated.</li>
+<li><b>Conservative grading</b>: if one daily bar touches both stop and target,
+the stop is counted first.</li>
+</ul>
+
+<h2>Current statistics</h2>
+<div class="empty">No closed outcomes yet &mdash; statistics appear automatically once recommendation windows start closing.</div>
+
+<h2>The feedback mechanism &mdash; five gates between data and rule changes</h2>
+<p class="note">The loop tunes the strategy <i>only</i> when evidence forces it to.
+Weak evidence &rArr; silence. That is by design: a loop that churns rules on noise
+destroys edges faster than it finds them.</p>
+
+<div class="gatelist">
+<div class="gate"><span class="st mut">0/30 closed</span>
+<b>Gate 1 &middot; Minimum sample.</b> Nothing may even be <i>drafted</i> until
+30 recommendations have closed under the current ruleset.
+<div class="bar"><i style="width:0%"></i></div>
+<span class="note">Status: <b>DATA-COLLECTION MODE</b></span></div>
+
+<div class="gate"><b>Gate 2 &middot; Statistical significance.</b> A signal counts only
+if its with-vs-without hit-rate difference survives a two-proportion z-test
+(p &lt; 0.05, &ge;10 samples each side). &ldquo;Three good weeks&rdquo; is not evidence.</div>
+
+<div class="gate"><b>Gate 3 &middot; Out-of-sample confirmation.</b> The pattern must
+also win on historical data it was not derived from (walk-forward backtest vs the
+28.1% base rate). Journal-derived alone is never enough.</div>
+
+<div class="gate"><b>Gate 4 &middot; Human approval.</b> The loop outputs a written
+proposal to <span class="mono">STRATEGY-PROPOSALS.md</span>; only a human commit to
+<span class="mono">TRADING-STRATEGY.md</span> makes it live. The ruleset version is
+bumped so Gate 5 can compare eras.</div>
+
+<div class="gate"><b>Gate 5 &middot; Regression protection.</b> After any change, the
+next 30 closed trades are compared against the old baseline. Underperformance
+raises a rollback flag &mdash; again as a proposal, never automatically.</div>
+</div>
+
+<h2>Weekly cadence</h2>
+<p class="note">Every Saturday 09:00 the scheduled task runs
+<span class="mono">journal.weekly_report</span> (hit rate vs the 3&ndash;4% target,
+expectancy, per-signal attribution &rarr;
+<span class="mono">journal/reports/WEEKLY-*.md</span>) and
+<span class="mono">journal.feedback_loop</span> (the gates above &rarr; a tuning
+proposal draft only if Gates 1&ndash;2 pass). Outcome records: 0
+total, 0 closed.</p>
+</section>
+</main>
+<footer>Static file generated by <span class="mono">python -m journal.dashboard</span>
+&mdash; deterministic, read-only, no LLM at runtime. Regenerates nightly (20:30) and
+Saturdays (09:00) via Task Scheduler. Honest-numbers policy: nothing on this page is
+a promise of returns.</footer>
+<script>
+function show(id,btn){
+  document.querySelectorAll('section.tab').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id).classList.add('on');btn.classList.add('on');
+}
+</script>
+</body></html>

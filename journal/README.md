@@ -42,7 +42,13 @@ test_system.bat                   smoke test — run anytime
 Or directly: `python -m journal.capture_outcomes`, `python -m journal.weekly_report`,
 `python -m journal.feedback_loop`.
 
-### Task Scheduler setup (one-time, admin PowerShell)
+**Dashboard**: `python -m journal.dashboard` regenerates `dashboard.html` (repo
+root) — a static three-tab control room (how it works / daily recommendations /
+journal + feedback gates). Both .bat launchers regenerate it automatically, so
+it is always current after the nightly run. Open it in any browser; no server
+needed.
+
+### Task Scheduler setup (DONE — registered 2026-07-19; commands kept for a fresh machine)
 
 ```powershell
 schtasks /Create /TN "TradingBot\JournalUpdate" /TR "C:\Users\saikr\Downloads\abundance-trading-bot\scripts\run_journal_update.bat" /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST 20:30
