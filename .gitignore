@@ -29,3 +29,5 @@ data/bhavcopy/
 
 # Runtime session tokens (never commit)
 data/.kotak_session.json
+abundance/journal.sqlite3
+__pycache__/

@@ -1,0 +1,106 @@
+{
+  "generated_utc": "2026-07-18T12:48:03+00:00",
+  "data_source": "history_cache_5min",
+  "symbols": 14,
+  "span": "2026-02-06 \u2192 2026-05-05",
+  "trading_days": 57,
+  "train_test_cutoff": "2026-03-30",
+  "ruleset": {
+    "version": "1.0.0",
+    "target_pct": 3.0,
+    "stop_pct": 2.0,
+    "time_stop_sessions": 5,
+    "atr_pct_min": 1.2,
+    "momentum_lookback": 20,
+    "vol_surge_min": 1.1,
+    "regime_ema": 50,
+    "max_picks_per_day": 3
+  },
+  "baseline": {
+    "all": {
+      "n": 490,
+      "hit_rate_3pct": 39.18,
+      "win_rate": 52.86,
+      "avg_ret_pct": 0.105,
+      "avg_win_pct": 2.478,
+      "avg_loss_pct": -2.554,
+      "expectancy_pct": 0.105,
+      "worst_trade_pct": -4.002,
+      "worst_mae_pct": -8.669,
+      "exits": {
+        "target": 192,
+        "stop": 125,
+        "time_stop": 173
+      }
+    },
+    "train": {
+      "n": 196,
+      "hit_rate_3pct": 39.29,
+      "win_rate": 50.0,
+      "avg_ret_pct": -0.284,
+      "avg_win_pct": 2.548,
+      "avg_loss_pct": -3.116,
+      "expectancy_pct": -0.284,
+      "worst_trade_pct": -4.002,
+      "worst_mae_pct": -8.669,
+      "exits": {
+        "target": 77,
+        "stop": 75,
+        "time_stop": 44
+      }
+    },
+    "test": {
+      "n": 294,
+      "hit_rate_3pct": 39.12,
+      "win_rate": 54.76,
+      "avg_ret_pct": 0.365,
+      "avg_win_pct": 2.435,
+      "avg_loss_pct": -2.14,
+      "expectancy_pct": 0.365,
+      "worst_trade_pct": -4.001,
+      "worst_mae_pct": -8.094,
+      "exits": {
+        "target": 115,
+        "stop": 50,
+        "time_stop": 129
+      }
+    }
+  },
+  "selected": {
+    "all": {
+      "n": 26,
+      "hit_rate_3pct": 15.38,
+      "win_rate": 46.15,
+      "avg_ret_pct": -0.341,
+      "avg_win_pct": 1.613,
+      "avg_loss_pct": -2.016,
+      "expectancy_pct": -0.341,
+      "worst_trade_pct": -3.933,
+      "worst_mae_pct": -7.457,
+      "exits": {
+        "target": 4,
+        "stop": 3,
+        "time_stop": 19
+      }
+    },
+    "train": {
+      "n": 0
+    },
+    "test": {
+      "n": 26,
+      "hit_rate_3pct": 15.38,
+      "win_rate": 46.15,
+      "avg_ret_pct": -0.341,
+      "avg_win_pct": 1.613,
+      "avg_loss_pct": -2.016,
+      "expectancy_pct": -0.341,
+      "worst_trade_pct": -3.933,
+      "worst_mae_pct": -7.457,
+      "exits": {
+        "target": 4,
+        "stop": 3,
+        "time_stop": 19
+      }
+    }
+  }
+}
