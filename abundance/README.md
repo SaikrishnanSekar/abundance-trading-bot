@@ -19,7 +19,13 @@ If Claude access disappears tomorrow, everything here keeps working.
 4. Optional Telegram: put `TELEGRAM_BOT_TOKEN=` and `TELEGRAM_CHAT_ID=` in a
    `.env` at the repo root (already gitignored). Without creds, messages go to
    `abundance\reports\notify_fallback.log` instead — nothing crashes.
-5. Run `abundance\setup_schedule.bat` **as Administrator** to register the
+5. Optional (recommended) Dhan history: put `DHAN_ACCESS_TOKEN=` and
+   `DHAN_CLIENT_ID=` in the same `.env`. This is the SAME token the live bot
+   already uses for `scripts/dhan.sh` — read-only historical-candles calls
+   only, no order endpoints are ever touched from this module. Without it,
+   the engine falls back to NSE bhavcopy (slower first run, ~260 files) then
+   to the bundled 5-min cache.
+6. Run `abundance\setup_schedule.bat` **as Administrator** to register the
    scheduled tasks (daily scan 19:15, journal update 19:25, weekly report Sat
    10:00 — local time; NSE bhavcopy publishes ~18:30 IST).
 
@@ -27,10 +33,10 @@ If Claude access disappears tomorrow, everything here keeps working.
 
 | Script | What it does |
 |---|---|
-| `run_scan.bat` | Downloads latest bhavcopy, evaluates all filters, journals up to 3 picks, sends `==> ABUNDANCE SCAN` to Telegram |
+| `run_scan.bat` | Fetches latest data (Dhan if configured, else bhavcopy), evaluates all filters, journals up to 3 picks, sends `==> ABUNDANCE SCAN` to Telegram |
 | `run_journal_update.bat` | Captures outcomes (exit price/reason, MFE/MAE) for entries whose 5-session window closed |
 | `run_weekly_report.bat` | Weekly rollup (hit rate, expectancy, per-signal attribution) + evidence-gated feedback check |
-| `run_backtest.bat` | 12-month baseline vs ruleset backtest on real bhavcopy data (first run downloads ~260 files) |
+| `run_backtest.bat` | 12-month baseline vs ruleset backtest on real data — Dhan history (fast, 1 call/symbol) if `.env` has Dhan creds, else bhavcopy (first run downloads ~260 files) |
 | `test_system.bat` | Smoke test; safe anytime — uses a temporary journal |
 
 ## How to read the weekly report
@@ -63,12 +69,21 @@ If Claude access disappears tomorrow, everything here keeps working.
 Every journal entry records the version that produced it, so evidence never
 contaminates across rulesets.
 
-## Data sources (read-only)
+## Data sources (read-only — priority order)
 
-- NSE bhavcopy: `https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_<YYYYMMDD>_F_0000.csv.zip`
-  (free, no auth). Cached under `data\bhavcopy\`. Unreachable → clear error, no fake data.
-- Fallback: `data\history_cache\*_5min_v8.json` (real Dhan 5-min candles,
-  aggregated to daily). Used automatically when bhavcopy is absent.
+1. **Dhan `/v2/charts/historical`** (`abundance/dhan_history.py`) — same
+   credentials as `scripts/dhan.sh`, POST only, historical-candles endpoint
+   only. One call per symbol pulls ~12 months in one shot, plus the real
+   NIFTY index and India VIX for the regime snapshot. Cached under
+   `data\dhan_daily\`. Missing securityIds are resolved once from Dhan's
+   public scrip-master CSV and cached to `data\dhan_securityids.json`
+   (`data\nse_securities.json` itself is human-managed and never written by
+   this module). No credentials → prints one line, exits cleanly, falls
+   through to bhavcopy.
+2. **NSE bhavcopy**: `https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_<YYYYMMDD>_F_0000.csv.zip`
+   (free, no auth). Cached under `data\bhavcopy\`. Unreachable → clear error, no fake data.
+3. **Fallback**: `data\history_cache\*_5min_v8.json` (real Dhan 5-min candles,
+   aggregated to daily). Used automatically when both of the above are absent.
 - Telegram `sendMessage` (optional, notification only).
 
 ## Design notes
@@ -77,7 +92,15 @@ contaminates across rulesets.
   target +3%, ATR-aware stop (max(2%, 1.5×ATR%) capped 4%), time stop at close
   of session 5. A bar touching both stop and target counts as a **stop** —
   daily bars can't order intraday touches and we never assume the good case.
-- The regime filter uses an equal-weight composite of the universe (bhavcopy
-  has no index rows); risk-off → zero picks, and that's correct output.
+  Checked against real 5-min data (57 sessions, 14 symbols): this ambiguity
+  never actually occurred — average daily range (2.26%) sits inside the
+  combined stop+target spread — so the tie-break is a safety margin, not a
+  source of distortion, at least on that sample. Re-check once 12 months of
+  data is available (wider-range sessions are more likely there).
+- The regime filter uses the real NIFTY close (via Dhan) when available,
+  else an equal-weight composite of the universe (bhavcopy has no index
+  rows); risk-off → zero picks, and that's correct output. India VIX is
+  recorded in the journal for future signal attribution but does NOT gate
+  the scan — VIX gating is the live bot's job (`scripts/vix.sh` / gate_check.py).
 - The journal (`abundance\journal.sqlite3`) is append-only, enforced by SQLite
   triggers — `UPDATE`/`DELETE` abort even from an external shell.

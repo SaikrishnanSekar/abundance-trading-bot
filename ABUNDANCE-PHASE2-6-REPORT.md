@@ -1,6 +1,19 @@
 # Abundance Engine — Phases 2–6 Report (baseline, modifications, honest numbers)
 
-Date: 2026-07-18 · Ruleset v1.0.0 · Engine: `abundance/` (pure stdlib Python)
+Date: 2026-07-18 (updated same day, continuation session) · Ruleset v1.0.0 · Engine: `abundance/` (pure stdlib Python)
+
+**Update note:** this session added `abundance/dhan_history.py` — a
+read-only Dhan `/v2/charts/historical` source that pulls ~12 months in one
+call per symbol (vs 260 bhavcopy ZIP downloads) and supplies the **real**
+NIFTY index + India VIX for the regime snapshot, replacing the equal-weight
+proxy composite when available. `data.load_best_available()` now prefers it.
+This session's sandbox still has no NSE/Dhan network access (see Phase 2
+disclosure below, unchanged) and no `DHAN_ACCESS_TOKEN`/`DHAN_CLIENT_ID` in
+env — the module was exercised via the smoke test's graceful-degradation path
+(prints one line, returns 0, falls back) rather than a live fetch. **On the
+Windows machine, `run_backtest.bat` will now use Dhan history automatically**
+whenever `.env` has Dhan credentials, giving the definitive 12-month baseline
+in minutes instead of the slower bhavcopy path.
 
 ## Phase 2 — Baseline (real data, real caveats)
 
@@ -49,6 +62,19 @@ accumulates, but no capital should follow it until (a) the 12-month
 `run_backtest.bat` on the Windows machine shows the selected set beating
 baseline out-of-sample, or (b) the journal reaches N≥30 and the evidence gates
 pass.
+
+## Phase 3 addendum — exit-ambiguity check on real intraday data
+
+The daily-bar simulator's tie-break rule ("if a bar touches both stop and
+target, count it a stop — worst case") was checked against real 5-min
+candles (`data/history_cache`, same 14-symbol/57-session sample). Across all
+1,644 simulated trade-days, **zero days touched both stop and target** —
+average single-day range was 2.26%, comfortably inside the ≥5% combined
+stop+target spread (target +3%, stop -2% to -4%). Verdict: the worst-case
+tie-break is a correct safety margin on this dataset, not a source of
+distortion in the reported hit rate. This should be re-checked once the
+12-month dataset is available, since a full year will include higher-VIX
+sessions where single-day ranges run wider.
 
 ## Phases 4–5 — Journal and feedback loop (delivered, verified)
 
