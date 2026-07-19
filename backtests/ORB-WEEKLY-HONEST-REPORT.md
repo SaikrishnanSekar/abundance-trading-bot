@@ -163,3 +163,61 @@ Risk notes for the human approver:
   trial will likely start feeling like a loser before a trend week pays.
 - Dhan token status (probed 2026-07-19): EXPIRED (DH-901 on /v2/fundlimit and
   /v2/profile). Refresh from Dhan portal into .env before any live order.
+
+---
+
+## Deep-history validation on Upstox data (2026-07-19, evening)
+
+New source: Upstox public v3 historical-candle API (no auth, native 5-min, depth
+to >=Feb 2022, 1 month/request). Cross-validated vs Yahoo on 10 tickers x 5 days:
+close MAD ~0.01%, worst bar 0.163%, volume ratio 1.00 -> trusted. Backfilled
+Jan 2025 -> Jul 2026: 148 tickers x 382 trading days (TATAMOTORS and JBCHEPHARM
+lack instrument keys post-demerger/rename — follow up).
+
+**Critical property: all of 2025 is PRE-SAMPLE.** The FINAL config was frozen on
+Feb-May 2026 data; it never saw 2025 in any tuning decision.
+
+### FINAL config (P5 + bank-3%) across 81 weeks
+
+| Period | weeks | mean/wk | P(>=3%) | P(>0) | worst wk |
+|---|---|---|---|---|---|
+| 2025-H1 (pre-sample) | 26 | +2.48% | 69.2% | 69.2% | -6.40% |
+| 2025-H2 (pre-sample) | 27 | +1.88% | 48.1% | 77.8% | -6.64% |
+| 2026 (tuning era + OOS) | 28 | +3.18% | 67.9% | 82.1% | -9.32% |
+| **FULL (81 wk)** | **81** | **+2.63%** [CI +1.72 to +3.53] | **63.0%** [CI 51.9-72.8%] | 77.8% | -9.32% |
+
+Median week +3.30%. Total simulated PnL +Rs106,331 on Rs50k (18.5 months, no
+compounding). Variant-rank stability: on 2025-only data the FINAL config still
+has the top P(>=3%) (58.5%) of the pre-registered grid — selection is stable.
+Trade audit: clean (max single-bar move 2.85%, real trend days, losses ~-Rs830).
+
+### Risk (FULL period) — escalations vs the 10-week estimate
+
+- **Max DD Rs7,136 = 14.27% of cash — effectively AT the -15% kill switch.**
+  A marginally worse sequence trips it. Recommendation: run the live sleeve at
+  0.75x size (Rs37.5k notional/pos) until 20 live trades, keeping projected
+  worst-case DD ~10.7%.
+- Longest drawdown: 80 calendar days (and the series ends inside a drawdown).
+- Worst single week -9.32% (deeper than the -3.54% seen in the short window).
+- Worst day ~-Rs2,217 (-4.4%): up to 3 concurrent positions can lose together
+  before the daily halt reads realized PnL. Same behavior as the live rulebook.
+
+### Slippage stress (per-side), FULL 81 weeks
+
+| slip | mean/wk | P(>=3%) |
+|---|---|---|
+| 0.050% | +2.63% | 63.0% |
+| 0.075% | +1.62% | 51.9% |
+| 0.100% | +0.56% | 39.5% |
+| 0.150% | -1.94% | 30.9% |
+
+Edge survives to ~0.075-0.10%/side (more robust than the 10-week estimate).
+Limit orders at the breakout price remain mandatory; the live trial's first job
+is measuring realized slippage.
+
+### Standing conclusion
+
+On 81 weeks spanning three regimes, the implemented logic delivers
+**P(week >= 3%) = 63% [CI 52-73%], mean +2.6%/wk, median +3.3%** — with a
+14.3% max drawdown and multi-week underwater stretches. Still no guaranteed
+weekly minimum; this is the strongest evidence-backed estimate to date.

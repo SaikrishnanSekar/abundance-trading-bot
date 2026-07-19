@@ -36,3 +36,4 @@ __pycache__/
 
 # Runtime logs
 logs/
+data/history_cache_upstox/
