@@ -426,11 +426,19 @@ in LIVE-PULSE.md for 2 weeks to validate with real volume data before proposing 
 - cooldown_until: 2026-08-02
 - status: PENDING
 
-Evidence: backtests/ORB-WEEKLY-HONEST-REPORT.md (phase 1 + phase 2 addendum).
+Evidence: backtests/ORB-WEEKLY-HONEST-REPORT.md (phases 1-3 + deep-history section).
 Protocol: pre-registered variant grids, selection on IS only (train <= 2026-05-08),
 OOS = 2026-05-09 -> 2026-07-17 fetched AFTER all tuning, scored once. Trade audit
-clean (no glitch bars). Phase-1 finding stands: the old N50 2x-target config decayed
-to +0.4%/wk OOS; the recalibrated P5 config is what survives validation. A guaranteed
-minimum 3-4%/wk does not exist on current evidence — P(>=3%) tops out at ~40-43%.
+clean (no glitch bars). A guaranteed minimum 3-4%/wk does not exist on any evidence.
+
+**Deep-history update (same day, Upstox 5-min data, 148 tickers, 81 weeks
+Jan 2025 -> Jul 2026 — all of 2025 pre-sample):** P(week>=3%) = 63.0%
+[CI 52-73%], mean +2.63%/wk [CI +1.7 to +3.5], median +3.30%; positive in all
+three regimes (2025-H1 69%, 2025-H2 48%, 2026 68%); variant rank stable on
+2025-only data. RISK: Max DD 14.27% — effectively at the -15% kill switch;
+longest DD 80 calendar days; worst week -9.32%. **Amended sizing ask: run the
+trial at 0.75x size (Rs37.5k notional/pos) for the first 20 live trades**, which
+projects worst-case DD ~10.7%, clear of the kill switch. Slippage: edge survives
+to ~0.075-0.10%/side on 81 weeks; limit orders at breakout price mandatory.
 
 Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.
