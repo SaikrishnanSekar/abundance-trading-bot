@@ -40,6 +40,81 @@ token_map  = {}   # {str(instrument_token): ticker}
 lock       = threading.Lock()
 running    = True
 
+# ── 5-min bar recorder ────────────────────────────────────────────────────────
+# Kotak Neo has NO historical-candles API (verified 2026-07-19: neo_api_client
+# exposes only quotes/orders/websocket). So we build our own history from the
+# tick stream: completed 5-min OHLCV bars per ticker, persisted to a SEPARATE
+# cache dir so broker-grade bars never mix with the Yahoo cache. Overlap days
+# allow Yahoo-vs-Kotak cross-validation.
+KBAR_DIR   = ROOT / "data" / "history_cache_kotak"
+cur_bars   = {}   # {ticker: {"win": epoch_min_start, "o","h","l","c","vol_open","vol_last"}}
+done_bars  = {}   # {ticker: [bar dicts pending persist]}
+
+
+def _bar_window(now):
+    """Floor now to its 5-min window start (datetime, IST)."""
+    return now.replace(minute=now.minute - now.minute % 5, second=0, microsecond=0)
+
+
+def _update_bar(ticker, ltp, cum_vol, now):
+    """Feed one tick into the current 5-min bar; roll over on window change."""
+    win = _bar_window(now)
+    b = cur_bars.get(ticker)
+    if b is None or b["win"] != win:
+        vol_base = cum_vol
+        if b is not None:
+            done_bars.setdefault(ticker, []).append(_finalize_bar(b))
+            # volume traded between the old bar's last tick and this first tick
+            # belongs to the NEW bar: baseline from the old bar's last cum vol
+            if b["vol_last"] is not None:
+                vol_base = b["vol_last"]
+        cur_bars[ticker] = {"win": win, "o": ltp, "h": ltp, "l": ltp, "c": ltp,
+                            "vol_open": vol_base, "vol_last": cum_vol}
+        return
+    b["c"] = ltp
+    if ltp > b["h"]: b["h"] = ltp
+    if ltp < b["l"]: b["l"] = ltp
+    if cum_vol is not None:
+        if b["vol_open"] is None:
+            b["vol_open"] = cum_vol
+        b["vol_last"] = cum_vol
+
+
+def _finalize_bar(b):
+    vol = 0
+    if b["vol_last"] is not None and b["vol_open"] is not None:
+        vol = max(0, b["vol_last"] - b["vol_open"])
+    return {"dt": b["win"].isoformat(),
+            "open": round(b["o"], 4), "high": round(b["h"], 4),
+            "low": round(b["l"], 4), "close": round(b["c"], 4),
+            "volume": int(vol), "src": "kotak_ws"}
+
+
+def persist_bars(final=False):
+    """Merge completed bars into per-ticker Kotak cache files (dedupe by dt)."""
+    with lock:
+        if final:
+            for t, b in cur_bars.items():
+                done_bars.setdefault(t, []).append(_finalize_bar(b))
+            cur_bars.clear()
+        pending = {t: bars for t, bars in done_bars.items() if bars}
+        done_bars.clear()
+    if not pending:
+        return
+    KBAR_DIR.mkdir(parents=True, exist_ok=True)
+    for t, bars in pending.items():
+        f = KBAR_DIR / f"{t}_5min_kotak.json"
+        existing = []
+        if f.exists():
+            try:
+                existing = json.loads(f.read_text(encoding="utf-8"))
+            except Exception:
+                existing = []
+        merged = {b["dt"]: b for b in existing}
+        merged.update({b["dt"]: b for b in bars})
+        f.write_text(json.dumps(sorted(merged.values(), key=lambda x: x["dt"])),
+                     encoding="utf-8")
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -102,6 +177,13 @@ def on_message(msg):
             if vol is not None:
                 s["volume"] = vol
 
+            if ltp is not None:
+                now_ist = datetime.now(IST)
+                hhmm = now_ist.hour * 100 + now_ist.minute
+                if 915 <= hhmm <= 1530:
+                    _update_bar(ticker, ltp, vol if vol is not None
+                                else s.get("volume"), now_ist)
+
             ap = _float(item.get("ap"))     # session VWAP
             if ap is not None:
                 s["vwap"] = ap
@@ -131,6 +213,7 @@ def on_message(msg):
 
 def write_feed_loop():
     """Flush live_state to FEED_FILE every WRITE_INTERVAL seconds."""
+    last_bar_flush = time.time()
     while running:
         time.sleep(WRITE_INTERVAL)
         with lock:
@@ -144,6 +227,14 @@ def write_feed_loop():
             FEED_FILE.write_text(json.dumps(payload), encoding="utf-8")
         except Exception as e:
             print(f"[{_ts()}] write error: {e}", flush=True)
+
+        # Persist completed 5-min bars every 60s
+        if time.time() - last_bar_flush >= 60:
+            last_bar_flush = time.time()
+            try:
+                persist_bars()
+            except Exception as e:
+                print(f"[{_ts()}] bar persist error: {e}", flush=True)
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -196,6 +287,12 @@ def main():
         snapshot = {k: dict(v) for k, v in live_state.items()}
     FEED_FILE.write_text(json.dumps({"updated_at": datetime.now(IST).isoformat(),
                                      "tickers": snapshot}), encoding="utf-8")
+    try:
+        persist_bars(final=True)
+        n_files = len(list(KBAR_DIR.glob("*_5min_kotak.json"))) if KBAR_DIR.exists() else 0
+        print(f"[{_ts()}] 5-min Kotak bars persisted ({n_files} tickers).", flush=True)
+    except Exception as e:
+        print(f"[{_ts()}] final bar persist error: {e}", flush=True)
     print(f"[{_ts()}] Feed stopped. Final snapshot written.", flush=True)
 
 
