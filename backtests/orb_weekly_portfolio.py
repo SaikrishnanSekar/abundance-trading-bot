@@ -181,10 +181,30 @@ def execute(day_bars, sig, risk_size, variant=None):
 
 
 def run_portfolio(universe, day_list, variant, risk_size=True):
-    """Chronological daily sim with concurrency + daily-loss-halt. Returns trades, daily pnl."""
+    """Chronological daily sim with concurrency + daily-loss-halt. Returns trades, daily pnl.
+    variant["week_target"]: bank-the-week — halt new entries for the rest of the ISO
+    week once realized week PnL (completed trades only, no lookahead) >= this rupee
+    amount. variant["week_brake"]: same, halt once week PnL <= -this amount.
+    """
+    week_target = variant.get("week_target")
+    week_brake  = variant.get("week_brake")
+    week_realized = defaultdict(float)   # iso-week -> realized PnL from prior days
+
+    def iso_week(d):
+        y, m, dd = map(int, d.split("-"))
+        c = date(y, m, dd).isocalendar()
+        return f"{c[0]}-W{c[1]:02d}"
+
     daily_pnl = {}
     all_trades = []
     for d in day_list:
+        wk = iso_week(d)
+        if week_target is not None and week_realized[wk] >= week_target:
+            daily_pnl[d] = 0.0
+            continue
+        if week_brake is not None and week_realized[wk] <= -week_brake:
+            daily_pnl[d] = 0.0
+            continue
         # collect candidate signals across tickers for this day
         cands = []
         for t, days in universe.items():
@@ -202,12 +222,17 @@ def run_portfolio(universe, day_list, variant, risk_size=True):
             open_now = [t for t in taken if t["exit_i"] > c["entry_i"]]
             if len(open_now) >= MAX_CONCURRENT:
                 continue
-            # daily halt uses only PnL realized BEFORE this entry (no lookahead)
+            # halts use only PnL realized BEFORE this entry (no lookahead)
             realized = sum(t["pnl"] for t in taken if t["exit_i"] <= c["entry_i"])
             if realized <= DAILY_LOSS_CAP:
                 break
+            if week_target is not None and week_realized[wk] + realized >= week_target:
+                break
+            if week_brake is not None and week_realized[wk] + realized <= -week_brake:
+                break
             taken.append(c)
         daily_pnl[d] = sum(c["pnl"] for c in taken)
+        week_realized[wk] += daily_pnl[d]
         all_trades.extend(taken)
     return all_trades, daily_pnl
 

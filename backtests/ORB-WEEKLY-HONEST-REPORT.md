@@ -100,3 +100,40 @@ tightens the stop instead of shrinking qty).
 implemented logic is P5. P(week >= 3%) ≈ 40-43% (CI wide). A guaranteed
 *minimum* 3-4%/week does not exist on current evidence — half of all weeks land
 below +0.5%.
+
+---
+
+## Phase 3 addendum (same day) — bank-the-week overlay
+
+P(week >= 3%) is a THRESHOLD metric, so halting new entries once the week's
+realized PnL crosses the threshold is quasi-dominant for it: a banked week can
+never un-cross; decay weeks (touch +3% then bleed back) get rescued. Tested as a
+pre-registered grid on P5 (`week_target` / `week_brake` in orb_weekly_portfolio.py):
+
+| Config | OOS mean/wk | OOS P(>=3%) | OOS median | IS P(>=3%) |
+|---|---|---|---|---|
+| P5 no banking | +2.30% | 40% | +0.49% | 46.2% |
+| **P5 + bank at +3% (Rs1,500)** | **+2.30%** | **50%** [CI 20-80%] | **+2.57%** | 46.2% |
+| P5 + bank +3.5% / +4% | +2.17% | 50% | +1.92% | 46.2% |
+| P5 + bank + weekly -2% brake | +1.17-1.30% | 40% | negative | 30.8% |
+
+Blended 23-week P(>=3%) for the final config: **48% [CI 26-70%]**.
+
+- Caveat stated honestly: in this OOS window part of the banking lift comes from
+  skipped trades that happened to lose (luck), not only threshold-locking. The
+  structural argument holds regardless; the magnitude carries uncertainty.
+- Weekly loss brakes REJECTED: they block mid-week recovery and cut P(>=3%).
+
+## FINAL configuration (the implemented maximum-probability logic)
+
+P5 + bank-the-week: 149-ticker universe, 15-min OR, close beyond OR +/-0.1% with
+2.0x volume, entries 09:30-11:30 (limit orders at breakout price ONLY), full
+20%-margin sizing with Rs750 cash-cut stop tightening, trail 1x OR-width behind
+best close (no fixed target), max 3 concurrent, daily -1.5% halt, flat 15:15,
+**halt all new entries for the rest of the week once realized week PnL >= +3%
+of cash (Rs1,500)**.
+
+Honest final numbers: P(week >= 3%) = 48-50% (CI wide, 10 true OOS weeks);
+mean ~+2.3%/wk OOS; median +2.6%; worst week -3.54%. A guaranteed minimum
+3-4%/week does not exist on current evidence — this is the probability maximum
+achievable within the rulebook, roughly a coin flip per week.
