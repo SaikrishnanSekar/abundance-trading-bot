@@ -124,11 +124,39 @@ Tier 2/3 sleeves (midcap/ETF) suspended until further notice.
 
 ---
 
-## ORB Trial Sleeve (approved 2026-05-05, params tuned 2026-05-06)
+## ORB Trial Sleeve (approved 2026-05-05, params tuned 2026-05-06, v4 recalibration approved 2026-07-19)
 
-**Status**: ACTIVE — 5-trade live trial. Review post-mortems after trade 5 before extending.
+**Status**: ACTIVE — v4 live trial, first **20 trades at 0.75× size**. Approved by Sai
+in-session 2026-07-19 (proposal `orb_test_sleeve` 2026-07-19, ACCEPTED). Review
+post-mortems + realized-slippage report after trade 20 before scaling to 1.0×.
 
-### Setup rules (v3 — tuned 2026-05-06)
+### Setup rules (v4 — deep-history validated, backtests/ORB-WEEKLY-HONEST-REPORT.md)
+
+- **Timeframe**: 5-min candles, NSE 09:15–15:15 IST
+- **Opening range**: first 3 × 5-min candles; ORH/ORL = max high / min low of bars 0–2
+- **Universe**: N50 + NXT50 + MID50 (149 tickers). Midcap leg = Sleeve B activation,
+  granted for this sleeve only by the 2026-07-19 approval.
+- **Width gate**: REMOVED (supersedes the 2026-05-06 ≥1.5% gate). Only degenerate
+  ranges < 0.10% are skipped.
+- **Long entry**: 5-min close > ORH × 1.001 AND volume ≥ 2.0× 20-bar rolling avg
+- **Short entry**: 5-min close < ORL × 0.999 AND volume ≥ 2.0× 20-bar rolling avg
+  (VWAP/RSI are advisory display only in v4 — the validated backtest config does not gate on them)
+- **Entry window**: 09:30–11:30 IST. **Limit orders at the breakout price ONLY** —
+  backtested edge dies above ~0.10%/side slippage; never chase with market orders.
+- **Sizing (trial)**: 0.75 × 20% of effective margin = **₹37,500 notional/position**;
+  stop tightened so max loss/trade ≈ ₹560 (0.75 × ₹750 cash-cut rule), never looser
+  than the far OR bound.
+- **Stop**: far side of opening range, tightened per sizing rule above
+- **Exit**: NO fixed target — trail stop 1× OR-width behind best close (tighten-only),
+  update each bar close; hard flat at 15:10
+- **Bank-the-week**: once realized week PnL ≥ +₹1,500 (3% of cash), NO new entries
+  until the next ISO week (G14 gate: pass `week_bank_enabled=true` +
+  `scripts/week_target_check.py` output to gate_check)
+- **Max 1 trade per ticker per day** (first signal only); max 3 concurrent (house rule)
+- Evidence: 81 weeks Upstox 5-min (all of 2025 pre-sample): P(week≥3%)=63% [CI 52–73],
+  mean +2.63%/wk, MaxDD 14.27%, worst week −9.32%. At 0.75×: projected MaxDD ~10.7%.
+
+### Setup rules (v3 — tuned 2026-05-06, SUPERSEDED by v4 above)
 
 - **Timeframe**: 5-min candles, NSE 09:15–15:15 IST
 - **Opening range**: first 3 × 5-min candles (09:15, 09:20, 09:25)

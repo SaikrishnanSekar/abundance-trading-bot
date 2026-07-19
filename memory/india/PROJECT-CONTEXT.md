@@ -9,6 +9,7 @@
   config, OOS P(week≥3%)=50%, mean +2.30%/wk (backtests/ORB-WEEKLY-HONEST-REPORT.md).
   No guaranteed weekly minimum exists; claims must always carry OOS evidence + CIs.
 - Monthly target (aspirational, derived): ₹20,000–25,000 net.
+- ACTIVE TRIAL (from 2026-07-20): ORB v4 sleeve, 20 trades at 0.75× size (₹37.5k notional/pos, ~₹560 risk cap), 149-ticker universe, bank-the-week ₹1,500, limit orders only. Every entry still needs human Y. Measure realized slippage per trade — the go/no-go variable for scaling to 1.0×.
 - Operator: Sai. Manual approval required for every entry.
 - Owner of strategy rules: human only. Bot proposes; human commits.
 - Timezone: Asia/Kolkata.

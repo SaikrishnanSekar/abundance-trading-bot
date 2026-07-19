@@ -17,7 +17,8 @@ Call `python3 scripts/gate_check.py` with JSON stdin (one call, one result). Inp
 7. Drawdown from peak capital → `drawdown_pct` (block at 15%).
 8. LIVE-PULSE.md thesis-break flag → `thesis_break`.
 9. Position cost as % of available margin → `position_cost_pct` (max 20).
-10. `market_is_open` → `true` iff **all three** conditions hold in Asia/Kolkata: (a) weekday is Mon-Fri, (b) current time is `09:15 <= t <= 15:15`, (c) today is not listed in `data/nse_holidays.txt`. `date +%H%M` alone is NOT sufficient — Saturdays and NSE holidays would silently pass. Compute it like this:
+10. Bank-the-week (v4, approved 2026-07-19): run `python scripts/week_target_check.py`; pass `week_bank_enabled: true`, `week_realized_pnl: <the Rs total it prints>`, `week_bank_target: 1500` → gate_check G14 blocks new entries once the ISO week has banked ≥ ₹1,500.
+11. `market_is_open` → `true` iff **all three** conditions hold in Asia/Kolkata: (a) weekday is Mon-Fri, (b) current time is `09:15 <= t <= 15:15`, (c) today is not listed in `data/nse_holidays.txt`. `date +%H%M` alone is NOT sufficient — Saturdays and NSE holidays would silently pass. Compute it like this:
 
     ```bash
     now_date=$(TZ=Asia/Kolkata date +%Y-%m-%d)
@@ -71,12 +72,15 @@ MARGIN=$(bash scripts/dhan.sh funds \
 TIER=2
 
 # 5 — size (exits code 2 if stop too tight or heat > 6%)
+# ORB v4 TRIAL (approved 2026-07-19): first 20 ORB-sleeve trades run at 0.75x —
+# multiply gate_check's size_multiplier by 0.75 for ORB entries until the
+# 20-trade post-mortem review clears full size. Non-ORB entries: unchanged.
 SIZING=$(python3 scripts/size_calc.py \
     --market india \
     --entry "$ENTRY" --atr "$ATR" \
     --capital 20000 --margin "$MARGIN" \
     --tier "$TIER" \
-    --size-multiplier <from gate_check output>)
+    --size-multiplier <gate_check size_multiplier x 0.75 for ORB v4 trial>)
 
 if [ $? -ne 0 ]; then
   REASON=$(echo "$SIZING" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('error','size_calc rejected'))")

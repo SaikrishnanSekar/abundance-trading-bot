@@ -108,8 +108,10 @@ HEADERS = {
 FEED_FILE    = Path(__file__).parent / "data" / "live_feed.json"
 FEED_MAX_AGE = 60   # seconds
 
-# Set true only via --proposed CLI flag (pending orb_test_sleeve recalibration)
-PROPOSED_MODE = False
+# v4 config APPROVED 2026-07-19 (orb_test_sleeve): no width gate, full universe.
+# PROPOSED_MODE now defaults ON; --legacy restores the superseded v3 behavior
+# (N50-only, >=1.5% width gate) for comparison.
+PROPOSED_MODE = True
 
 
 # ── Single-pass cache preload ─────────────────────────────────────────────────
@@ -579,13 +581,12 @@ def scan(universe=None, label="NIFTY 50"):
 
 
 if __name__ == "__main__":
-    # --full scans N50+NXT50+MID50 (the phase-2 validated universe:
-    # backtests/orb_weekly_phase2.py). Default stays N50.
-    # --proposed previews the PENDING recalibration (no 1.5% width gate) —
-    # advisory only until the orb_test_sleeve proposal is human-approved.
-    PROPOSED_MODE = "--proposed" in sys.argv
-    if "--full" in sys.argv or PROPOSED_MODE:
-        full = NIFTY_50 + NIFTY_NEXT_50 + MIDCAP_50_LIQUID
-        scan(list(dict.fromkeys(full)), label="N50+NXT50+MID50 (149)")
-    else:
+    # v4 (approved 2026-07-19): default = full 149-ticker universe, no width
+    # gate, entries flagged after 11:30. --legacy restores superseded v3
+    # (N50-only, >=1.5% width gate) for comparison runs.
+    if "--legacy" in sys.argv:
+        PROPOSED_MODE = False
         scan()
+    else:
+        full = NIFTY_50 + NIFTY_NEXT_50 + MIDCAP_50_LIQUID
+        scan(list(dict.fromkeys(full)), label="N50+NXT50+MID50 (149) v4")

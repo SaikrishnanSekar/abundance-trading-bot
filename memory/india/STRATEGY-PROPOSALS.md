@@ -424,7 +424,7 @@ in LIVE-PULSE.md for 2 weeks to validate with real volume data before proposing 
 - expected_impact: Highest P(>=3% week) of every config tested across 2 phases (18 variants, 2 universes, 9 prior strategy families). OOS: +2.30%/wk, P(>=3%)=40%, P(>0)=60%, worst week -3.54%.
 - risk: (a) edge is slippage-fragile — at 0.10%/side it flips negative; first 5 live trades must measure realized slippage vs the 0.05% assumption; (b) 10 OOS weeks only, CI 10-70%; (c) profile is lumpy — mean carried by outlier trend weeks; (d) mid-cap legs inactive until Sleeve B approved.
 - cooldown_until: 2026-08-02
-- status: PENDING
+- status: ACCEPTED — 2026-07-19 (approved by Sai in-session; TRADING-STRATEGY.md v4 section committed same day; 0.75× sizing for first 20 live trades)
 
 Evidence: backtests/ORB-WEEKLY-HONEST-REPORT.md (phases 1-3 + deep-history section).
 Protocol: pre-registered variant grids, selection on IS only (train <= 2026-05-08),
