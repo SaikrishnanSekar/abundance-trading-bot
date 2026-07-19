@@ -65,6 +65,7 @@ from scan_orb_live import (
     preload_daily_context, NIFTY_50, NIFTY_NEXT_50, MIDCAP_50_LIQUID,
     _ticker_sector,
 )
+from journal.record import journal_safely, log_orb_proposal
 
 IST = timezone(timedelta(hours=5, minutes=30))
 
@@ -73,7 +74,7 @@ IST = timezone(timedelta(hours=5, minutes=30))
 SCAN_GROUPS = {
     "N50":   True,   # Nifty 50        (50 stocks)  — always liquid, core universe
     "NXT50": True,   # Nifty Next 50   (50 stocks)  — liquid large-caps outside N50
-    "MID50": False,  # Nifty Midcap 50 (50 stocks)  — higher beta; set True to enable
+    "MID50": True,   # Nifty Midcap 50 (50 stocks)  — enabled 2026-07-19 (ORB v4 approved universe)
 }
 
 # Min avg daily volume (shares) for BUY NOW to fire for each group.
@@ -130,7 +131,8 @@ def check_orb(today_bars, bars, fd, avg_day_vol, day_fraction):
     orl = min(b["low"]  for b in today_bars[:3])
     orb_w = orh - orl
     mid   = (orh + orl) / 2
-    if orb_w <= 0 or mid <= 0 or orb_w / mid * 100 < 1.5:
+    # v4 (approved 2026-07-19): width gate removed — only degenerate ranges skipped
+    if orb_w <= 0 or mid <= 0 or orb_w / mid * 100 < 0.10:
         return None
 
     long_entry  = orh * 1.001
@@ -167,26 +169,37 @@ def check_orb(today_bars, bars, fd, avg_day_vol, day_fraction):
     failed_long  = any(b["high"] >= orh * 0.998 and b["close"] < long_entry  for b in today_bars[3:])
     failed_short = any(b["low"]  <= orl * 1.002 and b["close"] > short_entry for b in today_bars[3:])
 
+    # v4 gates: volume only. VWAP/RSI are ADVISORY tags (validated backtest
+    # config does not gate on them) — shown in notes, never block ENTRY.
     if close_px > long_entry and not failed_long:
         direction = "LONG"
-        gates_ok  = vol_ok and vwap_lk and rsi_lk
-        fails     = [] + (["vol"] if not vol_ok else []) + \
-                    (["VWAP"] if not vwap_lk else []) + \
-                    (["RSI"] if not rsi_lk else [])
+        gates_ok  = vol_ok
+        fails     = (["vol"] if not vol_ok else [])
+        advisory  = (["VWAP-" ] if not vwap_lk else []) + (["RSI-"] if not rsi_lk else [])
     elif close_px < short_entry and not failed_short:
         direction = "SHORT"
-        gates_ok  = vol_ok and vwap_sk and rsi_sk
-        fails     = [] + (["vol"] if not vol_ok else []) + \
-                    (["VWAP"] if not vwap_sk else []) + \
-                    (["RSI"] if not rsi_sk else [])
+        gates_ok  = vol_ok
+        fails     = (["vol"] if not vol_ok else [])
+        advisory  = (["VWAP-"] if not vwap_sk else []) + (["RSI-"] if not rsi_sk else [])
     else:
         return None
+    late = _now_hhmm() > 1130   # v4 entry window ends 11:30 for ORB
 
     sl = orl if direction == "LONG" else orh
     t1 = close_px + orb_w * 1.5 * (1 if direction == "LONG" else -1)
     t2 = close_px + orb_w * 2.5 * (1 if direction == "LONG" else -1)
 
-    status = "ENTRY" if gates_ok else ("BREAKOUT-" + "+".join(fails) + "-FAIL")
+    if gates_ok and late:
+        status = "ENTRY-LATE"          # valid signal, past the 11:30 v4 window — watch only
+    elif gates_ok:
+        status = "ENTRY"
+    else:
+        status = "BREAKOUT-" + "+".join(fails) + "-FAIL"
+    adv_tag = (" [" + " ".join(advisory) + "]") if advisory else ""
+    note = f"ORB {orb_w/mid*100:.2f}% wid | vol{vol_r:.1f}x"
+    if rsi:
+        note += f" | RSI {rsi:.0f}"
+    note += adv_tag + (" [LATE>11:30]" if late else "")
     return {
         "strategy": "ORB",
         "status":   status,
@@ -198,7 +211,8 @@ def check_orb(today_bars, bars, fd, avg_day_vol, day_fraction):
         "t2":    t2,
         "vol_r": vol_r,
         "rsi":   rsi,
-        "notes": f"ORB {orb_w/mid*100:.1f}% wid | vol{vol_r:.1f}x | RSI {rsi:.0f}" if rsi else "",
+        "orb_width_pct": round(orb_w / mid * 100, 3),
+        "notes": note,
     }
 
 
@@ -531,13 +545,23 @@ def scan():
             if orb_entry:
                 if in_window and vol_liquid:
                     buy_now.append(row)
+                    # journal every actionable ORB signal (dedup by id — one
+                    # per ticker/side/day) so recommendation quality is
+                    # gradeable even in observation mode
+                    journal_safely(log_orb_proposal, {
+                        "sym": ticker, "side": row["direction"],
+                        "entry": row["entry"], "target1": row["t1"],
+                        "stop": row["stop"],
+                        "orb_width_pct": row.get("orb_width_pct"),
+                        "qty": None, "atr": None, "vix": None,
+                    })
                 elif in_window and not vol_liquid:
                     row = dict(row)
                     row["notes"] = row.get("notes","") + f" | SKIP: thin({avg_d/1e5:.1f}L<{min_vol/1e5:.0f}L)"
                     watching.append(row)
                 else:
                     historical.append({**row, "note_time": "post-window"})
-            elif "FAIL" in orb["status"]:
+            elif orb["status"] == "ENTRY-LATE" or "FAIL" in orb["status"]:
                 watching.append(row)
 
         # ── Gap Fill — collect only; route after loop with market-wide filter ──
@@ -737,6 +761,18 @@ def scan():
 
     if not confluence and not active_buys:
         _tg_lines.append("No entry signals — monitoring.")
+
+    # ORB flow visibility: near-signals (gate-fail / late breakouts), top 5.
+    # Shows what the scanner is tracking even when nothing is fully actionable.
+    orb_watch = [r for r in watching if r.get("strategy") == "ORB"]
+    if orb_watch:
+        orb_watch.sort(key=lambda r: -(r.get("vol_r") or 0))
+        _tg_lines.append("")
+        _tg_lines.append(f"*ORB WATCH ({len(orb_watch)} near-signals):*")
+        for r in orb_watch[:5]:
+            _tg_lines.append(
+                f"  {r['ticker']} {r.get('direction','')} {r.get('status','')} "
+                f"@ {r.get('price',0):.2f} | {r.get('notes','')}")
 
     # Always show top squeeze watches
     squeeze_watch = sorted(

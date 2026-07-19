@@ -4,6 +4,10 @@ description: Attempt ONE new India intraday entry (propose order, DO NOT place w
 
 You are attempting ONE new India MIS intraday entry. The user must approve via Telegram before the order is placed.
 
+## Gate 0 — Observation mode (check FIRST)
+
+If `memory/india/OBSERVATION-MODE.md` exists and today's date (Asia/Kolkata) falls inside its hold dates, STOP immediately — post to Telegram: `⏸ OBSERVATION MODE — no orders until <resume date>. Signal noted in journal.` Do not propose any order.
+
 ## Gates (MUST ALL PASS — use deterministic checker)
 
 Call `python3 scripts/gate_check.py` with JSON stdin (one call, one result). Inputs:
