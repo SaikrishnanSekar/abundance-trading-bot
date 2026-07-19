@@ -50,18 +50,26 @@ NIFTY_50 = [
 ]
 
 
+UPSTOX_DIR = ROOT / "data" / "history_cache_upstox"
+
+
 def load_universe(tickers=None):
     """{ticker: {date_str: [bars sorted by time]}}
-    tickers=None -> Nifty 50. tickers="ALL" -> every cached symbol (N50+NXT50+MID50).
+    tickers=None -> Nifty 50 (Yahoo cache). "ALL" -> every Yahoo-cached symbol.
+    "UPSTOX" -> every symbol in the deep Upstox cache (cross-validated source).
     """
-    if tickers == "ALL":
-        tickers = sorted(f.name.replace("_5min_v8.json", "")
+    src_dir, suffix = CACHE_DIR, "_5min_v8.json"
+    if tickers == "UPSTOX":
+        src_dir, suffix = UPSTOX_DIR, "_5min_upstox.json"
+        tickers = sorted(f.name.replace(suffix, "") for f in src_dir.glob(f"*{suffix}"))
+    elif tickers == "ALL":
+        tickers = sorted(f.name.replace(suffix, "")
                          for f in CACHE_DIR.glob("*_5min_v8.json"))
     elif tickers is None:
         tickers = NIFTY_50
     data = {}
     for t in tickers:
-        f = CACHE_DIR / f"{t}_5min_v8.json"
+        f = src_dir / f"{t}{suffix}"
         if not f.exists():
             continue
         bars = json.loads(f.read_text(encoding="utf-8"))
