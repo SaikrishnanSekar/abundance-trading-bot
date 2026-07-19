@@ -137,3 +137,29 @@ Honest final numbers: P(week >= 3%) = 48-50% (CI wide, 10 true OOS weeks);
 mean ~+2.3%/wk OOS; median +2.6%; worst week -3.54%. A guaranteed minimum
 3-4%/week does not exist on current evidence — this is the probability maximum
 achievable within the rulebook, roughly a coin flip per week.
+
+---
+
+## Pre-live-trial risk assessment (2026-07-19, final config P5 + bank-3%)
+
+Daily-close equity curve, Rs50k cash base:
+
+| Metric | OOS (48d) | IS (59d) | Combined (107d) |
+|---|---|---|---|
+| Max drawdown | **Rs5,825 = 11.65%** | Rs3,542 = 7.08% | Rs5,825 = 11.65% |
+| Longest DD duration | 26 cal days | 35 cal days | 35 cal days |
+| Underwater at window end | yes, 4 days | yes, 2 days | yes, 4 days |
+| Win/loss count ratio | 0.69 (WR 40.9%) | 0.73 (WR 42.3%) | 0.72 (WR 41.7%) |
+| Avg win / avg loss (payoff) | 2.15 (Rs630/-293) | 1.66 | 1.85 |
+| Profit factor | 1.48 | 1.22 | 1.32 |
+| Total PnL | +Rs11,488 (+22.98%) | +Rs8,110 | +Rs19,598 (+39.2%) |
+
+Risk notes for the human approver:
+- The OOS max DD (11.65%) came within 3.4pts of the -15% account kill switch.
+  A modestly worse sequence would trip it. Consider trial at reduced size.
+- This is a low-WR / high-payoff profile: 59% of trades lose; the system's edge
+  arrives in bursts. Expect multi-week underwater stretches (up to ~5 weeks seen).
+- Both windows END in (shallow) drawdown — normal for this profile, but the live
+  trial will likely start feeling like a loser before a trend week pays.
+- Dhan token status (probed 2026-07-19): EXPIRED (DH-901 on /v2/fundlimit and
+  /v2/profile). Refresh from Dhan portal into .env before any live order.
