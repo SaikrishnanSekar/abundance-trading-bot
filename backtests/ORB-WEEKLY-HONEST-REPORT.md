@@ -64,3 +64,39 @@ python scripts/fetch_history_yahoo.py --groups N50
 python backtests/orb_weekly_portfolio.py
 ```
 Re-score monthly; the OOS window grows ~1 week per week of nightly fetches.
+
+---
+
+## Phase 2 addendum (same day) — universe expansion + trailing exit
+
+New levers tested (pre-registered grid, `orb_weekly_phase2.py`, IS-only selection):
+full 149-ticker universe (N50+NXT50+MID50, all caches refreshed through
+2026-07-17) and full-notional sizing (20%-margin qty; the Rs750 cash-cut rule
+tightens the stop instead of shrinking qty).
+
+**Winner (chosen on IS, confirmed OOS): P5 = full universe + full-size +
+1x-width trailing stop, no fixed target, entries 09:30-11:30.**
+
+| Window | N | WR | mean/wk | P(>=3%) | P(>0) | worst wk | best wk |
+|---|---|---|---|---|---|---|---|
+| IS (13 wk) | 236 | 42.8% | +1.73% | 46.2% | 46.2% | -3.66% | +7.51% |
+| OOS (10 wk) | 212 | 42.0% | **+2.30%** | **40%** [CI 10-70%] | 60% | -3.54% | +16.87% |
+| IS+OOS (23 wk) | — | — | +1.98% [CI +0.11 to +4.14] | 43% [CI 22-65%] | — | — | — |
+
+- OOS mean EXCEEDS IS mean (no in-sample inflation signature). Trade audit of the
+  largest winners/losers: clean data (max single-bar move 1.2%), real multi-percent
+  mid-cap trend days, losses capped ~Rs830 (Rs750 rule + costs).
+- Median OOS week is only +0.49% — the mean is carried by outlier trend weeks.
+  This is a lumpy, positive-skew profile, not a steady 3%/week.
+- **CRITICAL slippage sensitivity: the entire edge lives below ~0.1% per-side
+  slippage.** At 0.10%/side the strategy is negative (OOS -0.73%/wk); at 0.15%
+  it is ruinous (-3.53%/wk). Live execution MUST use limit orders at the
+  breakout price; market-order chasing on mid-caps destroys the edge. This is
+  the #1 live-validation risk and the first thing the 5-trade trial must measure.
+- Mid-cap tickers require Sleeve B approval per TRADING-STRATEGY.md — the
+  proposal covers this; nothing activates without human commit.
+
+**Final honest answer to the 3-4%/week goal:** the probability-maximizing
+implemented logic is P5. P(week >= 3%) ≈ 40-43% (CI wide). A guaranteed
+*minimum* 3-4%/week does not exist on current evidence — half of all weeks land
+below +0.5%.

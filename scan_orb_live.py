@@ -108,6 +108,9 @@ HEADERS = {
 FEED_FILE    = Path(__file__).parent / "data" / "live_feed.json"
 FEED_MAX_AGE = 60   # seconds
 
+# Set true only via --proposed CLI flag (pending orb_test_sleeve recalibration)
+PROPOSED_MODE = False
+
 
 # ── Single-pass cache preload ─────────────────────────────────────────────────
 
@@ -277,15 +280,17 @@ def fetch_data(ticker):
 
 # ── Main scan ─────────────────────────────────────────────────────────────────
 
-def scan():
-    print("--- NIFTY 50 LIVE ORB SCAN ---")
+def scan(universe=None, label="NIFTY 50"):
+    if universe is None:
+        universe = NIFTY_50
+    print(f"--- {label} LIVE ORB SCAN ---")
     now_ist   = datetime.now(IST)
     today_str = now_ist.date().isoformat()
     print(f"Time: {now_ist.strftime('%Y-%m-%d %H:%M:%S')} IST")
     print("-" * 80)
 
     # Single-pass cache preload: avg volumes + market breadth + daily ATR/MA context
-    avg_day_vols, breadth, daily_ctx = preload_daily_context(today_str)
+    avg_day_vols, breadth, daily_ctx = preload_daily_context(today_str, universe)
 
     # Market breadth header (Jeff Sun regime check — NSE equivalent)
     if breadth["n"] > 0:
@@ -311,7 +316,7 @@ def scan():
 
     results = []
 
-    for ticker in NIFTY_50:
+    for ticker in universe:
         bars = fetch_data(ticker)
         if not bars:
             continue
@@ -328,14 +333,16 @@ def scan():
             continue
 
         width_pct = orb_width / mid * 100
-        # Width gate: portfolio backtest (orb_weekly_portfolio.py, IS Feb-May +
-        # OOS May-Jul 2026) shows the old >=1.5% hard skip removes ~2/3 of
-        # profitable signals (avg OR width is ~1.0-1.2%). Only degenerate
-        # ranges (<0.10% — data glitch / no movement) are skipped now.
-        if width_pct < 0.10:
+        # Width gate: >=1.5% is the ACCEPTED rule (orb_width_gate, 2026-05-06,
+        # in TRADING-STRATEGY.md) and stays the default. The 2026-07-19 portfolio
+        # study (orb_weekly_portfolio.py / orb_weekly_phase2.py) found it removes
+        # ~2/3 of profitable signals; its removal is PROPOSED (dim orb_test_sleeve)
+        # and previewable via --proposed, which keeps only a 0.10% degenerate floor.
+        min_width = 0.10 if PROPOSED_MODE else 1.5
+        if width_pct < min_width:
             results.append({
                 "ticker": ticker,
-                "status": f"SKIP-WIDTH ({width_pct:.2f}%<0.10% degenerate)",
+                "status": f"SKIP-WIDTH ({width_pct:.2f}%<{min_width}%)",
                 "close": today_bars[-1]["close"], "orh": orh, "orl": orl,
                 "vol_ratio": 0, "width_pct": width_pct,
                 "time": today_bars[-1]["dt"].strftime('%H:%M'),
@@ -572,4 +579,13 @@ def scan():
 
 
 if __name__ == "__main__":
-    scan()
+    # --full scans N50+NXT50+MID50 (the phase-2 validated universe:
+    # backtests/orb_weekly_phase2.py). Default stays N50.
+    # --proposed previews the PENDING recalibration (no 1.5% width gate) —
+    # advisory only until the orb_test_sleeve proposal is human-approved.
+    PROPOSED_MODE = "--proposed" in sys.argv
+    if "--full" in sys.argv or PROPOSED_MODE:
+        full = NIFTY_50 + NIFTY_NEXT_50 + MIDCAP_50_LIQUID
+        scan(list(dict.fromkeys(full)), label="N50+NXT50+MID50 (149)")
+    else:
+        scan()

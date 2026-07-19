@@ -50,10 +50,17 @@ NIFTY_50 = [
 ]
 
 
-def load_universe():
-    """{ticker: {date_str: [bars sorted by time]}}"""
+def load_universe(tickers=None):
+    """{ticker: {date_str: [bars sorted by time]}}
+    tickers=None -> Nifty 50. tickers="ALL" -> every cached symbol (N50+NXT50+MID50).
+    """
+    if tickers == "ALL":
+        tickers = sorted(f.name.replace("_5min_v8.json", "")
+                         for f in CACHE_DIR.glob("*_5min_v8.json"))
+    elif tickers is None:
+        tickers = NIFTY_50
     data = {}
-    for t in NIFTY_50:
+    for t in tickers:
         f = CACHE_DIR / f"{t}_5min_v8.json"
         if not f.exists():
             continue
@@ -136,7 +143,13 @@ def execute(day_bars, sig, risk_size, variant=None):
     stop, tgt = sig["stop"], sig["tgt"]
     use_tgt = not variant.get("trail")
     qty = max(1, int(MAX_POS_SIZE / entry))
-    if risk_size:
+    if variant.get("full_size"):
+        # full 20%-margin notional; -1.5%-cash cut rule tightens the stop instead
+        # of shrinking qty (stop never looser than the OR bound)
+        max_dist = MAX_RISK_TRADE / qty
+        if abs(entry - stop) > max_dist:
+            stop = entry - max_dist if sig["side"] == "L" else entry + max_dist
+    elif risk_size:
         stop_dist = abs(entry - stop)
         if stop_dist > 0:
             qty = min(qty, max(1, int(MAX_RISK_TRADE / stop_dist)))

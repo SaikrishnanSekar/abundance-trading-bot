@@ -416,19 +416,21 @@ in LIVE-PULSE.md for 2 weeks to validate with real volume data before proposing 
 
 ---
 
-## 2026-07-19 · ORB sleeve recalibration — validated portfolio config (V5)
+## 2026-07-19 · ORB sleeve recalibration — validated portfolio config (P5, phase 2)
 - dimension: orb_test_sleeve
-- evidence_n: 382 real trades (213 IS + 169 OOS, backtests/orb_weekly_portfolio.py)
-- current_rule: "ORB Trial Sleeve: 15-min OR, vol >= 2.0x, entry cut-off 10:30, width >= 1.5% (scanner gate)."
-- proposed_rule: (1) extend entry window to 09:30-11:30 IST; (2) drop the width >= 1.5% scanner hard-gate (keep 0.10% degenerate floor); (3) size each trade risk-capped at Rs750 (qty = min(20% margin notional, Rs750 / stop-distance)); (4) keep 15-min OR, vol 2.0x, 0.1% buffer, 2x-width target, stop = far OR bound, flat 15:15, max 3 concurrent, daily -1.5% halt. Expectation reset: weekly mean +0.4% OOS (NOT 2.7%); P(week >= 3%) ~20-43%.
-- expected_impact: Highest available P(>=3% week) among all 12 pre-registered variants and 9 prior strategy families; ~1.6x more signals than 10:30 cut-off; shallower worst week than frozen V0 (-3.7% vs -5.2% OOS).
-- risk: OOS window is only 10 weeks; edge collapsed IS->OOS (2.6%->0.4%/wk) so live results may hover near breakeven; low-VIX regime may persist.
+- evidence_n: 448 real trades (236 IS + 212 OOS, backtests/orb_weekly_phase2.py, 149-ticker universe)
+- current_rule: "ORB Trial Sleeve: 15-min OR, vol >= 2.0x, entry cut-off 10:30, width >= 1.5% gate (orb_width_gate, accepted 2026-05-06), N50 only."
+- proposed_rule: (1) universe = N50+NXT50+MID50 (149 tickers; NXT50/MID50 legs need Sleeve B activation); (2) entry window 09:30-11:30 IST; (3) REMOVE the >= 1.5% width gate (keep 0.10% degenerate floor) — supersedes accepted orb_width_gate; (4) full 20%-margin sizing with the Rs750 cash-cut tightening the stop (never below OR bound); (5) NO fixed target — trail stop 1x OR-width behind best close, tighten-only; (6) keep 15-min OR, vol 2.0x, 0.1% buffer, flat 15:15, max 3 concurrent, daily -1.5% halt. (7) LIMIT ORDERS ONLY at breakout price: backtest edge dies above ~0.1%/side slippage. Expectation reset: mean +2.0%/wk blended [CI +0.1 to +4.1], P(week >= 3%) 40-43%, median week +0.5%.
+- expected_impact: Highest P(>=3% week) of every config tested across 2 phases (18 variants, 2 universes, 9 prior strategy families). OOS: +2.30%/wk, P(>=3%)=40%, P(>0)=60%, worst week -3.54%.
+- risk: (a) edge is slippage-fragile — at 0.10%/side it flips negative; first 5 live trades must measure realized slippage vs the 0.05% assumption; (b) 10 OOS weeks only, CI 10-70%; (c) profile is lumpy — mean carried by outlier trend weeks; (d) mid-cap legs inactive until Sleeve B approved.
 - cooldown_until: 2026-08-02
 - status: PENDING
 
-Evidence: backtests/ORB-WEEKLY-HONEST-REPORT.md. Selection done on IS only; OOS
-(2026-05-09 -> 2026-07-17, never used in tuning) scored once. All variants positive
-OOS but none reach 1%/wk mean. The 3-4%/week goal is NOT certifiable as a minimum;
-V5 is the probability-maximizing configuration on current evidence.
+Evidence: backtests/ORB-WEEKLY-HONEST-REPORT.md (phase 1 + phase 2 addendum).
+Protocol: pre-registered variant grids, selection on IS only (train <= 2026-05-08),
+OOS = 2026-05-09 -> 2026-07-17 fetched AFTER all tuning, scored once. Trade audit
+clean (no glitch bars). Phase-1 finding stands: the old N50 2x-target config decayed
+to +0.4%/wk OOS; the recalibrated P5 config is what survives validation. A guaranteed
+minimum 3-4%/wk does not exist on current evidence — P(>=3%) tops out at ~40-43%.
 
 Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.
