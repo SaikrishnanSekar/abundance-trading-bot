@@ -182,6 +182,17 @@ def main():
         # must not produce a proposal that would get rejected at execution.
         check("G13_market_hours", d["market_is_open"], "Market is not currently open (caller-supplied clock check).")
 
+        # G14: bank-the-week (India). DEFAULT OFF — activates only when the caller
+        # passes week_bank_enabled=true, which requires the human-approved
+        # orb_test_sleeve proposal (2026-07-19). Once the ISO week has banked
+        # >= week_bank_target rupees of realized PnL, no new entries this week.
+        # Realized total comes from scripts/week_target_check.py.
+        if d["market"] == "india" and d.get("week_bank_enabled"):
+            wk_pnl = float(d.get("week_realized_pnl", 0))
+            wk_tgt = float(d.get("week_bank_target", 1500))
+            check("G14_week_banked", wk_pnl < wk_tgt,
+                  f"Week banked Rs{wk_pnl:+,.0f} >= Rs{wk_tgt:,.0f} target — no new entries until next week.")
+
         size_multiplier = 1.0
         if d["market"] == "us" and d["vix"] > 25 and not vix_block:
             size_multiplier = 0.35
