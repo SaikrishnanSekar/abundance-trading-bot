@@ -170,13 +170,16 @@ def execute(day_bars, sig, risk_size, variant=None):
         if hhmm(fb) >= 1510 or j == flat_idx:
             px = fb["open"] * (1 - SLIPPAGE_PCT) if long else fb["open"] * (1 + SLIPPAGE_PCT)
             pnl = (px - entry) * qty if long else (entry - px) * qty
-            return {"entry_i": sig["i"], "exit_i": j, "pnl": pnl - cost, "exit": "EOD", "qty": qty}
+            return {"entry_i": sig["i"], "exit_i": j, "pnl": pnl - cost, "exit": "EOD",
+                    "qty": qty, "side": sig["side"]}
         if (long and fb["low"] <= stop) or (not long and fb["high"] >= stop):
             pnl = (stop - entry) * qty if long else (entry - stop) * qty
-            return {"entry_i": sig["i"], "exit_i": j, "pnl": pnl - cost, "exit": "SL", "qty": qty}
+            return {"entry_i": sig["i"], "exit_i": j, "pnl": pnl - cost, "exit": "SL",
+                    "qty": qty, "side": sig["side"]}
         if use_tgt and ((long and fb["high"] >= tgt) or (not long and fb["low"] <= tgt)):
             pnl = (tgt - entry) * qty if long else (entry - tgt) * qty
-            return {"entry_i": sig["i"], "exit_i": j, "pnl": pnl - cost, "exit": "TP", "qty": qty}
+            return {"entry_i": sig["i"], "exit_i": j, "pnl": pnl - cost, "exit": "TP",
+                    "qty": qty, "side": sig["side"]}
         # tighten-only management, evaluated on bar close (no lookahead)
         if variant.get("breakeven"):
             fav = fb["close"] - entry if long else entry - fb["close"]

@@ -5,3 +5,4 @@ Per-trade scoring on 5 dimensions (each 1-5):
 Append-only. Newest at top.
 
 ---
+
