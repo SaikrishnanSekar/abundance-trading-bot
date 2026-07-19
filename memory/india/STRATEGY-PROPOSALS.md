@@ -413,3 +413,22 @@ at standard R:R because stop (first-bar low) > target. Recommended: log gap-up o
 in LIVE-PULSE.md for 2 weeks to validate with real volume data before proposing a trial.
 
 ---
+
+---
+
+## 2026-07-19 · ORB sleeve recalibration — validated portfolio config (V5)
+- dimension: orb_test_sleeve
+- evidence_n: 382 real trades (213 IS + 169 OOS, backtests/orb_weekly_portfolio.py)
+- current_rule: "ORB Trial Sleeve: 15-min OR, vol >= 2.0x, entry cut-off 10:30, width >= 1.5% (scanner gate)."
+- proposed_rule: (1) extend entry window to 09:30-11:30 IST; (2) drop the width >= 1.5% scanner hard-gate (keep 0.10% degenerate floor); (3) size each trade risk-capped at Rs750 (qty = min(20% margin notional, Rs750 / stop-distance)); (4) keep 15-min OR, vol 2.0x, 0.1% buffer, 2x-width target, stop = far OR bound, flat 15:15, max 3 concurrent, daily -1.5% halt. Expectation reset: weekly mean +0.4% OOS (NOT 2.7%); P(week >= 3%) ~20-43%.
+- expected_impact: Highest available P(>=3% week) among all 12 pre-registered variants and 9 prior strategy families; ~1.6x more signals than 10:30 cut-off; shallower worst week than frozen V0 (-3.7% vs -5.2% OOS).
+- risk: OOS window is only 10 weeks; edge collapsed IS->OOS (2.6%->0.4%/wk) so live results may hover near breakeven; low-VIX regime may persist.
+- cooldown_until: 2026-08-02
+- status: PENDING
+
+Evidence: backtests/ORB-WEEKLY-HONEST-REPORT.md. Selection done on IS only; OOS
+(2026-05-09 -> 2026-07-17, never used in tuning) scored once. All variants positive
+OOS but none reach 1%/wk mean. The 3-4%/week goal is NOT certifiable as a minimum;
+V5 is the probability-maximizing configuration on current evidence.
+
+Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.

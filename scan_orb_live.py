@@ -328,10 +328,14 @@ def scan():
             continue
 
         width_pct = orb_width / mid * 100
-        if width_pct < 1.5:
+        # Width gate: portfolio backtest (orb_weekly_portfolio.py, IS Feb-May +
+        # OOS May-Jul 2026) shows the old >=1.5% hard skip removes ~2/3 of
+        # profitable signals (avg OR width is ~1.0-1.2%). Only degenerate
+        # ranges (<0.10% — data glitch / no movement) are skipped now.
+        if width_pct < 0.10:
             results.append({
                 "ticker": ticker,
-                "status": f"SKIP-WIDTH ({width_pct:.1f}%<1.5%)",
+                "status": f"SKIP-WIDTH ({width_pct:.2f}%<0.10% degenerate)",
                 "close": today_bars[-1]["close"], "orh": orh, "orl": orl,
                 "vol_ratio": 0, "width_pct": width_pct,
                 "time": today_bars[-1]["dt"].strftime('%H:%M'),
@@ -433,10 +437,15 @@ def scan():
         gap_tag = (f" [gap{gap_pct:+.1f}%]" if gap_pct is not None and abs(gap_pct) > 5
                    else "")
 
+        # ── Entry-window tag: validated window is 09:30-11:30 IST
+        # (orb_weekly_portfolio.py V5 — chosen in-sample, held up best OOS).
+        # Signals after 11:30 are flagged, not hidden: human decides.
+        late_tag = " [LATE >11:30]" if (now_ist.hour * 100 + now_ist.minute) > 1130 else ""
+
         # ── Status assignment
         if close_px > long_entry:
             if vol_ok and vwap_ok_long and rsi_ok_long:
-                status = f">>> ENTRY LONG (vol{vol_str}+VWAP+RSI OK){ext_tag}{gap_tag}"
+                status = f">>> ENTRY LONG (vol{vol_str}+VWAP+RSI OK){ext_tag}{gap_tag}{late_tag}"
             elif not rsi_ok_long:
                 status = f"BREAKOUT LONG (RSI FAIL {rsi_str} — skip){ext_tag}"
             elif not vwap_ok_long:
@@ -445,7 +454,7 @@ def scan():
                 status = f"BREAKOUT LONG (LOW VOL {vol_str} — wait){ext_tag}"
         elif close_px < short_entry:
             if vol_ok and vwap_ok_short and rsi_ok_short:
-                status = f">>> ENTRY SHORT (vol{vol_str}+VWAP+RSI OK){ext_tag}{gap_tag}"
+                status = f">>> ENTRY SHORT (vol{vol_str}+VWAP+RSI OK){ext_tag}{gap_tag}{late_tag}"
             elif not rsi_ok_short:
                 status = f"BREAKOUT SHORT (RSI FAIL {rsi_str} — skip){ext_tag}"
             elif not vwap_ok_short:

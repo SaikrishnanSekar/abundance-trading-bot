@@ -189,3 +189,13 @@ Re-evaluate at 15-min timeframe only if ORB sleeve shows positive live results f
 - Honest report: backtests/HONEST-REPORT-2026-07-18.md. FINDING logged in STRATEGY-PROPOSALS.md - keep MA-abundance research-only.
 - No live action. Market closed (Saturday).
 - Addendum: bhavcopy refreshed to 2026-07-17. Phase-3 walk-forward study (9 signals, N50, 16,688 symbol-days): NO signal beats 29% base rate out-of-sample; 20d-high breakout significantly WORSE (-6.4pt, p=0.0003). No proposal - correct output is silence. Baseline re-run on extended data: LONG-WATCH 25.3%, unchanged conclusion.
+
+## 2026-07-19 - ORB portfolio weekly study: OOS validation of the 3-4%/week goal
+
+- 5-min cache refreshed via Yahoo (N50, now 2026-02-06 -> 2026-07-17, 107 days). Clean OOS window: 2026-05-09 onward (48 days, 10 weeks, never used in tuning).
+- New portfolio-level simulator backtests/orb_weekly_portfolio.py: Rs50k, MIS 5x, 20% margin/pos, Rs750 risk cap, max 3 concurrent, daily -1.5% halt, real costs. 12 pre-registered ORB variants; selection on IS only.
+- RESULT: IS mean +2.6%/wk, P(>=3%) 61.5% -> OOS mean +0.4%/wk, P(>=3%) 20% [CI 0-50%]. The old "2.7%/week" ORB claim was in-sample; edge largely does NOT survive. All variants positive OOS but none >= 1%/wk.
+- Chosen config V5 (entry window 09:30-11:30, no width gate): highest IS P(>=3%), best OOS among the tie. Blended 23-week P(>=3%) = 43% [CI 22-65%].
+- Scanner scan_orb_live.py: width>=1.5% hard skip removed (was excluding ~2/3 of validated signals; avg OR width ~1.0%), replaced by 0.10% degenerate floor + [LATE >11:30] tag.
+- Proposal appended (dim orb_test_sleeve, cooldown clear): recalibrated sleeve config + expectation reset. NO minimum 3-4%/week logic exists on current evidence; V5 is the probability-maximizing config. Full report: backtests/ORB-WEEKLY-HONEST-REPORT.md.
+- No live action. Market closed (Sunday).
