@@ -11,8 +11,9 @@ import sys, os, json, time, urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-ROOT     = Path(__file__).parent
-LOG_FILE = ROOT / "logs" / "scan_all.log"
+ROOT          = Path(__file__).parent
+LOG_FILE      = ROOT / "logs" / "scan_all.log"
+TIMELINE_FILE = ROOT / "journal" / "india" / "signal_timeline.jsonl"
 
 env_file = ROOT / ".env"
 if env_file.exists():
@@ -37,6 +38,32 @@ class _Tee:
 _log_fh = open(LOG_FILE, "a", encoding="utf-8", errors="replace")
 sys.stdout = _Tee(sys.__stdout__, _log_fh)
 sys.stderr = _Tee(sys.__stderr__, _log_fh)
+
+
+def _log_signal_timeline(rows, date_str, time_str):
+    """Append one JSONL row per trackable signal this cycle, for the
+    price-action tracker tab. Only rows with a real entry price count as a
+    recommendation worth tracking end-to-end (skips bare BB-Squeeze watches
+    that have no entry/target yet). Deliberately append-only and best-effort:
+    a timeline write failure must never break the live scan."""
+    try:
+        TIMELINE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with TIMELINE_FILE.open("a", encoding="utf-8") as f:
+            for r in rows:
+                if not r.get("entry"):
+                    continue
+                rec = {
+                    "date": date_str, "time": time_str,
+                    "ticker": r.get("ticker"), "sector": r.get("sector"),
+                    "group": r.get("group"), "strategy": r.get("strategy"),
+                    "direction": r.get("direction"),
+                    "price": r.get("price"), "entry": r.get("entry"),
+                    "stop": r.get("stop"), "t1": r.get("t1"), "t2": r.get("t2"),
+                    "status": r.get("status"), "notes": r.get("notes"),
+                }
+                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception as e:
+        print(f"[timeline] WARNING: signal timeline logging failed ({e}) — scan continues.")
 
 
 def _send_telegram(text):
@@ -65,7 +92,7 @@ from scan_orb_live import (
     preload_daily_context, NIFTY_50, NIFTY_NEXT_50, MIDCAP_50_LIQUID,
     _ticker_sector,
 )
-from journal.record import journal_safely, log_orb_proposal
+from journal.record import journal_safely, log_orb_proposal, RECS_FILE
 
 IST = timezone(timedelta(hours=5, minutes=30))
 
@@ -706,6 +733,32 @@ def scan():
     # Section 3 — TODAY'S RESULTS
     print(f"\n... TODAY'S HISTORY ...  ({len(historical)} completed / in-trade)")
     print_table(sorted(historical, key=lambda r: (r['strategy'], r['ticker'])), show_entry=True)
+
+    # Price-action tracker feed: ONLY tickers that genuinely earned a spot in
+    # buy_now/confluence at some point today (per recommendations.jsonl, the
+    # existing authoritative "was this really recommended" record — written
+    # by log_orb_proposal above). For those tickers only, keep logging EVERY
+    # cycle regardless of section, so the tracker can follow the full price
+    # journey after the entry moment (once qualified, it may show up in
+    # watching/historical on later cycles as it matures toward target/stop —
+    # that's still the same recommendation, not a new candidate). ORB/
+    # CONFLUENCE only — Gap-Fill/PDH/BB-Squeeze are still pending-approval
+    # sleeves and never real buy recommendations, and never reach
+    # recommendations.jsonl in the first place.
+    qualified_today = set()
+    if RECS_FILE.exists():
+        for _line in RECS_FILE.read_text(encoding="utf-8").splitlines():
+            if not _line.strip():
+                continue
+            _rec = json.loads(_line)
+            if _rec.get("entry_date") == today_str and _rec.get("source") == "orb_live":
+                qualified_today.add(_rec["ticker"])
+
+    _log_signal_timeline(
+        [r for r in buy_now + watching + historical + confluence
+         if r.get("strategy") in ("ORB", "CONFLUENCE") and r.get("ticker") in qualified_today],
+        today_str, now_ist.strftime("%H:%M"),
+    )
 
     # Quick summary
     active_buys = [r for r in buy_now if "POST-WINDOW" not in r.get("status","")]
