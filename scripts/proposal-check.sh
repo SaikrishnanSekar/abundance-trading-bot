@@ -45,7 +45,7 @@ SUPPRESS_DAYS = 30
 
 def parse_blocks(path):
     if not path.exists(): return []
-    txt = path.read_text()
+    txt = path.read_text(encoding='utf-8')
     out = []
     for m in re.finditer(r'^##\s*(\d{4}-\d{2}-\d{2})\s*·\s*(.+?)$', txt, re.MULTILINE):
         date_s, head = m.group(1), m.group(2).strip()
@@ -74,7 +74,7 @@ if matching:
 # 30-day suppression if rejected 3 times
 rejections = []
 if REJ.exists():
-    txt = REJ.read_text()
+    txt = REJ.read_text(encoding='utf-8')
     for m in re.finditer(r'^-\s*(\d{4}-\d{2}-\d{2})\s+·\s+dim:(\S+)', txt, re.MULTILINE):
         try:
             d = datetime.date.fromisoformat(m.group(1))
