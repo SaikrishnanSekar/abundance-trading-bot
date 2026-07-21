@@ -119,6 +119,17 @@ git push origin main
 
 On push divergence: `git pull --rebase origin main`, then push. Never force-push.
 
+## Daily Journal → SecondBrain (each day's journal routine)
+
+Whenever `journal/reports/DAILY-YYYY-MM-DD.html` is built or updated for a day, append a
+**5-bullet recap** for that day to the SecondBrain vault page
+`wiki/trading/abundance-trading-bot-status.md` (Desktop\SecondBrain), under its
+**Daily Summaries** section — newest entry at the bottom, one entry per trading day.
+Keep each bullet to one line: it's a fast-scan recap, the HTML has the full detail. If
+the day's work is substantial (new bug found/fixed, a strategy decision, a research
+result), also file a `raw/YYYY-MM-DD-*.md` source doc per the vault's own CLAUDE.md and
+update `wiki/index.md` / `wiki/log.md` accordingly.
+
 ## No .env in Cloud Mode
 
 The scripts read .env first and fall back to process env vars. In cloud routines, **do not create or write a .env file**. If a wrapper prints "KEY not set in environment", stop and post a Telegram alert with the missing var name. Do NOT create a .env as a "workaround".
