@@ -41,10 +41,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_price_tracker import ROOT, REPORTS_DIR, load_day, build_lifecycles
 from build_strategy_improvement import load_recommendations
+from build_catalysts import load_catalysts  # canonical catalyst store reader
 
 RSI_OB = 80.0
 RSI_OS = 20.0
-CATALYSTS_FILE = ROOT / "journal" / "india" / "catalysts.jsonl"
 TIMELINE_FILE = ROOT / "journal" / "india" / "signal_timeline.jsonl"
 
 
@@ -54,24 +54,6 @@ def esc(s: str) -> str:
 
 def day_page_name(date_str: str) -> str:
     return f"STRATEGY-IMPROVEMENT-rsi_overbought_entry-{date_str}.html"
-
-
-def load_catalysts(date_str: str) -> dict:
-    """ticker -> {polarity, summary, source} for the day."""
-    out: dict[str, dict] = {}
-    if not CATALYSTS_FILE.exists():
-        return out
-    for line in CATALYSTS_FILE.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        r = json.loads(line)
-        if r.get("date") == date_str:
-            out[r["ticker"]] = {
-                "polarity": (r.get("polarity") or "none").lower(),
-                "summary": r.get("summary", ""),
-                "source": r.get("source", ""),
-            }
-    return out
 
 
 def logged_rsi(date_str: str) -> dict:

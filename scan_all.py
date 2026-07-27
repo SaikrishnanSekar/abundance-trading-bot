@@ -15,6 +15,35 @@ ROOT          = Path(__file__).parent
 LOG_FILE      = ROOT / "logs" / "scan_all.log"
 TIMELINE_FILE = ROOT / "journal" / "india" / "signal_timeline.jsonl"
 
+# Catalyst layer: morning news, cross-checked against every intraday signal.
+# Advisory only — the tag never gates an entry (that gate is the human buy-side
+# check + the rsi_overbought_entry experiment). See routines/india/00-pre-market.md.
+sys.path.insert(0, str(ROOT / "scripts"))
+try:
+    from build_catalysts import load_catalysts
+except Exception:
+    def load_catalysts(_date):  # scanner must never crash if the store is absent
+        return {}
+
+_CAT_MARK = {"positive": "🟢CAT+", "negative": "🔴CAT−", "none": "⚪CAT?"}
+
+
+def _catalyst_tag(cat: dict | None) -> str:
+    """Compact marker for a signal line. '⚪CAT n/a' = not researched today."""
+    if not cat:
+        return "⚪CAT n/a"
+    return _CAT_MARK.get(cat.get("polarity", "none"), "⚪CAT?")
+
+
+def _catalyst_note(cat: dict | None) -> str:
+    """Marker + short summary for the detail line."""
+    if not cat:
+        return "catalyst: not researched"
+    s = (cat.get("summary") or "").strip()
+    if len(s) > 70:
+        s = s[:67] + "…"
+    return f"{_catalyst_tag(cat)} {s}".strip()
+
 env_file = ROOT / ".env"
 if env_file.exists():
     for _line in env_file.read_text(encoding="utf-8").splitlines():
@@ -535,6 +564,7 @@ def scan():
 
     avg_day_vols, breadth, daily_ctx = preload_daily_context(today_str, universe=UNIVERSE)
     live_feed, feed_fresh = load_live_feed()
+    catalysts = load_catalysts(today_str)  # morning news layer (advisory)
 
     p20 = breadth["p20"]
     regime = "BULLISH" if p20 >= 60 else ("NEUTRAL" if p20 >= 40 else "BEARISH")
@@ -574,7 +604,8 @@ def scan():
         min_vol    = MIN_VOL_FOR_ENTRY.get(group, 0)
         vol_liquid = avg_d >= min_vol  # False → demote to WATCHING regardless of gates
 
-        base = {"ticker": ticker, "sector": sector, "group": group}
+        base = {"ticker": ticker, "sector": sector, "group": group,
+                "catalyst": catalysts.get(ticker)}
 
         # ── ORB ──
         orb = check_orb(today_bars, bars, fd, avg_d, day_fraction)
@@ -804,9 +835,10 @@ def scan():
             sl = r.get("stop")  or 0
             t2s = f" | T2 {t2:.2f}" if t2 else ""
             _tg_lines.append(
-                f"  *{r['ticker']}* {r.get('direction','')} @ {r.get('price',0):.2f}\n"
+                f"  *{r['ticker']}* {r.get('direction','')} @ {r.get('price',0):.2f}  {_catalyst_tag(r.get('catalyst'))}\n"
                 f"    Entry {e:.2f} | T1 {t1:.2f}{t2s} | SL {sl:.2f}\n"
-                f"    {r.get('notes','')}"
+                f"    {r.get('notes','')}\n"
+                f"    {_catalyst_note(r.get('catalyst'))}"
             )
 
     if active_buys:
@@ -819,9 +851,10 @@ def scan():
             sl = r.get("stop")  or 0
             t2s = f" | T2 {t2:.2f}" if t2 else ""
             _tg_lines.append(
-                f"  *{r['ticker']}* ({r['strategy']} {r.get('direction','')}) @ {r.get('price',0):.2f}\n"
+                f"  *{r['ticker']}* ({r['strategy']} {r.get('direction','')}) @ {r.get('price',0):.2f}  {_catalyst_tag(r.get('catalyst'))}\n"
                 f"    Entry {e:.2f} | T1 {t1:.2f}{t2s} | SL {sl:.2f}\n"
-                f"    {r.get('notes','')}"
+                f"    {r.get('notes','')}\n"
+                f"    {_catalyst_note(r.get('catalyst'))}"
             )
 
     if not confluence and not active_buys:
@@ -837,7 +870,7 @@ def scan():
         for r in orb_watch[:5]:
             _tg_lines.append(
                 f"  {r['ticker']} {r.get('direction','')} {r.get('status','')} "
-                f"@ {r.get('price',0):.2f} | {r.get('notes','')}")
+                f"@ {r.get('price',0):.2f} {_catalyst_tag(r.get('catalyst'))} | {r.get('notes','')}")
 
     # Always show top squeeze watches
     squeeze_watch = sorted(
