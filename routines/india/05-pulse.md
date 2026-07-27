@@ -65,11 +65,11 @@ All other actions require a proposal + human YES.
    - Stop the routine immediately.
    If `CURRENT_EQUITY > peak_equity`, update `peak_equity` in LIVE-PULSE.md (equity high-water mark).
 8. Update `memory/india/LIVE-PULSE.md` snapshot (include `peak_equity:` field every write).
-9. **Just-in-time catalysts (HOURLY — cover every signal since the last pulse).**
-   This is the hourly catalyst sweep. A name that first signals at 09:40 is researched at
-   the ~10:30 pulse; one that appears at 10:20 is picked up at 10:30; and so on each hour.
-   **Already-covered tickers are skipped** (they're no longer "pending"), so each pulse only
-   researches what is NEW this hour — the LLM cost stays bounded (usually 0–3 names).
+9. **Just-in-time catalysts (hourly FALLBACK / backfill).**
+   The primary catalyst research is the fast 3-min `08-catalyst-scan.md` during the
+   09:30–11:30 entry window; this hourly step is the safety net that catches anything it
+   missed (a failed run, a signal after 11:30, etc.). **Already-covered tickers are skipped**
+   (no longer "pending"), so this usually finds 0 names — run it and move on if so.
    1. `python scripts/pending_catalysts.py $(date +%F) --json` → tickers that signalled
       today but still have no catalyst.
    2. For EACH, research online (`WebSearch`, or `bash scripts/news.sh symbol <SYM>`):
