@@ -11,15 +11,13 @@ Produce today's India research brief BEFORE market open so the `watchlist-approv
 1. Pull latest memory: `git pull --rebase origin main`.
 2. `bash scripts/vix.sh india` → capture India VIX.
 3. `bash scripts/news.sh india` → today's top catalysts (3-5 bullets + sources).
-4. **Catalyst sweep for the ORB-eligible set (STRONG-22).** Run ONE batched catalyst query (not 22 separate calls — stay within the ~10-call budget) covering all 22 names in `scripts/premarket_watchlist.py::STRONG_22`:
-   `bash scripts/news.sh symbol "<SYM1>,<SYM2>,...,<SYM22>"` (or a single `bash scripts/perplexity.sh "Today's market-moving catalyst per NSE ticker: <list>. For EACH give one line + whether it is positive/negative/none for the stock, with a source."`).
-   Then classify each into `positive` / `negative` / `none` (direction-agnostic news sentiment) and write the machine-readable store the intraday scanner reads:
-   ```
-   # Build a JSON array: [{"ticker","polarity","summary","source"}, ...] for STRONG-22
-   # (write it to a temp file, then:)
-   python scripts/build_catalysts.py --date $(date +%F) --from-json <tmp.json>
-   ```
-   This is idempotent (safe to re-run). `scan_all.py` reads `journal/india/catalysts.jsonl` live and tags every ORB/CONFLUENCE/watch signal with 🟢CAT+ / 🔴CAT− / ⚪CAT? — **advisory only, it never blocks an entry** (the catalyst gate is the human buy-side check + the `rsi_overbought_entry` experiment). If `news.sh`/`perplexity.sh` prints "KEY not set", STOP and Telegram-alert the missing var — do NOT create `.env`, and do NOT fabricate polarities (leave the ticker out; the scanner shows ⚪CAT n/a).
+4. **Per-ticker catalysts are NOT pre-swept here.** We do not research a fixed
+   STRONG-22 list any more — ORB fires across all 149 names, so the winners are
+   usually outside any fixed list (LODHA/COFORGE/CHOLAFIN on 2026-07-27 all were).
+   Instead, catalysts are fetched **just-in-time when a signal actually fires**, in
+   the intraday routines (`02-market-open.md`, `03-midday.md`) via
+   `scripts/pending_catalysts.py`. The only catalyst work here is the market-wide
+   macro read from step 3 (`news.sh india`).
 5. `bash scripts/pulse.sh india` → any open positions?
 6. Write to `memory/india/RESEARCH-LOG.md` — append a dated block:
 
