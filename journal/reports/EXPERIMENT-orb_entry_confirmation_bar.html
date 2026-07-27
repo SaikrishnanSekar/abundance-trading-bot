@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Experiment — orb_entry_confirmation_bar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #898781;
+    --grid: #e1e0d9; --baseline: #c3c2b7; --border: rgba(11,11,11,0.10);
+    --good: #0ca30c; --warning: #fab219; --critical: #d03b3b; --series-blue: #2a78d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark; --surface-1: #1a1a19; --page: #0d0d0d;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+      --grid: #2c2c2a; --baseline: #383835; --border: rgba(255,255,255,0.10);
+      --good: #0ca30c; --warning: #fab219; --critical: #e66767; --series-blue: #3987e5;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark; --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+    --grid: #2c2c2a; --baseline: #383835; --border: rgba(255,255,255,0.10);
+    --good: #0ca30c; --warning: #fab219; --critical: #e66767; --series-blue: #3987e5;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--page); color: var(--text-primary); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+  header.top h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  header.top .sub { color: var(--text-secondary); font-size: 0.92rem; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-secondary); background: var(--surface-1); margin-top: 10px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.running { background: var(--warning); }
+  .dot.ready { background: var(--good); }
+  .dot.drop { background: var(--critical); }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 22px 0 28px; }
+  @media (max-width: 700px) { .tiles { grid-template-columns: 1fr; } }
+  .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .tile .label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .tile .value { font-size: 1.55rem; font-weight: 600; margin-top: 4px; }
+  .tile .note { font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px; }
+  section { margin-bottom: 32px; }
+  section h2 { font-size: 1.02rem; margin: 0 0 4px; }
+  section .lede { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  thead th { text-align: left; font-weight: 600; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid var(--grid); }
+  tbody td { padding: 8px 10px; border-bottom: 1px solid var(--grid); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .table-wrap { overflow-x: auto; }
+  a { color: var(--series-blue); text-decoration: none; font-weight: 600; }
+  footer { border-top: 1px solid var(--border); margin-top: 30px; padding-top: 14px; font-size: 0.76rem; color: var(--text-muted); }
+  footer code { color: var(--text-secondary); }
+  .conclusion { border-radius: 10px; padding: 16px 18px; margin-bottom: 28px; border: 1px solid var(--border); }
+  .conclusion.ready { background: color-mix(in srgb, var(--good) 10%, var(--surface-1)); border-color: var(--good); }
+  .conclusion.drop { background: color-mix(in srgb, var(--critical) 10%, var(--surface-1)); border-color: var(--critical); }
+  .conclusion h2 { margin: 0 0 8px; font-size: 1rem; }
+  .conclusion p { margin: 0; font-size: 0.88rem; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="viz-root wrap">
+  <header class="top">
+    <div style="margin-bottom:8px;"><a href="index.html" style="color:var(--text-muted); font-size:0.8rem;">&larr; All daily journals</a></div>
+    <h1>Experiment: orb_entry_confirmation_bar</h1>
+    <div class="sub">Skip an ORB entry if the bar immediately after the breakout bar (5 min later) has already reversed back beyond the breakout level. Control = current v4 rules (take every signal). Treatment = the proposed filter.</div>
+    <span class="badge"><span class="dot ready"></span>CONCLUDED — treatment beat control, recommend committing</span>
+  </header>
+
+  <div class="tiles">
+    <div class="tile">
+      <div class="label">Cumulative control P&amp;L</div>
+      <div class="value">+₹249</div>
+      <div class="note">current rules (no filter) — 5 day(s) recorded</div>
+    </div>
+    <div class="tile">
+      <div class="label">Cumulative treatment P&amp;L</div>
+      <div class="value">+₹619</div>
+      <div class="note">with the proposed rule applied</div>
+    </div>
+    <div class="tile">
+      <div class="label">Cumulative delta</div>
+      <div class="value" style="color:var(--good);">+₹369</div>
+      <div class="note">Decision reached — treatment ahead, ready for human review</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Day-by-day</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th class="num">Trades</th><th class="num">Skipped</th><th class="num">Control P&amp;L</th><th class="num">Treatment P&amp;L</th><th class="num">Delta</th><th></th></tr></thead>
+      <tbody>
+        <tr><td><a href="STRATEGY-IMPROVEMENT-2026-07-21.html">2026-07-21</a></td><td class="num">7</td><td class="num">3</td><td class="num">+₹397</td><td class="num">+₹492</td><td class="num" style="color:var(--good);">+₹95</td><td><a href="STRATEGY-IMPROVEMENT-2026-07-21.html">detail</a></td></tr>
+<tr><td><a href="STRATEGY-IMPROVEMENT-2026-07-22.html">2026-07-22</a></td><td class="num">1</td><td class="num">0</td><td class="num">+₹332</td><td class="num">+₹332</td><td class="num" style="color:var(--good);">+₹0</td><td><a href="STRATEGY-IMPROVEMENT-2026-07-22.html">detail</a></td></tr>
+<tr><td><a href="STRATEGY-IMPROVEMENT-2026-07-23.html">2026-07-23</a></td><td class="num">0</td><td class="num">0</td><td class="num">+₹0</td><td class="num">+₹0</td><td class="num" style="color:var(--good);">+₹0</td><td><a href="STRATEGY-IMPROVEMENT-2026-07-23.html">detail</a></td></tr>
+<tr><td><a href="STRATEGY-IMPROVEMENT-2026-07-24.html">2026-07-24</a></td><td class="num">0</td><td class="num">0</td><td class="num">+₹0</td><td class="num">+₹0</td><td class="num" style="color:var(--good);">+₹0</td><td><a href="STRATEGY-IMPROVEMENT-2026-07-24.html">detail</a></td></tr>
+<tr><td><a href="STRATEGY-IMPROVEMENT-2026-07-27.html">2026-07-27</a></td><td class="num">11</td><td class="num">5</td><td class="num">₹-479</td><td class="num">₹-205</td><td class="num" style="color:var(--good);">+₹275</td><td><a href="STRATEGY-IMPROVEMENT-2026-07-27.html">detail</a></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <div class="conclusion ready"><h2>✅ Experiment concluded — recommend committing</h2><p>Over 5 trading day(s), the proposed rule beat current rules by <b>₹369</b> (control ₹249 vs treatment ₹619). This meets the 5-day decision threshold set when the experiment was registered. Next step: human review of the day-by-day table below, then commit the rule change to <code>memory/india/TRADING-STRATEGY.md</code> to make it live. This page will not update further — the experiment stopped recording once concluded.</p></div>
+
+  <section>
+    <h2>Decision rule</h2>
+    <p class="lede">Once &gt;= min_days_before_decision real trading days are recorded: if cumulative treatment P&amp;L &gt; cumulative control P&amp;L, ready for human commit to TRADING-STRATEGY.md. If treatment P&amp;L &lt;= control P&amp;L, propose dropping it (move to STRATEGY-PROPOSALS-REJECTED.md) instead of committing. Below min_days, report progress only — no decision either way.</p>
+  </section>
+
+  <footer>
+    Backtest evidence: 81wk/1046-trade backtest: +26.5% to total P&amp;L, holds in both split halves (+39.7% / +18.4%)<br>
+    Proposal: <code>memory/india/STRATEGY-PROPOSALS.md · 2026-07-21 · dimension orb_entry_confirmation_bar</code><br>
+    Runs automatically every trading day as part of <code>run_journal_update.bat</code>
+    (the same 20:30 IST routine that writes the rest of the daily journal) —
+    no manual step needed. Manual re-run: <code>python scripts/run_experiments.py [YYYY-MM-DD]</code>.
+  </footer>
+</div>
+</body>
+</html>

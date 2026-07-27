@@ -1,0 +1,22 @@
+{
+  "orb_entry_confirmation_bar": {
+    "description": "Skip an ORB entry if the bar immediately after the breakout bar (5 min later) has already reversed back beyond the breakout level. Control = current v4 rules (take every signal). Treatment = the proposed filter.",
+    "proposal_ref": "memory/india/STRATEGY-PROPOSALS.md · 2026-07-21 · dimension orb_entry_confirmation_bar",
+    "backtest_ref": "81wk/1046-trade backtest: +26.5% to total P&L, holds in both split halves (+39.7% / +18.4%)",
+    "started": "2026-07-21",
+    "status": "concluded_ready_to_commit",
+    "min_days_before_decision": 5,
+    "decision_rule": "Once >= min_days_before_decision real trading days are recorded: if cumulative treatment P&L > cumulative control P&L, ready for human commit to TRADING-STRATEGY.md. If treatment P&L <= control P&L, propose dropping it (move to STRATEGY-PROPOSALS-REJECTED.md) instead of committing. Below min_days, report progress only — no decision either way."
+  },
+  "rsi_overbought_entry": {
+    "engine": "rsi_overbought",
+    "description": "Skip an ORB entry taken at extreme RSI (long >= 80 / short <= 20) that has NO supporting catalyst (news that backs the trade's direction). Catalyst-aware: extreme-RSI entries WITH a supporting catalyst are kept. Control = current v4 rules (take every signal). Treatment = the catalyst-aware skip.",
+    "proposal_ref": "memory/india/STRATEGY-PROPOSALS.md · 2026-07-27 · dimension rsi_overbought_entry",
+    "backtest_ref": "No backtest — live-only discovery from the 2026-07-27 recommendation review (journal/india/FINDINGS-2026-07-27.md, N=7-11, confounded). This experiment IS the evidence-gathering; no prior offline validation exists.",
+    "catalyst_note": "The core question is the CATALYST correlation, not RSI alone: 2026-07-27 showed RSI-extreme entries with a supporting catalyst (CHOLAFIN, RSI 85, Q1 +21%) won, while RSI-extreme entries without one (ABFRL/TCS/HCLTECH) lost. Catalyst polarity comes from journal/india/catalysts.jsonl, populated by the daily research pass; the per-day page reports the catalyst-supported vs catalyst-less split explicitly. If catalysts.jsonl stops being maintained, unknown=none (conservative) and the treatment degrades toward RSI-only — watch the 'catalyst source' coverage before trusting a decision.",
+    "started": "2026-07-27",
+    "status": "running",
+    "min_days_before_decision": 10,
+    "decision_rule": "Once >= min_days_before_decision real trading days are recorded: if cumulative treatment P&L > cumulative control P&L AND the catalyst-supported vs catalyst-less split on RSI-extreme entries is directionally consistent (supported outperforms unsupported), ready for human review + TRADING-STRATEGY.md commit. Otherwise propose dropping (move to STRATEGY-PROPOSALS-REJECTED.md). Below min_days, report progress only. Higher min_days (10) than confirmation-bar because there was no offline backtest — all evidence is being gathered live."
+  }
+}

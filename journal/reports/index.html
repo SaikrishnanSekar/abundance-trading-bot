@@ -72,6 +72,10 @@
   .pill.quiet { color: var(--text-muted); background: color-mix(in srgb, var(--text-muted) 16%, transparent); }
   .pill.has-signals { color: var(--warning); background: color-mix(in srgb, var(--warning) 18%, transparent); }
   .pill.has-trades { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); }
+  .pill.critical { color: var(--critical); background: color-mix(in srgb, var(--critical) 16%, transparent); }
+  .exp-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; font-size: 0.85rem; }
+  .exp-card .exp-title { font-weight: 600; margin-right: 8px; }
+  .exp-card .exp-desc { color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px; }
   footer { border-top: 1px solid var(--border); margin-top: 30px; padding-top: 14px; font-size: 0.76rem; color: var(--text-muted); }
   footer code { color: var(--text-secondary); }
   .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0 24px; }
@@ -86,14 +90,14 @@
 <div class="viz-root wrap">
   <header class="top">
     <h1>Journal Index — Abundance Trading Bot</h1>
-    <div class="sub">2 daily report(s) on file. Click any date to open that day's journal.</div>
+    <div class="sub">5 daily report(s) on file. Click any date to open that day's journal.</div>
   </header>
 
   <div class="tiles">
     <div class="tile">
       <div class="label">Cumulative P&amp;L (net of Dhan costs)</div>
-      <div class="value" style="color:var(--good);">+₹743</div>
-      <div class="note">v4 trial, 2026-07-20 → 2026-07-21, 7 tracked recommendation(s)</div>
+      <div class="value" style="color:var(--good);">+₹729</div>
+      <div class="note">v4 trial, 2026-07-20 → 2026-07-24, 8 tracked recommendation(s)</div>
     </div>
   </div>
 
@@ -102,6 +106,13 @@
     <span class="item"><span class="dot has-signals"></span>Buy signal(s) fired</span>
     <span class="item"><span class="dot has-trades"></span>Live trade(s) placed</span>
   </div>
+
+  <section>
+    <h2>Running experiments</h2>
+    <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:12px;">Controlled tests of proposed strategy tweaks — see <code>journal/india/experiments/registry.json</code>. Each is confirmed against real daily trades before a commit/drop decision.</p>
+    <div class="exp-card"><span class="exp-title">orb_entry_confirmation_bar</span><span class="pill has-trades">ready to commit</span> <a href="EXPERIMENT-orb_entry_confirmation_bar.html">scoreboard</a><div class="exp-desc">Skip an ORB entry if the bar immediately after the breakout bar (5 min later) has already reversed back beyond the breakout level. Control = current v4 rules (take every signal). Treatment = the proposed filter. — cumulative delta so far: +₹369 over 5 day(s)</div></div>
+<div class="exp-card"><span class="exp-title">rsi_overbought_entry</span><span class="pill has-signals">running (1/10 days)</span> <a href="EXPERIMENT-rsi_overbought_entry.html">scoreboard</a><div class="exp-desc">Skip an ORB entry taken at extreme RSI (long >= 80 / short <= 20) that has NO supporting catalyst (news that backs the trade's direction). Catalyst-aware: extreme-RSI entries WITH a supporting catalyst are kept. Control = current v4 rules (take every signal). Treatment = the catalyst-aware skip. — cumulative delta so far: +₹899 over 1 day(s)</div></div>
+  </section>
 
   <div class="months">
     <div class="month">
@@ -112,7 +123,7 @@
 <tr><td class="pad"></td><td class="pad"></td><td class="day no-report"><span class="daynum">1</span></td><td class="day no-report"><span class="daynum">2</span></td><td class="day no-report"><span class="daynum">3</span></td><td class="day no-report"><span class="daynum">4</span></td><td class="day no-report"><span class="daynum">5</span></td></tr>
 <tr><td class="day no-report"><span class="daynum">6</span></td><td class="day no-report"><span class="daynum">7</span></td><td class="day no-report"><span class="daynum">8</span></td><td class="day no-report"><span class="daynum">9</span></td><td class="day no-report"><span class="daynum">10</span></td><td class="day no-report"><span class="daynum">11</span></td><td class="day no-report"><span class="daynum">12</span></td></tr>
 <tr><td class="day no-report"><span class="daynum">13</span></td><td class="day no-report"><span class="daynum">14</span></td><td class="day no-report"><span class="daynum">15</span></td><td class="day no-report"><span class="daynum">16</span></td><td class="day no-report"><span class="daynum">17</span></td><td class="day no-report"><span class="daynum">18</span></td><td class="day no-report"><span class="daynum">19</span></td></tr>
-<tr><td class="day has-report quiet"><a href="DAILY-2026-07-20.html" title="0 buy signals · Observation Mode Day 1/3 · 3 ops findings (feed outage, silent task death, proposal-check.sh bug fixed)"><span class="daynum">20</span><span class="daydot"></span></a></td><td class="day has-report has-signals"><a href="DAILY-2026-07-21.html" title="7 real ORB recommendations, resolved end-to-end via Yahoo fill: 4 win / 3 loss, net +₹743 (cum. +₹4,667) · Observation Mode Day 2/3"><span class="daynum">21</span><span class="daydot"></span></a></td><td class="day no-report"><span class="daynum">22</span></td><td class="day no-report"><span class="daynum">23</span></td><td class="day no-report"><span class="daynum">24</span></td><td class="day no-report"><span class="daynum">25</span></td><td class="day no-report"><span class="daynum">26</span></td></tr>
+<tr><td class="day has-report quiet"><a href="DAILY-2026-07-20.html" title="0 buy signals · Observation Mode Day 1/3 · 3 ops findings (feed outage, silent task death, proposal-check.sh bug fixed)"><span class="daynum">20</span><span class="daydot"></span></a></td><td class="day has-report has-signals"><a href="DAILY-2026-07-21.html" title="7 real ORB recommendations, resolved via the actual trailing-stop rule: 2 win / 5 loss, net +₹397 (v4-trial cumulative +₹397) · Observation Mode Day 2/3"><span class="daynum">21</span><span class="daydot"></span></a></td><td class="day has-report has-signals"><a href="DAILY-2026-07-22.html" title="Machine off most of the day (11:27-22:47) - 1 real ORB recommendation before the outage, WIN +Rs332 - Observation Mode Day 3/3, backfilled + graded this evening"><span class="daynum">22</span><span class="daydot"></span></a></td><td class="day has-report quiet"><a href="DAILY-2026-07-23.html" title="Near-total outage - only 1 scan cycle ran all day, 5+ hours after close. 0 real recommendations. Full-universe backtest shows 7 signals the market actually offered (+Rs597 combined w/ 07-22)."><span class="daynum">23</span><span class="daydot"></span></a></td><td class="day has-report quiet"><a href="DAILY-2026-07-24.html" title="4th session with a market-hours compute gap. KotakFeed has not logged a successful start since 2026-07-22 22:47 - today's catch-up attempt (18:55 IST) was explicitly rejected by Task Scheduler (0x800710E0, ALREADY_RUNNING). 0 real recommendations. Full-universe backtest shows 5 signals the market offered, net -Rs1,582 (20% win rate)."><span class="daynum">24</span><span class="daydot"></span></a></td><td class="day no-report"><span class="daynum">25</span></td><td class="day no-report"><span class="daynum">26</span></td></tr>
 <tr><td class="day no-report"><span class="daynum">27</span></td><td class="day no-report"><span class="daynum">28</span></td><td class="day no-report"><span class="daynum">29</span></td><td class="day no-report"><span class="daynum">30</span></td><td class="day no-report"><span class="daynum">31</span></td><td class="pad"></td><td class="pad"></td></tr>
 </tbody>
 </table>
@@ -125,7 +136,10 @@
     <table class="list">
       <thead><tr><th>Date</th><th>Regime</th><th>Status</th><th class="num">Buy sig.</th><th class="num">Live trades</th><th class="num">Net P&amp;L</th><th>Headline</th></tr></thead>
       <tbody>
-        <tr><td><a href="DAILY-2026-07-21.html">2026-07-21</a></td><td>NEUTRAL</td><td><span class="pill has-signals">SIGNALS</span></td><td class="num">7</td><td class="num">0</td><td class="num" style="color:var(--good);">+₹743</td><td class="headline">7 real ORB recommendations, resolved end-to-end via Yahoo fill: 4 win / 3 loss, net +₹743 (cum. +₹4,667) · Observation Mode Day 2/3</td></tr>
+        <tr><td><a href="DAILY-2026-07-24.html">2026-07-24</a></td><td>NEUTRAL</td><td><span class="pill quiet">QUIET</span></td><td class="num">0</td><td class="num">0</td><td class="num" style="color:var(--good);">+₹0</td><td class="headline">4th session with a market-hours compute gap. KotakFeed has not logged a successful start since 2026-07-22 22:47 - today's catch-up attempt (18:55 IST) was explicitly rejected by Task Scheduler (0x800710E0, ALREADY_RUNNING). 0 real recommendations. Full-universe backtest shows 5 signals the market offered, net -Rs1,582 (20% win rate).</td></tr>
+<tr><td><a href="DAILY-2026-07-23.html">2026-07-23</a></td><td>NEUTRAL</td><td><span class="pill quiet">QUIET</span></td><td class="num">0</td><td class="num">0</td><td class="num" style="color:var(--good);">+₹0</td><td class="headline">Near-total outage - only 1 scan cycle ran all day, 5+ hours after close. 0 real recommendations. Full-universe backtest shows 7 signals the market actually offered (+Rs597 combined w/ 07-22).</td></tr>
+<tr><td><a href="DAILY-2026-07-22.html">2026-07-22</a></td><td>BULLISH</td><td><span class="pill has-signals">SIGNALS</span></td><td class="num">1</td><td class="num">0</td><td class="num" style="color:var(--good);">+₹332</td><td class="headline">Machine off most of the day (11:27-22:47) - 1 real ORB recommendation before the outage, WIN +Rs332 - Observation Mode Day 3/3, backfilled + graded this evening</td></tr>
+<tr><td><a href="DAILY-2026-07-21.html">2026-07-21</a></td><td>NEUTRAL</td><td><span class="pill has-signals">SIGNALS</span></td><td class="num">7</td><td class="num">0</td><td class="num" style="color:var(--good);">+₹397</td><td class="headline">7 real ORB recommendations, resolved via the actual trailing-stop rule: 2 win / 5 loss, net +₹397 (v4-trial cumulative +₹397) · Observation Mode Day 2/3</td></tr>
 <tr><td><a href="DAILY-2026-07-20.html">2026-07-20</a></td><td>NEUTRAL</td><td><span class="pill quiet">QUIET</span></td><td class="num">0</td><td class="num">0</td><td class="num" style="color:var(--good);">+₹0</td><td class="headline">0 buy signals · Observation Mode Day 1/3 · 3 ops findings (feed outage, silent task death, proposal-check.sh bug fixed)</td></tr>
       </tbody>
     </table>
