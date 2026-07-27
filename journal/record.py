@@ -70,7 +70,17 @@ def log_orb_proposal(pending: dict, now: datetime | None = None) -> str | None:
     now = now or datetime.now(IST)
     rs = current_ruleset()
     date_iso = now.date().isoformat()
+    if pending.get("entry") in (None, 0, 0.0):
+        raise ValueError(
+            f"log_orb_proposal: invalid entry price {pending.get('entry')!r} for "
+            f"{pending.get('sym')} — cannot compute target/stop ratio (divide by entry)."
+        )
     entry = float(pending["entry"])
+    if entry <= 0:
+        raise ValueError(
+            f"log_orb_proposal: non-positive entry price {entry} for "
+            f"{pending.get('sym')} — cannot compute target/stop ratio."
+        )
     sign = 1.0 if pending["side"] == "LONG" else -1.0
     target_pct = sign * (float(pending["target1"]) - entry) / entry * 100.0
     stop_pct = sign * (float(pending["stop"]) - entry) / entry * 100.0

@@ -463,7 +463,10 @@ def check_pdh(today_bars, bars, today_str):
             break
 
     if entry_bar is None:
-        # No pullback yet
+        # No pullback yet. The planned entry is the PDH level itself — that is
+        # where the pullback trigger (close back above PDH) fires. Report it as
+        # the entry so the recommendation shows a real price, never None (which
+        # the Telegram renderer would coerce to a misleading "Entry 0.00").
         near_pdh = cur_price <= pdh * 1.006
         return {
             "strategy":  "PDH",
@@ -472,7 +475,7 @@ def check_pdh(today_bars, bars, today_str):
             "pdh":       pdh,
             "gap_pct":   gap_pct,
             "price":     cur_price,
-            "entry":     None,
+            "entry":     pdh,
             "stop":      stop,
             "t1":        t1,
             "t2":        t2,
@@ -786,7 +789,7 @@ def scan():
         _tg_lines.append("")
         _tg_lines.append(f"*CONFLUENCE — BB Squeeze + ORB ({len(confluence)} signal(s)):*")
         for r in sorted(confluence, key=lambda x: -x.get("n_sq", 0)):
-            e  = r.get("entry") or 0
+            e  = r.get("entry") or r.get("price") or 0  # never render a fake 0.00 entry
             t1 = r.get("t1")    or 0
             t2 = r.get("t2")
             sl = r.get("stop")  or 0
@@ -801,7 +804,7 @@ def scan():
         _tg_lines.append("")
         _tg_lines.append(f"*BUY NOW ({len(active_buys)} signal(s)):*")
         for r in sorted(active_buys, key=lambda x: x["strategy"]):
-            e  = r.get("entry") or 0
+            e  = r.get("entry") or r.get("price") or 0  # never render a fake 0.00 entry
             t1 = r.get("t1")    or 0
             t2 = r.get("t2")
             sl = r.get("stop")  or 0
