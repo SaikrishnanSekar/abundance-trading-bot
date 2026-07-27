@@ -1,6 +1,9 @@
 # Routine: India — 60-Min Pulse (hourly 09:30–15:10 IST)
 
-Lightweight. No LLM calls if avoidable. No new entries proposed here.
+Lightweight on position management (no LLM calls there if avoidable). No new entries
+proposed here. **One bounded LLM task IS run every pulse now: just-in-time catalyst
+research for tickers that signalled since the last pulse (step 9)** — this is how
+catalysts are collected hourly across the session.
 
 ## Authority reminder
 
@@ -62,7 +65,22 @@ All other actions require a proposal + human YES.
    - Stop the routine immediately.
    If `CURRENT_EQUITY > peak_equity`, update `peak_equity` in LIVE-PULSE.md (equity high-water mark).
 8. Update `memory/india/LIVE-PULSE.md` snapshot (include `peak_equity:` field every write).
-9. Commit + push only if LIVE-PULSE.md, a new SL order was placed, DAY-HALT, or KILL_SWITCH changed.
+9. **Just-in-time catalysts (HOURLY — cover every signal since the last pulse).**
+   This is the hourly catalyst sweep. A name that first signals at 09:40 is researched at
+   the ~10:30 pulse; one that appears at 10:20 is picked up at 10:30; and so on each hour.
+   **Already-covered tickers are skipped** (they're no longer "pending"), so each pulse only
+   researches what is NEW this hour — the LLM cost stays bounded (usually 0–3 names).
+   1. `python scripts/pending_catalysts.py $(date +%F) --json` → tickers that signalled
+      today but still have no catalyst.
+   2. For EACH, research online (`WebSearch`, or `bash scripts/news.sh symbol <SYM>`):
+      last ~48h company news / earnings / block deals + a source. Classify polarity
+      **direction-agnostic**: `positive` / `negative` / `none`.
+   3. `echo '[{"ticker":"...","polarity":"...","summary":"...","source":"..."}]' | python scripts/build_catalysts.py --date $(date +%F) --stdin`.
+   The next scan cycle tags those signals 🟢CAT+ / 🔴CAT− / ⚪CAT? automatically —
+   **advisory only, never gates an entry**. Do NOT fabricate; keys-down / no-news → omit
+   (scanner shows ⚪CAT n/a). No `.env`.
+10. Commit + push only if LIVE-PULSE.md, a new SL order was placed, DAY-HALT, KILL_SWITCH,
+    or `journal/india/catalysts.jsonl` changed.
 
 ## Output
 

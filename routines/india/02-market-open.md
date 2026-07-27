@@ -13,23 +13,9 @@ First 5 minutes of opening auction are volatile — we wait till 09:20 before pr
 3. For each approved ticker:
    - `bash scripts/dhan.sh quote SYM NSE_EQ`
    - Check: price action in first 5 min, volume > 1.5x prev-day average if known, clear breakout or pullback setup.
-4. **Just-in-time catalysts (cover every signal, any of the 149 — not a fixed list).**
-   Fetch catalysts for whatever actually signalled today but has none on file yet:
-   1. `python scripts/pending_catalysts.py $(date +%F) --json` → `[{ticker,side,ts}, ...]`.
-   2. For EACH ticker, research its catalyst online — `WebSearch`, or
-      `bash scripts/news.sh symbol <SYM>` — company-specific news / earnings / block
-      deals in the last ~48h, with a source. Classify polarity **direction-agnostic**:
-      `positive` / `negative` / `none`.
-   3. Write in one shot (idempotent):
-      ```
-      echo '[{"ticker":"LODHA","polarity":"positive","summary":"Q1 PAT +103% beat","source":"<url>"}]' \
-        | python scripts/build_catalysts.py --date $(date +%F) --stdin
-      ```
-   4. `git add journal/india/catalysts.jsonl` (committed in step 6 below).
-   The next scan cycle tags those signals 🟢CAT+ / 🔴CAT− / ⚪CAT? automatically —
-   **advisory only, never gates an entry**. Do NOT fabricate polarities; if research
-   is unavailable (keys down / no news), leave the ticker out (scanner shows ⚪CAT n/a).
-   No `.env`.
+4. **Catalysts:** the just-in-time catalyst research runs **hourly in `05-pulse.md` (step 9)**,
+   not here — the opening range isn't complete until 09:30, so few signals exist at 09:20.
+   If any signal already carries a catalyst tag from a prior pulse, factor it in below.
 5. Pick the strongest setup (at most 1 this pass) — prefer a setup whose catalyst is
    supportive (🟢 for a long / 🔴 for a short) over ⚪/contrary ones. Call `/trade-india`
    logic for that ticker — which means: **propose** the order to Telegram and stop.
