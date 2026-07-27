@@ -28,12 +28,11 @@ def esc(s: str) -> str:
 
 
 IST = timezone(timedelta(hours=5, minutes=30))
-SQUARE_OFF_TIME = "15:15"  # MIS must be flat by 15:15 IST — memory/india/TRADING-STRATEGY.md
-
 ROOT = Path(__file__).resolve().parent.parent
 TIMELINE_FILE = ROOT / "journal" / "india" / "signal_timeline.jsonl"
 REPORTS_DIR = ROOT / "journal" / "reports"
 YAHOO_CACHE_DIR = ROOT / "data" / "yahoo_intraday_fill_cache"
+RECS_FILE_FOR_WIDTH = ROOT / "journal" / "india" / "recommendations.jsonl"
 
 # Rs 37,500 notional/position — the approved ORB v4 trial sizing (0.75x, see
 # memory/india/PROJECT-CONTEXT.md). Applied uniformly to every tracked signal
@@ -49,23 +48,30 @@ NOTIONAL_PER_TRADE = 37500.0
 CUMULATIVE_SINCE = "2026-07-20"
 
 CLOSE_REASON_LABEL = {
-    "TARGET": "Target hit",
-    "STOP": "Stop hit",
-    "EOD": "Closed — market close (15:15 square-off)",
+    "TRAIL_STOP": "Trailing stop hit",
+    "EOD": "Closed — market close (15:10 square-off)",
 }
 
 
+YAHOO_CACHE_VERSION = 2  # bump when the cached bar schema changes (v2: full OHLC, not close-only)
+
+
 def fetch_yahoo_intraday(ticker: str, date_str: str) -> list[dict]:
-    """5-min bars for one ticker/date from Yahoo, used to fill in whatever
-    the live scanner missed (it only ran 09:30-10:20 today, but the trading
-    day runs to 15:30 — every recommendation must resolve to target/stop/
-    market-close, never just 'we stopped watching'). Cached to disk since
-    the same ticker/date is re-fetched every time this script re-runs.
+    """Full-day 5-min OHLC bars for one ticker/date from Yahoo — used both to
+    fill in whatever the live scanner missed AND to replay the actual v4
+    trailing-stop execution (needs high/low for intrabar stop hits, not just
+    close). Cached to disk since the same ticker/date is re-fetched every
+    time this script re-runs. "price" is kept as an alias for close so
+    existing chart/table code that only cares about the close series still
+    works unchanged.
     """
     YAHOO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache_file = YAHOO_CACHE_DIR / f"{ticker}_{date_str}.json"
     if cache_file.exists():
-        return json.loads(cache_file.read_text(encoding="utf-8"))
+        cached = json.loads(cache_file.read_text(encoding="utf-8"))
+        if isinstance(cached, dict) and cached.get("_v") == YAHOO_CACHE_VERSION:
+            return cached["bars"]
+        # stale (pre-OHLC) cache from an earlier version — refetch below
 
     url = f"https://query2.finance.yahoo.com/v8/finance/chart/{ticker}.NS?interval=5m&range=60d"
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
@@ -74,21 +80,47 @@ def fetch_yahoo_intraday(ticker: str, date_str: str) -> list[dict]:
             data = json.loads(resp.read())
         result = data["chart"]["result"][0]
         ts = result["timestamp"]
-        closes = result["indicators"]["quote"][0]["close"]
+        quote = result["indicators"]["quote"][0]
         bars = []
-        for t, c in zip(ts, closes):
+        for i, t in enumerate(ts):
+            c = quote["close"][i]
             if c is None:
                 continue
             dt = datetime.fromtimestamp(t, IST)
             if dt.date().isoformat() != date_str:
                 continue
-            bars.append({"time": dt.strftime("%H:%M"), "price": round(float(c), 2)})
+            o, h, l = quote["open"][i], quote["high"][i], quote["low"][i]
+            v = quote.get("volume", [None] * len(ts))[i]
+            bars.append({
+                "time": dt.strftime("%H:%M"),
+                "open": round(float(o if o is not None else c), 2),
+                "high": round(float(h if h is not None else c), 2),
+                "low": round(float(l if l is not None else c), 2),
+                "close": round(float(c), 2),
+                "price": round(float(c), 2),
+                "volume": int(v) if v is not None else 0,
+            })
     except Exception as e:
         print(f"  [yahoo-fill] WARNING: fetch failed for {ticker} {date_str}: {e}")
         bars = []
 
-    cache_file.write_text(json.dumps(bars), encoding="utf-8")
+    cache_file.write_text(json.dumps({"_v": YAHOO_CACHE_VERSION, "bars": bars}), encoding="utf-8")
     return bars
+
+
+def get_orb_width_pct(ticker: str, date_str: str) -> float | None:
+    """Reads the recommendation's own orb_width_pct (same field
+    journal/orb_autopsy.py uses) so the trail-stop replay uses the exact
+    same width the live signal was actually generated with."""
+    if not RECS_FILE_FOR_WIDTH.exists():
+        return None
+    for line in RECS_FILE_FOR_WIDTH.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        if r.get("ticker") == ticker and r.get("entry_date") == date_str:
+            return r.get("signals", {}).get("orb_width_pct")
+    return None
 
 
 def load_day(date_str: str) -> list[dict]:
@@ -161,68 +193,75 @@ def minutes_since(t0: str, t1: str) -> int:
     return (h1 * 60 + m1) - (h0 * 60 + m0)
 
 
-def _scan_for_hit(bars: list[dict], stop, t1, t2, sign: float):
-    """Walk bars in order, stop before target on the same bar (conservative,
-    matches this project's existing journal convention). Returns
-    (close_reason, time, price) for the first hit, or None if none hit."""
-    for c in bars:
-        price = c.get("price")
-        if price is None:
-            continue
-        if stop is not None and sign * (price - stop) <= 0:
-            return "STOP", c["time"], stop
-        if t2 is not None and sign * (price - t2) >= 0:
-            return "TARGET", c["time"], t2
-        if t1 is not None and sign * (price - t1) >= 0:
-            return "TARGET", c["time"], t1
-    return None
+def replay_trail_stop(bars: list[dict], entry_idx: int, entry_price: float, side: str, width: float):
+    """The ACTUAL v4 execution rule — NOT a fixed target. Mirrors
+    journal/orb_autopsy.py's replay_v4() exactly: stop trails 1x width
+    behind the best close achieved since entry (tighten-only), flat at
+    15:10 IST. There is no T1/T2 exit — those fields in a recommendation
+    are informational only (shown to the human approving the trade), the
+    live system trails. Returns (exit_reason, exit_time, exit_price,
+    bars_used) walking forward from entry_idx+1."""
+    sign = 1 if side == "LONG" else -1
+    stop = entry_price - sign * width
+    best = bars[entry_idx]["close"]
+    used = []
+    for j in range(entry_idx + 1, len(bars)):
+        b = bars[j]
+        used.append(b)
+        if hhmm_str(b["time"]) >= 1510:
+            return "EOD", b["time"], b["open"], used
+        hit = b["low"] <= stop if side == "LONG" else b["high"] >= stop
+        if hit:
+            return "TRAIL_STOP", b["time"], stop, used
+        best = max(best, b["close"]) if side == "LONG" else min(best, b["close"])
+        cand = best - sign * width
+        stop = max(stop, cand) if side == "LONG" else min(stop, cand)
+    if used:
+        return "EOD", used[-1]["time"], used[-1]["close"], used
+    return "EOD", bars[entry_idx]["time"], bars[entry_idx]["close"], []
+
+
+def hhmm_str(t: str) -> int:
+    h, m = t.split(":")
+    return int(h) * 100 + int(m)
 
 
 def resolve_close(ticker: str, date_str: str, checkpoints: list[dict], direction: str) -> tuple[str, str, float, list[dict]]:
-    """Every recommendation gets a real close — target, stop, or the 15:15
-    MIS square-off — never just 'we stopped watching'. Checks the live
-    scanner's own checkpoints first; if those run out before the day
-    actually ends, fetches Yahoo 5-min bars to fill the rest of the session
-    and keeps checking. Returns (close_reason, exit_time, exit_price,
-    extra_checkpoints) — extra_checkpoints (Yahoo-sourced, tagged in notes)
-    should be appended to the lifecycle's checkpoint list for the chart/table.
+    """Every recommendation gets a real close — trailing-stop hit or the
+    15:10 EOD square-off — never just 'we stopped watching'. Uses Yahoo's
+    full-day 5-min OHLC bars (not the live scanner's sparse 10-min
+    checkpoints) to run the SAME trail-stop replay journal/orb_autopsy.py
+    uses, anchored at the real recorded entry time/price from
+    recommendations.jsonl. Returns (close_reason, exit_time, exit_price,
+    extra_checkpoints) — extra_checkpoints (Yahoo-sourced bars actually
+    used in the replay, tagged in notes) get appended to the lifecycle's
+    checkpoint list for the chart/table.
     """
-    sign = 1 if direction == "LONG" else -1
-    stop, t1, t2 = checkpoints[0].get("stop"), checkpoints[0].get("t1"), checkpoints[0].get("t2")
+    entry_price = checkpoints[0].get("entry")
+    entry_hhmm = checkpoints[0]["time"]
+    width_pct = get_orb_width_pct(ticker, date_str)
+    bars = fetch_yahoo_intraday(ticker, date_str)
 
-    hit = _scan_for_hit(checkpoints, stop, t1, t2, sign)
-    if hit:
-        return hit[0], hit[1], hit[2], []
+    if not bars or entry_price is None or width_pct is None:
+        last = checkpoints[-1]
+        return "EOD", last["time"], last.get("price"), []
 
-    last = checkpoints[-1]
-    if last["time"] >= SQUARE_OFF_TIME:
-        return "EOD", last["time"], last["price"], []
+    width = entry_price * abs(width_pct) / 100
+    # Anchor the entry bar: the Yahoo bar at/just before the recorded entry
+    # time whose close is closest to the recorded entry price.
+    candidates = [b for b in bars if b["time"] <= entry_hhmm]
+    if not candidates:
+        candidates = bars[:1]
+    entry_bar = min(candidates, key=lambda b: abs(b["close"] - entry_price))
+    entry_idx = bars.index(entry_bar)
 
-    # Live scanner stopped early — fill the rest of the session from Yahoo.
-    yahoo_bars = fetch_yahoo_intraday(ticker, date_str)
-    fill_bars = [
-        {"time": b["time"], "price": b["price"], "notes": "[Yahoo fill]",
-         "stop": stop, "t1": t1, "t2": t2}
-        for b in yahoo_bars if b["time"] > last["time"]
+    reason, exit_time, exit_price, used = replay_trail_stop(bars, entry_idx, entry_price, direction, width)
+    extra = [
+        {"time": b["time"], "price": b["close"], "notes": "[Yahoo fill]",
+         "stop": None, "t1": None, "t2": None}
+        for b in used
     ]
-    if not fill_bars:
-        # No Yahoo data available either (illiquid/delisted) — close at the
-        # last real price we have rather than leaving it unresolved.
-        return "EOD", last["time"], last["price"], []
-
-    hit = _scan_for_hit(fill_bars, stop, t1, t2, sign)
-    if hit:
-        used = [b for b in fill_bars if b["time"] <= hit[1]]
-        return hit[0], hit[1], hit[2], used
-
-    square_off_bars = [b for b in fill_bars if b["time"] <= SQUARE_OFF_TIME]
-    if square_off_bars:
-        last_fill = square_off_bars[-1]
-        return "EOD", last_fill["time"], last_fill["price"], square_off_bars
-    # Yahoo data ends before 15:15 too (e.g. today, still mid-session) —
-    # close at whatever the last available price is.
-    last_fill = fill_bars[-1]
-    return "EOD", last_fill["time"], last_fill["price"], fill_bars
+    return reason, exit_time, exit_price, extra
 
 
 def compute_pnl(entry_price: float, exit_price: float, direction: str) -> dict:
@@ -254,6 +293,14 @@ def build_lifecycles(records: list[dict]) -> list[dict]:
 
     if not records:
         return []
+
+    # A CONFLUENCE signal (BB-squeeze + ORB firing together) shares the ORB
+    # entry — it is a tag on that trade, not a second position. If the same
+    # ticker also has an ORB group, drop the CONFLUENCE group so the trade is
+    # counted once (else its P&L is double-booked; COFORGE, 2026-07-27).
+    orb_tickers = {t for (t, s) in groups if s == "ORB"}
+    groups = {k: v for k, v in groups.items()
+              if not (k[1] == "CONFLUENCE" and k[0] in orb_tickers)}
 
     lifecycles = []
     for (ticker, strat), rows in groups.items():
@@ -292,7 +339,7 @@ def render_svg(lc: dict) -> str:
     t0 = cps[0]["time"]
     xs = [minutes_since(t0, c["time"]) for c in cps]
     prices = [c["price"] for c in cps if c["price"] is not None]
-    ref_vals = [v for v in (lc["entry_price"], lc["stop"], lc["t1"], lc["t2"]) if v is not None]
+    ref_vals = [v for v in (lc["entry_price"], lc["stop"], lc["exit_price"]) if v is not None]
     all_vals = prices + ref_vals
     if not all_vals or max(xs) == 0:
         return ""
@@ -318,8 +365,7 @@ def render_svg(lc: dict) -> str:
         parts.append(f'<text x="{W-PR+4}" y="{y+3:.1f}" font-size="9" fill="var(--text-muted)">{label}</text>')
 
     ref_line(lc["entry_price"], "Entry", "var(--baseline)", dash=True)
-    ref_line(lc["t1"], "T1", "var(--good)")
-    ref_line(lc["stop"], "Stop", "var(--critical)")
+    ref_line(lc["stop"], "Initial stop", "var(--critical)", dash=True)
 
     pts = [(X(x), Y(c["price"])) for x, c in zip(xs, cps) if c["price"] is not None]
     if len(pts) >= 2:
@@ -378,7 +424,6 @@ def render_card(lc: dict) -> str:
     svg = render_svg(lc)
     ep = f'{lc["entry_price"]:.2f}' if lc["entry_price"] is not None else "-"
     sp = f'{lc["stop"]:.2f}' if lc["stop"] is not None else "-"
-    t1 = f'{lc["t1"]:.2f}' if lc["t1"] is not None else "-"
     xp = f'{lc["exit_price"]:.2f}' if lc["exit_price"] is not None else "-"
     pnl = lc["pnl"]
     if pnl:
@@ -402,8 +447,7 @@ def render_card(lc: dict) -> str:
       </div>
       <div class="track-levels">
         <span>Entry <b>{ep}</b></span>
-        <span>Target <b>{t1}</b></span>
-        <span>Stop <b>{sp}</b></span>
+        <span>Initial stop <b>{sp}</b> <span style="color:var(--text-muted);">(trails — no fixed target in v4)</span></span>
         <span>Invested <b>{invested_str}</b></span>
       </div>
       <div class="track-levels">
@@ -489,8 +533,7 @@ def build_tracker_panel_html(date_str: str) -> tuple[str, dict]:
     n_win = sum(1 for lc in lifecycles if lc["outcome"] == "WIN")
     n_loss = sum(1 for lc in lifecycles if lc["outcome"] == "LOSS")
     n_unknown = sum(1 for lc in lifecycles if lc["outcome"] == "UNKNOWN")
-    n_target = sum(1 for lc in lifecycles if lc["close_reason"] == "TARGET")
-    n_stop = sum(1 for lc in lifecycles if lc["close_reason"] == "STOP")
+    n_stop = sum(1 for lc in lifecycles if lc["close_reason"] == "TRAIL_STOP")
     n_eod = sum(1 for lc in lifecycles if lc["close_reason"] == "EOD")
     n_yahoo_filled = sum(1 for lc in lifecycles if any("[Yahoo fill]" in (c.get("notes") or "") for c in lc["checkpoints"]))
     total_pnl = sum(lc["pnl"]["pnl_rs"] for lc in lifecycles if lc["pnl"])
@@ -519,13 +562,13 @@ def build_tracker_panel_html(date_str: str) -> tuple[str, dict]:
       <div class="tile">
         <div class="label">Win / loss</div>
         <div class="value">{n_win} / {n_loss}{f' <span style="font-size:0.9rem;color:var(--text-muted);">(+{n_unknown} no entry data)</span>' if n_unknown else ''}</div>
-        <div class="note">{n_target} target · {n_stop} stop · {n_eod} market-close{f' ({n_yahoo_filled} via Yahoo fill)' if n_yahoo_filled else ''}</div>
+        <div class="note">{n_stop} trailing-stop hit · {n_eod} market-close{f' ({n_yahoo_filled} via Yahoo fill)' if n_yahoo_filled else ''}</div>
       </div>
     </div>
     <p style="color:var(--text-muted); font-size:0.76rem; margin:-8px 0 16px;">
       Position sizing: ₹{NOTIONAL_PER_TRADE:,.0f} notional/recommendation (v4 trial sizing, 0.75×) — paper P&amp;L only, no real capital at risk during Observation Mode.
       P&amp;L is net of an approximate Dhan intraday-equity round-trip cost stack (brokerage min(₹20, 0.03%)/leg, STT 0.025% on sell, exchange txn ~0.00325%, SEBI fee, stamp duty 0.003% on buy, 18% GST on brokerage+txn) — see each card's cost breakdown.
-      Every recommendation is closed: at target, at stop, or at the 15:15 IST MIS square-off — never left unresolved. When the live scanner stopped watching before the day ended, the rest of the session is filled in from Yahoo Finance's 5-min bars (marked "[Yahoo fill]" in the checkpoint history) so the true outcome is never just "we stopped looking."
+      Execution model matches the real v4 rule exactly (journal/orb_autopsy.py's replay_v4): trailing stop 1x opening-range-width behind the best close since entry — <b>no fixed target</b>, tighten-only, flat at 15:10 IST. Every recommendation is closed: trailing-stop hit or 15:10 square-off — never left unresolved. Uses Yahoo Finance's full-day 5-min OHLC bars (not the live scanner's sparse 10-min checkpoints) so the replay is accurate regardless of when the live scanner stopped watching.
       A handful may show "no entry data" if their real entry fell inside a known scanner-outage window — excluded from P&amp;L, not counted as a loss.
     </p>"""
     cards_html = kpis + '<div class="track-grid">' + "".join(render_card(lc) for lc in lifecycles) + "</div>"
