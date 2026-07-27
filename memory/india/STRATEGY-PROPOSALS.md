@@ -442,3 +442,41 @@ projects worst-case DD ~10.7%, clear of the kill switch. Slippage: edge survives
 to ~0.075-0.10%/side on 81 weeks; limit orders at breakout price mandatory.
 
 Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.
+
+---
+
+## 2026-07-21 · ORB entry confirmation-bar filter — skip trades that reverse within 5 min
+- dimension: orb_entry_confirmation_bar
+- evidence_n: 1,046 trades (81wk, Upstox 5-min, FINAL v4 config, backtests/orb_weekly_portfolio.py) + split-half robustness check (554 first-half / 492 second-half trades, effect holds independently in both)
+- current_rule: "ORB v4 entry: signal fires and is taken immediately on the breakout bar's close (close beyond ORH/ORL buffer + vol >= 2.0x)."
+- proposed_rule: Add ONE bar of follow-through confirmation before taking the entry: after the breakout bar closes, check bar+1 (the next 5-min bar). If bar+1's close has already reversed back beyond the breakout level (i.e. the breakout already failed within 5 minutes), SKIP the trade entirely rather than entering. If bar+1 confirms (still beyond the level), take the entry as today (no change to entry price, stop, target, or any other v4 parameter). Adds a 5-min delay only to the confirmation check, not to the position's entry price reference.
+- expected_impact: Full-sample backtest: 85/1046 trades (8.1%) would be skipped; those skipped trades have an 18.8% win rate vs 50.9% for the 961 kept trades. Total portfolio P&L over 81 weeks: Rs106,331 -> Rs134,490 (+26.5%). Holds independently in both halves of the sample (first half +39.7%, second half +18.4% — not a single-regime artifact).
+- risk: (a) This is an IN-SAMPLE discovery on the same 81-week dataset already used to select/validate the FINAL config — not a pre-registered IS/OOS test like the original config selection. The split-half check is reassuring (same direction/magnitude in two independent sub-periods) but is not a true held-out OOS validation; recommend treating the first ~10-15 live confirmation-filter decisions as a mini validation window before fully trusting the effect size. (b) Reduces trade frequency ~8%, marginal interaction with bank-the-week (fewer chances to reach +3%/wk, but disproportionately removes the worst trades so should be net neutral-to-positive there too — not separately quantified). (c) Entry-price approximation in the test uses the breakout bar's own close as a stand-in for the exact signal entry price (very close to the real convention but not byte-identical) — recommend the first live implementation double-check this against the actual signal object. (d) Two adjacent ideas (exit-side early cuts on VWAP-rejection and back-inside-box, using the same failure-study factors) were tested and REJECTED — both reduce total P&L (-16.0% and -3.4% respectively) despite looking compelling from raw loss-rate stats alone; full negative-result writeup in RESEARCH-LOG.md 2026-07-21 entry.
+- cooldown_until: 2026-08-04
+- status: PENDING
+
+Evidence: RESEARCH-LOG.md 2026-07-21 (evening) entry — includes the two rejected exit-side ideas for context on why an entry-side filter was tried instead. Reproduce via backtests/orb_weekly_portfolio.py FINAL config + a bar+1 confirmation check on entry_i+1 (ad-hoc test scripts not yet committed to the repo).
+
+Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.
+
+---
+
+## 2026-07-27 · RSI-overbought entry filter — de-prioritise ORB longs at RSI >= 80 without a catalyst
+- dimension: rsi_overbought_entry
+- evidence_n: 7 real scan recommendations (2026-07-27, observation/scan mode — Dhan token expired, none were live fills). BELOW the 5-trade operational-tweak minimum: this is a candidate, not a decision.
+- current_rule: "ORB v4: RSI is an ADVISORY tag only; entries fire on breakout + vol >= 2.0x regardless of RSI level."
+- proposed_rule: When an ORB long fires at RSI >= 80 (short at RSI <= 20) AND no catalyst is logged for the ticket in RESEARCH-LOG, either skip the entry or demote it to WATCH. NOTE: catalyst presence is not auto-detectable in the 149-ticker scan (no per-ticker news call — CLAUDE.md forbids new packages/rate-limited calls in routines), so the automatable form of this rule is RSI-only; the catalyst half stays with the existing manual buy-side gate.
+- expected_impact: On 2026-07-27, ORB longs at RSI >= 80 with no own catalyst (ABFRL 81, HCLTECH 89, TCS 86) all faded intraday; the winner (LODHA) entered at RSI 72 with a Q1 earnings beat. Directional only.
+- risk: (a) N=7, single session, single regime — statistically meaningless on its own; expected noise. (b) CONFOUNDED: CHOLAFIN entered at RSI 85 and finished green; SAIL failed at RSI 72 (weak-Q1 driven, not overbought). Catalyst — not RSI — is the dominant variable, and the scan cannot check catalyst. RSI-overbought is a cheap proxy, not the true signal. (c) A related idea (skip entries that reverse within 5 min — orb_entry_confirmation_bar) is already a running experiment and captures much of the same IT-cluster failure; risk of double-counting. (d) Must NOT be gated until it clears a controlled experiment; today it is surfaced only as a non-gating OB/OS advisory tag in scan_all.py.
+- cooldown_until: 2026-08-10
+- status: PENDING (candidate — accrue evidence before any decision)
+
+Evidence: journal/india/FINDINGS-2026-07-27.md (full per-name what-worked/what-didn't
+review with traced catalysts). Non-gating OB/OS advisory tag shipped to scan_all.py
+check_orb the same day (tests/test_scan_entry_fix.py). To graduate: register as a
+controlled experiment in journal/india/experiments/registry.json (treatment = skip
+RSI>=80 no-catalyst ORB longs) and run daily via run_experiments.py until
+min_days_before_decision, per the Controlled Experiments protocol. No hard rule changed;
+no TRADING-STRATEGY.md edit.
+
+Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.

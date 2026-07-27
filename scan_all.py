@@ -198,16 +198,25 @@ def check_orb(today_bars, bars, fd, avg_day_vol, day_fraction):
 
     # v4 gates: volume only. VWAP/RSI are ADVISORY tags (validated backtest
     # config does not gate on them) — shown in notes, never block ENTRY.
+    # OB/OS = overbought/oversold-at-entry risk flag. 2026-07-27 review: ORB
+    # longs entered at RSI >= 80 with no fresh catalyst faded intraday (see
+    # journal/india/FINDINGS-2026-07-27.md). Advisory only — surfaces the risk,
+    # never blocks the entry. Confounded with catalyst; gating deferred to the
+    # rsi_overbought_entry proposal/experiment.
+    rsi_ob = rsi is not None and rsi >= 80
+    rsi_os = rsi is not None and rsi <= 20
     if close_px > long_entry and not failed_long:
         direction = "LONG"
         gates_ok  = vol_ok
         fails     = (["vol"] if not vol_ok else [])
-        advisory  = (["VWAP-" ] if not vwap_lk else []) + (["RSI-"] if not rsi_lk else [])
+        advisory  = (["VWAP-" ] if not vwap_lk else []) + (["RSI-"] if not rsi_lk else []) \
+                    + (["OB"] if rsi_ob else [])
     elif close_px < short_entry and not failed_short:
         direction = "SHORT"
         gates_ok  = vol_ok
         fails     = (["vol"] if not vol_ok else [])
-        advisory  = (["VWAP-"] if not vwap_sk else []) + (["RSI-"] if not rsi_sk else [])
+        advisory  = (["VWAP-"] if not vwap_sk else []) + (["RSI-"] if not rsi_sk else []) \
+                    + (["OS"] if rsi_os else [])
     else:
         return None
     late = _now_hhmm() > 1130   # v4 entry window ends 11:30 for ORB

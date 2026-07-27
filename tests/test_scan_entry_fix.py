@@ -65,5 +65,44 @@ class RatioGuardsAgainstZeroEntry(unittest.TestCase):
             log_orb_proposal(pending)
 
 
+class RsiOverboughtAdvisory(unittest.TestCase):
+    """2026-07-27 finding: flag ORB longs entered at RSI >= 80 (advisory only,
+    never gates). Verified against a synthetic clean-breakout LONG."""
+
+    def _breakout_long_bars(self):
+        # 3-bar opening range 100-102, then a clean volume breakout above.
+        today = "2026-07-27"
+        prior = []
+        for i in range(20):
+            b = _bar(1000, 99, 99.5, 98.5, 99 + i * 0.1, 200000)
+            b["dt"] = datetime(2026, 7, 24, 10, 0, tzinfo=IST)
+            b["ts"] = b["dt"].timestamp()
+            prior.append(b)
+        t = [
+            _bar(915, 100.0, 101.0, 100.0, 100.8, 300000),
+            _bar(920, 100.8, 102.0, 100.5, 101.5, 300000),
+            _bar(925, 101.5, 102.0, 101.0, 101.8, 300000),
+            _bar(930, 101.8, 103.5, 101.8, 103.2, 900000),  # breakout bar, high vol
+        ]
+        return t, prior + t, today
+
+    def test_ob_tag_present_when_rsi_high_absent_when_low(self):
+        today_bars, bars, today = self._breakout_long_bars()
+        fd = {}
+        # Force RSI high, then low, via monkeypatch of the module-level calc_rsi.
+        orig = S.calc_rsi
+        try:
+            S.calc_rsi = lambda *a, **k: 88.0
+            hi = S.check_orb(today_bars, bars, fd, 0, 0.5)
+            self.assertIsNotNone(hi)
+            self.assertIn("OB", hi["notes"])
+            S.calc_rsi = lambda *a, **k: 60.0
+            lo = S.check_orb(today_bars, bars, fd, 0, 0.5)
+            self.assertIsNotNone(lo)
+            self.assertNotIn("[OB", lo["notes"].replace(" OB", " xx"))  # no standalone OB tag
+        finally:
+            S.calc_rsi = orig
+
+
 if __name__ == "__main__":
     unittest.main()
