@@ -55,6 +55,17 @@ class WriterValidation(unittest.TestCase):
     def test_empty_when_no_file(self):
         self.assertEqual(BC.load_catalysts("2099-01-01"), {})
 
+    def test_stamps_researched_at(self):
+        BC.upsert("2026-07-28", [{"ticker": "LODHA", "polarity": "positive"}])
+        got = BC.load_catalysts("2026-07-28")
+        self.assertIsNotNone(got["LODHA"]["researched_at"])  # timestamp auto-stamped
+
+    def test_caller_can_override_researched_at(self):
+        BC.upsert("2026-07-28", [{"ticker": "TCS", "polarity": "none",
+                                  "researched_at": "2026-07-28T09:40:00+05:30"}])
+        got = BC.load_catalysts("2026-07-28")
+        self.assertEqual(got["TCS"]["researched_at"], "2026-07-28T09:40:00+05:30")
+
 
 if __name__ == "__main__":
     unittest.main()

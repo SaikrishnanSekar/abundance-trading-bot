@@ -17,8 +17,11 @@ covering **any** of the 149 names the moment it signals, not a fixed list.
 ## Steps
 
 1. `git pull --rebase origin main`.
-2. `python scripts/pending_catalysts.py $(date +%F) --json` → tickers that signalled today
-   but have **no catalyst yet**. If the list is empty → **exit silently** (nothing new).
+2. `python scripts/pending_catalysts.py $(date +%F) --json` → tickers that need research now.
+   This already applies a **1-hour cooldown**: never-researched tickers come first, a ticker
+   researched < 60 min ago is skipped, and one researched > 60 min ago re-appears (with
+   `last_researched_min_ago`) in case its catalyst changed. If the list is empty → **exit
+   silently**. So each run focuses on genuinely new signals, not repeats.
 3. For EACH pending ticker (cap ~5 per run to stay fast): **`WebSearch`** its catalyst —
    today's / last-48h company-specific news, earnings, block deals, guidance, analyst
    actions — with a source URL. Classify polarity **direction-agnostic**:

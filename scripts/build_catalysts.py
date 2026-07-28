@@ -25,11 +25,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CATALYSTS_FILE = ROOT / "journal" / "india" / "catalysts.jsonl"
 POLARITIES = {"positive", "negative", "none"}
+IST = timezone(timedelta(hours=5, minutes=30))
 
 
 def load_catalysts(date_str: str) -> dict:
@@ -46,6 +48,7 @@ def load_catalysts(date_str: str) -> dict:
                 "polarity": (r.get("polarity") or "none").lower(),
                 "summary": r.get("summary", ""),
                 "source": r.get("source", ""),
+                "researched_at": r.get("researched_at"),  # ISO ts; None on legacy records
             }
     return out
 
@@ -60,6 +63,7 @@ def upsert(date_str: str, entries: list[dict]) -> int:
     """Idempotent upsert of the day's catalysts. Validates polarity. Replaces
     any existing record for (date, ticker); other dates are preserved. Returns
     the number of records written for this date."""
+    now_iso = datetime.now(IST).isoformat()
     clean = []
     for e in entries:
         ticker = (e.get("ticker") or "").strip().upper()
@@ -72,6 +76,9 @@ def upsert(date_str: str, entries: list[dict]) -> int:
             "date": date_str, "ticker": ticker, "polarity": polarity,
             "summary": (e.get("summary") or "").strip(),
             "source": (e.get("source") or "").strip(),
+            # When this catalyst was researched — drives the re-research cooldown in
+            # pending_catalysts.py. Caller may override (e.g. tests); else stamp now.
+            "researched_at": e.get("researched_at") or now_iso,
         })
     new_tickers = {c["ticker"] for c in clean}
     kept = [r for r in _load_all() if not (r.get("date") == date_str and r.get("ticker") in new_tickers)]

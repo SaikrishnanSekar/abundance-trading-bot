@@ -33,22 +33,56 @@ from build_catalysts import load_catalysts
 IST = timezone(timedelta(hours=5, minutes=30))
 
 
-def pending(recommendations: list[dict], catalyst_map: dict) -> list[dict]:
-    """Pure: tickers with an actionable signal but no catalyst yet, de-duped,
-    first-signal-of-the-day order preserved."""
+COOLDOWN_MIN = 60  # don't re-research a ticker within this many minutes
+
+
+def _age_min(researched_at, now):
+    """Minutes since a catalyst was researched, or None if missing/unparseable."""
+    if not researched_at:
+        return None
+    try:
+        t = datetime.fromisoformat(researched_at)
+    except Exception:
+        return None
+    if t.tzinfo is None:
+        t = t.replace(tzinfo=IST)
+    return (now - t).total_seconds() / 60.0
+
+
+def pending(recommendations: list[dict], catalyst_map: dict,
+            now=None, cooldown_min: int = COOLDOWN_MIN) -> list[dict]:
+    """Tickers with an actionable signal that need catalyst research now:
+      - NEVER researched (no record)               -> always included, listed FIRST
+      - researched > cooldown_min ago              -> re-included (catalyst may have changed)
+      - researched <= cooldown_min ago             -> skipped (cooling period)
+      - has a record but no researched_at (legacy) -> skipped
+    De-duped by ticker (first signal of the day). New tickers come before stale ones so a
+    capped run focuses on genuinely new signals."""
+    now = now or datetime.now(IST)
     seen: set[str] = set()
-    out: list[dict] = []
+    fresh: list[dict] = []   # never researched
+    stale: list[dict] = []   # researched but past the cooldown
     for r in recommendations:
         t = r.get("ticker")
-        if not t or t in catalyst_map or t in seen:
+        if not t or t in seen:
             continue
         seen.add(t)
-        out.append({"ticker": t, "side": r.get("side", ""), "ts": r.get("ts", "")})
-    return out
+        row = {"ticker": t, "side": r.get("side", ""), "ts": r.get("ts", "")}
+        rec = catalyst_map.get(t)
+        if rec is None:
+            fresh.append(row)
+            continue
+        age = _age_min(rec.get("researched_at"), now)
+        if age is not None and age > cooldown_min:
+            row["last_researched_min_ago"] = round(age)
+            stale.append(row)
+        # else: within cooldown, or legacy record with no timestamp -> skip
+    return fresh + stale
 
 
 def compute(date_str: str) -> list[dict]:
-    return pending(load_recommendations(date_str), load_catalysts(date_str))
+    return pending(load_recommendations(date_str), load_catalysts(date_str),
+                   now=datetime.now(IST))
 
 
 def main(argv=None):
