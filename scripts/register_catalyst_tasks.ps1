@@ -11,6 +11,14 @@ $vbs  = "$repo\scripts\run_hidden.vbs"
 $bat  = "$repo\scripts\run_catalyst_scan.bat"
 $days = @('Monday','Tuesday','Wednesday','Thursday','Friday')
 
+# ---------- Power: never sleep while plugged in (so all abundance cron tasks fire) ----------
+# On AC = never sleep/hibernate; on battery keep the OS default (KeepAwake below still
+# holds the 08:30-13:00 window on battery via WakeToRun). Change '0' to a minute value to
+# re-enable AC sleep after N idle minutes (e.g. 120 = sleep after 2h idle plugged in).
+powercfg /change standby-timeout-ac 0
+powercfg /change hibernate-timeout-ac 0
+Write-Host "Power: AC sleep = never (plugged in won't sleep)."
+
 # ---------- KeepAwake ----------
 $kaAction  = New-ScheduledTaskAction -Execute "powershell.exe" `
               -Argument "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$repo\scripts\keep_awake.ps1`"" `
