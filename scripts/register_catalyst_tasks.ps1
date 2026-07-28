@@ -60,20 +60,26 @@ foreach ($tn in @('NightlyHistoryFetch','JournalUpdate')) {
   } else { Write-Host "$tn not found (skip WakeToRun)" }
 }
 
-# Two forced-sleep tasks. rundll32 SetSuspendState suspends (hibernate is off above);
-# the '0' final arg leaves wake events ENABLED so WakeToRun can still wake it for nightly.
-$sleepAction   = New-ScheduledTaskAction -Execute "rundll32.exe" -Argument "powrprof.dll,SetSuspendState 0,1,0"
-$sleepSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
-foreach ($s in @(@{n='ForceSleep_Afternoon'; t='4:15pm'}, @{n='ForceSleep_Night'; t='9:00pm'})) {
+# Two forced-sleep tasks — IDLE-AWARE (force_sleep.ps1): they start at the trigger time
+# but only suspend once you've been idle >=10 min, and give up (don't sleep) if you're
+# still active by their give-up time — so they never yank the machine mid-work. Run DAILY
+# so weekends sleep too. Wake events stay enabled so nightly WakeToRun still wakes it.
+$sleepSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
+                   -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Hours 8)
+foreach ($s in @(@{n='ForceSleep_Afternoon'; t='4:15pm'; give='19:45'}, @{n='ForceSleep_Night'; t='9:00pm'; give='23:30'})) {
+  $act = New-ScheduledTaskAction -Execute "powershell.exe" `
+           -Argument ("-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$repo\scripts\force_sleep.ps1`" -IdleMinutes 10 -GiveUpAt " + $s.give) `
+           -WorkingDirectory $repo
   try {
-    Register-ScheduledTask -TaskName $s.n -TaskPath "\TradingBot\" -Action $sleepAction `
-      -Trigger (New-ScheduledTaskTrigger -Weekly -DaysOfWeek $days -At $s.t) `
+    Register-ScheduledTask -TaskName $s.n -TaskPath "\TradingBot\" -Action $act `
+      -Trigger (New-ScheduledTaskTrigger -Daily -At $s.t) `
       -Settings $sleepSettings -User $env:USERNAME -RunLevel Limited -Force -ErrorAction Stop | Out-Null
-    Write-Host ($s.n + " registered OK (" + $s.t + " Mon-Fri)")
+    Write-Host ($s.n + " registered OK (" + $s.t + " daily, idle-aware, give up " + $s.give + ")")
   } catch { Write-Host ($s.n + " FAILED: " + $_.Exception.Message) }
 }
 
 Write-Host "`nRegistered tasks under \TradingBot\:"
 Get-ScheduledTask -TaskPath "\TradingBot\" -TaskName "KeepAwake","CatalystScan","ForceSleep_Afternoon","ForceSleep_Night" -ErrorAction SilentlyContinue |
   Format-Table TaskName, State -AutoSize
-Write-Host "Power cycle: awake 08:30-16:15, sleep, wake 20:00/20:30 for nightly journal, sleep 21:00. (Mon-Fri)"
+Write-Host "Power cycle: awake 08:30-16:15, idle-sleep, wake 20:00/20:30 for nightly journal, idle-sleep after 21:00."
+Write-Host "Sleeps run DAILY (weekends too); KeepAwake+CatalystScan are Mon-Fri only."

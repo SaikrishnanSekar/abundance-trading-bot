@@ -50,8 +50,10 @@ data collection + a decision aid.
 ## Do NOT
 
 - Place orders or propose entries here — research only.
-- Fabricate polarities. Keys/news unavailable or genuinely no news → **omit** the ticker
-  (the scanner shows ⚪CAT n/a; the next run or the hourly pulse retries).
+- Fabricate a catalyst. But if you genuinely find **no material news**, still write the
+  ticker with `polarity: none` and summary "no fresh catalyst found" — that records it as
+  *researched* (scanner shows ⚪CAT·none). Only leave a ticker out if research truly failed
+  (WebSearch error) — then it stays ⚪CAT pending and the next run retries.
 - Create `.env`. Modify `TRADING-STRATEGY.md`.
 - Spend more than ~5 lookups per run — if more than ~5 are pending, do the top 5 by signal
   recency; the next 3-min run picks up the rest.

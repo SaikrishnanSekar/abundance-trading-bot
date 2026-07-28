@@ -25,20 +25,24 @@ except Exception:
     def load_catalysts(_date):  # scanner must never crash if the store is absent
         return {}
 
-_CAT_MARK = {"positive": "🟢CAT+", "negative": "🔴CAT−", "none": "⚪CAT?"}
+# Distinct states so the tag never conflates "not looked at" with "looked, no news":
+#   no record        -> ⚪CAT pending  (not researched yet — scan hasn't covered it)
+#   polarity "none"  -> ⚪CAT·none     (researched, no material catalyst found)
+#   positive/negative-> 🟢CAT+ / 🔴CAT−
+_CAT_MARK = {"positive": "🟢CAT+", "negative": "🔴CAT−", "none": "⚪CAT·none"}
 
 
 def _catalyst_tag(cat: dict | None) -> str:
-    """Compact marker for a signal line. '⚪CAT n/a' = not researched today."""
+    """Compact marker for a signal line."""
     if not cat:
-        return "⚪CAT n/a"
-    return _CAT_MARK.get(cat.get("polarity", "none"), "⚪CAT?")
+        return "⚪CAT pending"   # no record = not researched yet
+    return _CAT_MARK.get(cat.get("polarity", "none"), "⚪CAT·none")
 
 
 def _catalyst_note(cat: dict | None) -> str:
     """Marker + short summary for the detail line."""
     if not cat:
-        return "catalyst: not researched"
+        return "catalyst: not researched yet (scan pending)"
     s = (cat.get("summary") or "").strip()
     if len(s) > 70:
         s = s[:67] + "…"
