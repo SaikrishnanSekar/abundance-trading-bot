@@ -17,7 +17,10 @@ $days = @('Monday','Tuesday','Wednesday','Thursday','Friday')
 # re-enable AC sleep after N idle minutes (e.g. 120 = sleep after 2h idle plugged in).
 powercfg /change standby-timeout-ac 0
 powercfg /change hibernate-timeout-ac 0
-Write-Host "Power: AC sleep = never (plugged in won't sleep)."
+powercfg /hibernate off                                    # so forced-sleep suspends (not hibernates)
+powercfg /setacvalueindex scheme_current sub_sleep bd3b718a-0680-4d9d-8ab2-e1d2b4ac806d 1  # allow wake timers
+powercfg /setactive scheme_current
+Write-Host "Power: AC sleep = never (idle); hibernate off; wake timers allowed (for nightly WakeToRun)."
 
 # ---------- KeepAwake ----------
 $kaAction  = New-ScheduledTaskAction -Execute "powershell.exe" `
@@ -45,6 +48,32 @@ try {
   Write-Host "CatalystScan registered OK"
 } catch { Write-Host ("CatalystScan FAILED: " + $_.Exception.Message) }
 
+# ---------- Sleep/wake cycle: sleep after the afternoon cron, wake for nightly ----------
+# Let the 20:00 / 20:30 nightly journal tasks wake the machine from the afternoon sleep.
+foreach ($tn in @('NightlyHistoryFetch','JournalUpdate')) {
+  $tk = Get-ScheduledTask -TaskPath "\TradingBot\" -TaskName $tn -ErrorAction SilentlyContinue
+  if ($tk) {
+    $tk.Settings.WakeToRun = $true
+    $tk.Settings.StartWhenAvailable = $true
+    try { Set-ScheduledTask -InputObject $tk -ErrorAction Stop | Out-Null; Write-Host "$tn -> WakeToRun ON" }
+    catch { Write-Host ("$tn WakeToRun FAILED: " + $_.Exception.Message) }
+  } else { Write-Host "$tn not found (skip WakeToRun)" }
+}
+
+# Two forced-sleep tasks. rundll32 SetSuspendState suspends (hibernate is off above);
+# the '0' final arg leaves wake events ENABLED so WakeToRun can still wake it for nightly.
+$sleepAction   = New-ScheduledTaskAction -Execute "rundll32.exe" -Argument "powrprof.dll,SetSuspendState 0,1,0"
+$sleepSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+foreach ($s in @(@{n='ForceSleep_Afternoon'; t='4:15pm'}, @{n='ForceSleep_Night'; t='9:00pm'})) {
+  try {
+    Register-ScheduledTask -TaskName $s.n -TaskPath "\TradingBot\" -Action $sleepAction `
+      -Trigger (New-ScheduledTaskTrigger -Weekly -DaysOfWeek $days -At $s.t) `
+      -Settings $sleepSettings -User $env:USERNAME -RunLevel Limited -Force -ErrorAction Stop | Out-Null
+    Write-Host ($s.n + " registered OK (" + $s.t + " Mon-Fri)")
+  } catch { Write-Host ($s.n + " FAILED: " + $_.Exception.Message) }
+}
+
 Write-Host "`nRegistered tasks under \TradingBot\:"
-Get-ScheduledTask -TaskPath "\TradingBot\" -TaskName "KeepAwake","CatalystScan" -ErrorAction SilentlyContinue |
+Get-ScheduledTask -TaskPath "\TradingBot\" -TaskName "KeepAwake","CatalystScan","ForceSleep_Afternoon","ForceSleep_Night" -ErrorAction SilentlyContinue |
   Format-Table TaskName, State -AutoSize
+Write-Host "Power cycle: awake 08:30-16:15, sleep, wake 20:00/20:30 for nightly journal, sleep 21:00. (Mon-Fri)"

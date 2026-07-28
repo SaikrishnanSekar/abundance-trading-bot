@@ -21,8 +21,11 @@ if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Force -Path $logDi
 $log = Join-Path $logDir 'keep_awake.log'
 function Log($m) { "$([DateTime]::Now.ToString('s')) $m" | Out-File -FilePath $log -Append -Encoding utf8 }
 
-# Hold until 13:00 local (machine timezone is Asia/Calcutta = IST).
-$end = (Get-Date).Date.AddHours(13)
+# Hold until 16:10 local (machine timezone is Asia/Calcutta = IST) — covers the full
+# market + afternoon scan window (MultiStrategyScan ends 16:00). ForceSleep_Afternoon
+# then sleeps the machine at 16:15. On AC this is redundant with never-sleep; it's the
+# battery / wake-from-sleep safety net.
+$end = (Get-Date).Date.AddHours(16).AddMinutes(10)
 Log "keep-awake START, holding until $end"
 [Win32.Power]::SetThreadExecutionState($keepFlags) | Out-Null
 
