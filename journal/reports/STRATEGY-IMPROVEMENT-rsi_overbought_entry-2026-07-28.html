@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Strategy Improvement — rsi_overbought_entry — 2026-07-28</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  .viz-root { color-scheme: light; --surface-1:#fcfcfb; --page:#f9f9f7; --text-primary:#0b0b0b;
+    --text-secondary:#52514e; --text-muted:#898781; --grid:#e1e0d9; --border:rgba(11,11,11,0.10);
+    --good:#0ca30c; --critical:#d03b3b; --series-blue:#2a78d6; }
+  @media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme:dark; --surface-1:#1a1a19; --page:#0d0d0d; --text-primary:#fff; --text-secondary:#c3c2b7;
+    --text-muted:#898781; --grid:#2c2c2a; --border:rgba(255,255,255,0.10); --good:#0ca30c; --critical:#e66767; --series-blue:#3987e5; } }
+  :root[data-theme="dark"] .viz-root { color-scheme:dark; --surface-1:#1a1a19; --page:#0d0d0d; --text-primary:#fff;
+    --text-secondary:#c3c2b7; --text-muted:#898781; --grid:#2c2c2a; --border:rgba(255,255,255,0.10); --good:#0ca30c; --critical:#e66767; --series-blue:#3987e5; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--page); color:var(--text-primary); }
+  .wrap { max-width:1040px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:1.4rem; margin:0 0 4px; } .sub { color:var(--text-secondary); font-size:0.9rem; }
+  .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:22px 0; }
+  @media (max-width:800px) { .tiles { grid-template-columns:1fr 1fr; } }
+  .tile { background:var(--surface-1); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+  .tile .label { font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em; }
+  .tile .value { font-size:1.4rem; font-weight:600; margin-top:4px; }
+  .tile .note { font-size:0.76rem; color:var(--text-secondary); margin-top:4px; }
+  section { margin-bottom:30px; } section h2 { font-size:1rem; margin:0 0 4px; }
+  .lede { font-size:0.85rem; color:var(--text-secondary); margin:0 0 14px; }
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:0.8rem; background:var(--surface-1); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  thead th { text-align:left; font-weight:600; color:var(--text-muted); font-size:0.68rem; text-transform:uppercase; padding:8px 10px; border-bottom:1px solid var(--grid); }
+  tbody td { padding:8px 10px; border-bottom:1px solid var(--grid); }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:0.72rem; font-weight:600; }
+  .pill.win { background:color-mix(in srgb,var(--good) 16%,transparent); color:var(--good); }
+  .pill.loss { background:color-mix(in srgb,var(--critical) 16%,transparent); color:var(--critical); }
+  .pill.dropped { background:color-mix(in srgb,var(--text-muted) 16%,transparent); color:var(--text-muted); }
+  a { color:var(--series-blue); text-decoration:none; font-weight:600; }
+  footer { border-top:1px solid var(--border); margin-top:30px; padding-top:14px; font-size:0.76rem; color:var(--text-muted); }
+</style></head>
+<body><div class="viz-root wrap">
+  <div style="margin-bottom:8px;"><a href="index.html" style="color:var(--text-muted);font-size:0.8rem;">&larr; All daily journals</a>
+    &nbsp;·&nbsp; <a href="EXPERIMENT-rsi_overbought_entry.html" style="font-size:0.8rem;">Cumulative scoreboard &rarr;</a></div>
+  <h1>rsi_overbought_entry — 2026-07-28</h1>
+  <div class="sub">Skip ORB entries at extreme RSI (long &ge;80 / short &le;20) that lack a supporting catalyst. Catalyst-aware.</div>
+
+  <div class="tiles">
+    <div class="tile"><div class="label">Control P&amp;L</div><div class="value">-₹499</div><div class="note">take every signal</div></div>
+    <div class="tile"><div class="label">Treatment P&amp;L</div><div class="value">-₹1,329</div><div class="note">4 skipped</div></div>
+    <div class="tile"><div class="label">Delta</div><div class="value" style="color:var(--critical);">-₹830</div><div class="note">treatment − control</div></div>
+    <div class="tile"><div class="label">Extreme-RSI split</div><div class="value">+₹122 / +₹830</div><div class="note">catalyst-backed / catalyst-less P&amp;L</div></div>
+  </div>
+
+  <section>
+    <h2>Catalyst point of view</h2>
+    <p class="lede">Among RSI-extreme entries, the 2 with a supporting catalyst returned ₹122 (1/2 won) while the 4 without one returned ₹830 (3/4 won). Catalyst — not RSI alone — separates the winners.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Catalyst support</th><th class="num">Trades</th><th class="num">Win rate</th><th class="num">Total P&amp;L</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--good);font-weight:600;">Supported (news backs the direction)</td><td class="num">2</td><td class="num">50%</td><td class="num">+₹122</td></tr>
+        <tr><td style="color:var(--text-muted);font-weight:600;">Unsupported (no / contrary news)</td><td class="num">11</td><td class="num">36%</td><td class="num">-₹621</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Per-recommendation detail</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Ticker</th><th>Side</th><th class="num">RSI@entry</th><th>Catalyst</th><th>News</th><th>Actual</th><th class="num">Actual P&amp;L</th><th>Under filter</th><th class="num">Filtered P&amp;L</th></tr></thead>
+      <tbody><tr>
+      <td>WIPRO</td>
+      <td>SHORT</td>
+      <td class="num">78</td>
+      <td style="color:var(--text-muted);font-weight:600;">none</td>
+      <td>Q1 results/AGM ~2wks old, ex-div Jul27; no fresh 48h catalyst</td>
+      <td><span class="pill loss">LOSS</span></td>
+      <td class="num">-₹336</td>
+      <td><span class="pill win">kept</span></td>
+      <td class="num">-₹336</td>
+    </tr>
+<tr>
+      <td>POLICYBZR</td>
+      <td>LONG</td>
+      <td class="num">77</td>
+      <td style="color:var(--text-muted);font-weight:600;">none</td>
+      <td>No fresh catalyst; earlier block deals/July3 stake sale now stale</td>
+      <td><span class="pill win">WIN</span></td>
+      <td class="num">+₹270</td>
+      <td><span class="pill win">kept</span></td>
+      <td class="num">+₹270</td>
+    </tr>
+<tr>
+      <td>INFY</td>
+      <td>SHORT</td>
+      <td class="num">86</td>
+      <td style="color:var(--good);font-weight:600;">positive</td>
+      <td>Shares +3.7% on AI deal wins ($3.6B TCV) offsetting FY27 guidance cut to 1.5-3%</td>
+      <td><span class="pill loss">LOSS</span></td>
+      <td class="num">-₹411</td>
+      <td><span class="pill win">kept</span></td>
+      <td class="num">-₹411</td>
+    </tr>
+<tr>
+      <td>DABUR</td>
+      <td>LONG</td>
+      <td class="num">79</td>
+      <td style="color:var(--text-muted);font-weight:600;">none</td>
+      <td>No fresh catalyst; trading window closed all July, no new news</td>
+      <td><span class="pill loss">LOSS</span></td>
+      <td class="num">-₹99</td>
+      <td><span class="pill win">kept</span></td>
+      <td class="num">-₹99</td>
+    </tr>
+<tr>
+      <td>MARICO</td>
+      <td>LONG</td>
+      <td class="num">80 ⚠</td>
+      <td style="color:var(--text-muted);font-weight:600;">none</td>
+      <td>No fresh catalyst; all-time-high rally and JM upgrade were early July</td>
+      <td><span class="pill win">WIN</span></td>
+      <td class="num">+₹588</td>
+      <td><span class="pill loss">SKIPPED</span></td>
+      <td class="num">+₹0</td>
+    </tr>
+<tr>
+      <td>NAUKRI</td>
+      <td>LONG</td>
+      <td class="num">84 ⚠</td>
+      <td style="color:var(--text-muted);font-weight:600;">none</td>
+      <td>No fresh catalyst; Q1 billings rally and broker upgrades were Jul7-8</td>
+      <td><span class="pill win">WIN</span></td>
+      <td class="num">+₹46</td>
+      <td><span class="pill loss">SKIPPED</span></td>
+      <td class="num">+₹0</td>
+    </tr>
+<tr>
+      <td>NYKAA</td>
+      <td>LONG</td>
+      <td class="num">79</td>
+      <td style="color:var(--text-muted);font-weight:600;">none</td>
+      <td>no fresh catalyst found</td>
+      <td><span class="pill loss">LOSS</span></td>
+      <td class="num">-₹241</td>
+      <td><span class="pill win">kept</span></td>
+      <td class="num">-₹241</td>
+    </tr>
+<tr>
+      <td>OFSS</td>
+      <td>SHORT</td>
+      <td class="num">56</td>
+      <td style="color:var(--good);font-weight:600;">positive</td>
+      <td>OFSS +3.7% in Nifty IT rally; Q1 net income up 121% YoY, new CEO Ketkar</td>
+      <td><span class="pill loss">LOSS</span></td>
+      <td class="num">-₹380</td>
+      <td><span class="pill win">kept</span></td>
+      <td class="num">-₹380</td>
+    </tr>
+<tr>
+      <td>PERSISTENT</td>
+      <td>LONG</td>
+      <td class="num">90 ⚠</td>
+      <td style="color:var(--good);font-weight:600;">positive</td>
+      <td>July 27 dividend record date; AGM Aug 3 to vote on Nagarro buyout</td>
+      <td><span class="pill loss">LOSS</span></td>
+      <td class="num">-₹305</td>
+      <td><span class="pill win">kept</span></td>
+      <td class="num">-₹305</td>
+    </tr>
+<tr>
+      <td>SAIL</td>
+      <td>SHORT</td>
+      <td class="num">14 ⚠</td>
+      <td style="color:var(--text-muted);font-weight:600;">none</td>
+      <td>Q1 FY27 earnings call today 11am IST, results not yet out</td>
+      <td><span class="pill loss">LOSS</span></td>
+      <td class="num">-₹408</td>
+      <td><span class="pill loss">SKIPPED</span></td>
+      <td class="num">+₹0</td>
+    </tr>
+<tr>
+      <td>TVSMOTOR</td>
+      <td>LONG</td>
+      <td class="num">85 ⚠</td>
+      <td style="color:var(--text-muted);font-weight:600;">none</td>
+      <td>no fresh catalyst found</td>
+      <td><span class="pill win">WIN</span></td>
+      <td class="num">+₹605</td>
+      <td><span class="pill loss">SKIPPED</span></td>
+      <td class="num">+₹0</td>
+    </tr>
+<tr>
+      <td>COFORGE</td>
+      <td>LONG</td>
+      <td class="num">92 ⚠</td>
+      <td style="color:var(--good);font-weight:600;">positive</td>
+      <td>Q1FY27 PAT up 110% YoY, revenue +49%, order book +44% YoY</td>
+      <td><span class="pill win">WIN</span></td>
+      <td class="num">+₹427</td>
+      <td><span class="pill win">kept</span></td>
+      <td class="num">+₹427</td>
+    </tr>
+<tr>
+      <td>UNIONBANK</td>
+      <td>LONG</td>
+      <td class="num">64</td>
+      <td style="color:var(--text-muted);font-weight:600;">none</td>
+      <td>no fresh catalyst found</td>
+      <td><span class="pill loss">LOSS</span></td>
+      <td class="num">-₹254</td>
+      <td><span class="pill win">kept</span></td>
+      <td class="num">-₹254</td>
+    </tr></tbody>
+    </table></div>
+  </section>
+
+  <footer>Engine: <code>exp_rsi_overbought.py</code> · RSI@entry = scanner-logged (fallback recompute) ·
+    Catalyst = <code>journal/india/catalysts.jsonl</code> · P&amp;L = build_price_tracker Yahoo-fill model.<br>
+    Evidence: <code>journal/india/FINDINGS-2026-07-27.md</code>. Proposal: <code>memory/india/STRATEGY-PROPOSALS.md · rsi_overbought_entry</code>.
+  </footer>
+</div></body></html>
