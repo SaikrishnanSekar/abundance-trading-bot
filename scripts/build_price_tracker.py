@@ -508,6 +508,7 @@ def compute_cumulative_pnl(date_str: str) -> dict:
     all_rows = [r for r in load_upto(date_str) if r["date"] >= CUMULATIVE_SINCE]
     dates = sorted(set(r["date"] for r in all_rows))
     total_net, total_gross, total_costs, n_trades = 0.0, 0.0, 0.0, 0
+    bydir = {"LONG": {"n": 0, "wins": 0, "pnl": 0.0}, "SHORT": {"n": 0, "wins": 0, "pnl": 0.0}}
     for d in dates:
         day_rows = [r for r in all_rows if r["date"] == d]
         for lc in build_lifecycles(day_rows):
@@ -516,10 +517,33 @@ def compute_cumulative_pnl(date_str: str) -> dict:
                 total_gross += lc["pnl"]["gross_pnl_rs"]
                 total_costs += lc["pnl"]["costs"]["total"]
                 n_trades += 1
+                b = bydir.get(lc["direction"])
+                if b is not None:
+                    b["n"] += 1
+                    b["pnl"] += lc["pnl"]["pnl_rs"]
+                    if lc["outcome"] == "WIN":
+                        b["wins"] += 1
     return {
         "net": total_net, "gross": total_gross, "costs": total_costs,
-        "n_trades": n_trades, "n_days": len(dates),
+        "n_trades": n_trades, "n_days": len(dates), "by_direction": bydir,
     }
+
+
+def pnl_by_direction(lifecycles: list[dict]) -> dict:
+    """Split a day's resolved lifecycles into LONG vs SHORT — never mix the two.
+    Returns {'LONG': {n,wins,pnl}, 'SHORT': {n,wins,pnl}}."""
+    out = {"LONG": {"n": 0, "wins": 0, "pnl": 0.0}, "SHORT": {"n": 0, "wins": 0, "pnl": 0.0}}
+    for lc in lifecycles:
+        if not lc.get("pnl"):
+            continue
+        b = out.get(lc.get("direction"))
+        if b is None:
+            continue
+        b["n"] += 1
+        b["pnl"] += lc["pnl"]["pnl_rs"]
+        if lc["outcome"] == "WIN":
+            b["wins"] += 1
+    return out
 
 
 def build_tracker_panel_html(date_str: str) -> tuple[str, dict]:
@@ -547,6 +571,25 @@ def build_tracker_panel_html(date_str: str) -> tuple[str, dict]:
     cum_color = "var(--good)" if cum["net"] >= 0 else "var(--critical)"
     cum_sign = "+" if cum["net"] >= 0 else "-"
 
+    # Long vs Short — kept separate, never mixed (2026-07-29 request).
+    bydir = pnl_by_direction(lifecycles)
+    cbd = cum["by_direction"]
+
+    def _dir_html(today, cumu, label):
+        tp, cp = today["pnl"], cumu["pnl"]
+        tc = "var(--good)" if tp >= 0 else "var(--critical)"
+        cc = "var(--good)" if cp >= 0 else "var(--critical)"
+        return (f'<div style="display:flex; justify-content:space-between; gap:10px; font-size:0.82rem; padding:2px 0;">'
+                f'<span>{label} <span style="color:var(--text-muted);">{today["wins"]}/{today["n"]}</span></span>'
+                f'<span>today <b style="color:{tc};">{"+" if tp>=0 else "-"}₹{abs(tp):,.0f}</b> · '
+                f'cum <b style="color:{cc};">{"+" if cp>=0 else "-"}₹{abs(cp):,.0f}</b></span></div>')
+
+    dir_tile = (f'<div class="tile"><div class="label">Long vs Short (kept separate)</div>'
+                f'<div style="margin-top:6px;">'
+                + _dir_html(bydir["LONG"], cbd["LONG"], "LONG")
+                + _dir_html(bydir["SHORT"], cbd["SHORT"], "SHORT")
+                + '</div><div class="note">shorts tracked separately — do not net against longs</div></div>')
+
     kpis = f"""
     <div class="tiles" style="margin-bottom:20px;">
       <div class="tile">
@@ -564,6 +607,7 @@ def build_tracker_panel_html(date_str: str) -> tuple[str, dict]:
         <div class="value">{n_win} / {n_loss}{f' <span style="font-size:0.9rem;color:var(--text-muted);">(+{n_unknown} no entry data)</span>' if n_unknown else ''}</div>
         <div class="note">{n_stop} trailing-stop hit · {n_eod} market-close{f' ({n_yahoo_filled} via Yahoo fill)' if n_yahoo_filled else ''}</div>
       </div>
+      {dir_tile}
     </div>
     <p style="color:var(--text-muted); font-size:0.76rem; margin:-8px 0 16px;">
       Position sizing: ₹{NOTIONAL_PER_TRADE:,.0f} notional/recommendation (v4 trial sizing, 0.75×) — paper P&amp;L only, no real capital at risk during Observation Mode.
@@ -572,7 +616,9 @@ def build_tracker_panel_html(date_str: str) -> tuple[str, dict]:
       A handful may show "no entry data" if their real entry fell inside a known scanner-outage window — excluded from P&amp;L, not counted as a loss.
     </p>"""
     cards_html = kpis + '<div class="track-grid">' + "".join(render_card(lc) for lc in lifecycles) + "</div>"
-    return cards_html, {"net_today": total_pnl, "cumulative": cum["net"], "cumulative_trades": cum["n_trades"]}
+    return cards_html, {"net_today": total_pnl, "cumulative": cum["net"],
+                        "cumulative_trades": cum["n_trades"],
+                        "by_direction": bydir, "cumulative_by_direction": cbd}
 
 
 def inject_into_daily_html(date_str: str):
@@ -631,6 +677,17 @@ def inject_into_daily_html(date_str: str):
         meta["net_pnl_today"] = round(pnl_summary["net_today"], 2)
         meta["cumulative_pnl"] = round(pnl_summary["cumulative"], 2)
         meta["cumulative_trades"] = pnl_summary["cumulative_trades"]
+        # Long/short kept separate — never netted into one number.
+        bd = pnl_summary.get("by_direction", {})
+        cbd = pnl_summary.get("cumulative_by_direction", {})
+        if bd:
+            meta["long_pnl_today"] = round(bd["LONG"]["pnl"], 2)
+            meta["short_pnl_today"] = round(bd["SHORT"]["pnl"], 2)
+            meta["long_wl_today"] = f'{bd["LONG"]["wins"]}/{bd["LONG"]["n"]}'
+            meta["short_wl_today"] = f'{bd["SHORT"]["wins"]}/{bd["SHORT"]["n"]}'
+        if cbd:
+            meta["long_pnl_cumulative"] = round(cbd["LONG"]["pnl"], 2)
+            meta["short_pnl_cumulative"] = round(cbd["SHORT"]["pnl"], 2)
         new_meta_json = json.dumps(meta, indent=2, ensure_ascii=False)
         html = html[:mm.start()] + mm.group(1) + new_meta_json + mm.group(3) + html[mm.end():]
 

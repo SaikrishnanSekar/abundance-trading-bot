@@ -480,3 +480,19 @@ min_days_before_decision, per the Controlled Experiments protocol. No hard rule 
 no TRADING-STRATEGY.md edit.
 
 Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.
+
+---
+
+## 2026-07-29 · Disable the SHORT sleeve — long-only ORB
+- dimension: disable_shorts
+- evidence_n: 6 short trades to date (2026-07-21 → 07-28). BELOW the 20-trade structural-change minimum and the 10-trade sleeve minimum — this is a candidate under a controlled experiment, NOT a decision.
+- current_rule: "ORB v4 fires both LONG and SHORT signals across the universe."
+- proposed_rule: Drop all SHORT ORB signals; take longs only. (Treatment in the disable_shorts experiment = long-only P&L.)
+- expected_impact: Long/short split (scripts/pnl_split.py) as of 2026-07-28 — LONG 10/23 (43% WR) net +Rs195; SHORT 2/6 (33% WR) net -Rs445. On 07-28 alone all 4 shorts lost (-Rs1,536), two of them shorted into positive catalysts (INFY, OFSS). Removing shorts would have flipped 07-28 from -Rs499 to +Rs1,037.
+- risk: (a) N=6 shorts — tiny; 2 of the 6 (07-21, 07-22) were the sample's BEST trades (+Rs760, +Rs332). Disabling on this data overfits to 07-28. (b) The real defect may be BAD shorts (contra-catalyst / RSI-extreme), not shorts per se — a `short_needs_negative_catalyst` filter is the less-blunt alternative and should be weighed against a full disable. (c) Structural change (universe/direction) needs >=20 trades of evidence per governance.
+- cooldown_until: 2026-08-12
+- status: PENDING — registered as a controlled experiment (journal/india/experiments/registry.json, engine disable_shorts, started 2026-07-30, min_days 10). Recording begins 2026-07-30.
+
+Evidence: scripts/pnl_split.py (long/short split, kept separate) + DAILY page "Long vs Short" tile. To graduate: the disable_shorts experiment must beat control over >=10 short-bearing trading days; a human then commits the sleeve disable to TRADING-STRATEGY.md. No autonomous change.
+
+Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.

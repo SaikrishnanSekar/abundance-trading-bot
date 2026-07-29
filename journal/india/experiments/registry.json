@@ -18,5 +18,15 @@
     "status": "running",
     "min_days_before_decision": 10,
     "decision_rule": "Once >= min_days_before_decision real trading days are recorded: if cumulative treatment P&L > cumulative control P&L AND the catalyst-supported vs catalyst-less split on RSI-extreme entries is directionally consistent (supported outperforms unsupported), ready for human review + TRADING-STRATEGY.md commit. Otherwise propose dropping (move to STRATEGY-PROPOSALS-REJECTED.md). Below min_days, report progress only. Higher min_days (10) than confirmation-bar because there was no offline backtest — all evidence is being gathered live."
+  },
+  "disable_shorts": {
+    "engine": "disable_shorts",
+    "description": "Drop all SHORT ORB signals; keep longs unchanged. Control = take longs + shorts (current). Treatment = long-only. Motivated by the 2026-07-29 long/short split: shorts net -Rs445 over 6 trades (33% WR) vs longs +Rs195 over 23 (43% WR), with 07-28's 4 shorts all losing (two into positive catalysts).",
+    "proposal_ref": "memory/india/STRATEGY-PROPOSALS.md · 2026-07-29 · dimension disable_shorts",
+    "backtest_ref": "No backtest — live-only, motivated by the long/short split (scripts/pnl_split.py). N=6 shorts so far, tiny; this experiment IS the evidence-gathering.",
+    "started": "2026-07-30",
+    "status": "running",
+    "min_days_before_decision": 10,
+    "decision_rule": "Recording starts 2026-07-30 (started). Once >= min_days_before_decision real trading days with >=1 short in the control are recorded: if cumulative treatment (long-only) P&L > cumulative control P&L, ready for human review + a TRADING-STRATEGY.md commit that disables the short sleeve. Otherwise propose dropping (shorts stay enabled). Caveat: N=6 shorts today and 2 were the sample's best trades — do NOT disable on <10 short-bearing days of evidence."
   }
 }

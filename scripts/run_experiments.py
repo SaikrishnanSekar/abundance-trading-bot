@@ -36,6 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_price_tracker import ROOT, REPORTS_DIR
 from build_strategy_improvement import analyze, build as build_day_page
 import exp_rsi_overbought as _rsi_eng
+import exp_disable_shorts as _short_eng
 
 # Per-experiment engines. Each registry entry may name an "engine"; without one
 # it defaults to "confirmation_bar" (the original, so existing entries are
@@ -45,6 +46,7 @@ ENGINES = {
     "confirmation_bar": (analyze, build_day_page,
                          lambda d: f"STRATEGY-IMPROVEMENT-{d}.html"),
     "rsi_overbought": (_rsi_eng.analyze, _rsi_eng.build, _rsi_eng.day_page_name),
+    "disable_shorts": (_short_eng.analyze, _short_eng.build, _short_eng.day_page_name),
 }
 
 EXPERIMENTS_DIR = ROOT / "journal" / "india" / "experiments"
@@ -319,6 +321,10 @@ def run_all(date_str: str | None = None):
     for name, meta in registry.items():
         if meta.get("status") != "running":
             print(f"Skipping {name} (status={meta.get('status')}) — already concluded, not re-evaluated")
+            continue
+        started = meta.get("started")
+        if started and date_str < started:
+            print(f"Skipping {name} (starts {started}, not yet begun as of {date_str})")
             continue
         engine_name = meta.get("engine", "confirmation_bar")
         analyze_fn, build_fn, page_fn = ENGINES[engine_name]
