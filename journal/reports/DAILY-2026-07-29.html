@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Daily Journal — India — 2026-07-29</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="application/json" id="daily-meta">
+{
+  "date": "2026-07-29",
+  "market": "india",
+  "regime": "NEUTRAL",
+  "observation_mode": true,
+  "buy_signals": 3,
+  "live_trades": 0,
+  "orb_signals": 3,
+  "orb_failed": 2,
+  "gap_fill_signals": 0,
+  "gap_fill_failed": 0,
+  "rca_findings": 0,
+  "headline": "Only 3 signals but a +Rs1,983 day — carried ENTIRELY by one outlier: KAYNES LONG +Rs2,925 (+7.95%) via trailing stop. Strip it and the day is -Rs942. The winner had NO catalyst and RSI 86 — so the rsi_overbought experiment would have SKIPPED it; its cumulative delta cratered to -Rs2,259 over 3 days (thesis now clearly losing). Short lost again (BIOCON -Rs345; shorts 2/7, -Rs790 cum) — reinforces disable_shorts (starts 07-30).",
+  "net_pnl_today": 1982.82,
+  "cumulative_pnl": 1733.15,
+  "cumulative_trades": 32,
+  "long_pnl_today": 2327.96,
+  "short_pnl_today": -345.13,
+  "long_wl_today": "1/2",
+  "short_wl_today": "0/1",
+  "long_pnl_cumulative": 2523.15,
+  "short_pnl_cumulative": -790.0
+}
+</script>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --serious:        #ec835a;
+    --critical:       #d03b3b;
+    --series-blue:    #2a78d6;
+    --series-violet:  #4a3aa7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --good:           #0ca30c;
+      --warning:        #fab219;
+      --serious:        #ec835a;
+      --critical:       #e66767;
+      --series-blue:    #3987e5;
+      --series-violet:  #9085e9;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --serious:        #ec835a;
+    --critical:       #e66767;
+    --series-blue:    #3987e5;
+    --series-violet:  #9085e9;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header.top { margin-bottom: 20px; }
+  header.top h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  header.top .sub { color: var(--text-secondary); font-size: 0.92rem; }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--text-secondary);
+    background: var(--surface-1);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.good { background: var(--good); }
+  .dot.warning { background: var(--warning); }
+  .dot.critical { background: var(--critical); }
+  .dot.neutral { background: var(--text-muted); }
+
+  .tiles {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin: 22px 0 30px;
+  }
+  @media (max-width: 700px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+  .tile {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .tile .label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .tile .value { font-size: 1.65rem; font-weight: 600; margin-top: 4px; font-variant-numeric: proportional-nums; }
+  .tile .note { font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px; }
+
+  section { margin-bottom: 34px; }
+  section h2 {
+    font-size: 1.02rem; margin: 0 0 4px; color: var(--text-primary);
+  }
+  section .lede { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 14px; }
+
+  .rca-list { display: flex; flex-direction: column; gap: 10px; }
+  .rca-item {
+    display: flex; gap: 12px; padding: 12px 14px;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+  }
+  .rca-item .icon { flex: none; width: 20px; text-align: center; font-size: 0.95rem; line-height: 1.4; }
+  .rca-item .body h3 { margin: 0 0 3px; font-size: 0.88rem; }
+  .rca-item .body p { margin: 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45; }
+  .rca-item .body .status { font-size: 0.74rem; font-weight: 600; margin-top: 5px; }
+  .status.resolved { color: var(--good); }
+  .status.open { color: var(--warning); }
+  .status.fixed { color: var(--good); }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.82rem;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+  thead th {
+    text-align: left; font-weight: 600; color: var(--text-muted);
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.02em;
+    padding: 8px 12px; border-bottom: 1px solid var(--grid);
+  }
+  tbody td { padding: 8px 12px; border-bottom: 1px solid var(--grid); color: var(--text-primary); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+  }
+  .pill.win    { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); }
+  .pill.loss   { color: var(--critical); background: color-mix(in srgb, var(--critical) 16%, transparent); }
+
+  footer {
+    border-top: 1px solid var(--border); margin-top: 40px; padding-top: 16px;
+    font-size: 0.76rem; color: var(--text-muted);
+  }
+  footer code { color: var(--text-secondary); }
+  .table-wrap { overflow-x: auto; }
+
+  .tabbar { display: flex; gap: 4px; margin: 18px 0 22px; border-bottom: 1px solid var(--border); }
+  .tabbtn { appearance: none; background: none; border: none; font: inherit; font-size: 0.85rem; font-weight: 600;
+            color: var(--text-muted); padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; }
+  .tabbtn.active { color: var(--text-primary); border-bottom-color: var(--series-blue); }
+  .tabpanel { display: none; }
+  .tabpanel.active { display: block; }
+  .track-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .track-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .track-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .track-ticker { font-size: 1rem; font-weight: 700; margin-right: 8px; }
+  .track-sub { font-size: 0.72rem; color: var(--text-muted); }
+  .track-levels { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 8px; }
+  .track-levels b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .track-chart { margin: 4px 0 8px; }
+  .track-details summary { cursor: pointer; font-size: 0.76rem; color: var(--series-blue); font-weight: 600; }
+  table.cp-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; margin-top: 8px; }
+  table.cp-table th { text-align: left; color: var(--text-muted); font-weight: 600; padding: 4px 6px; border-bottom: 1px solid var(--grid); }
+  table.cp-table td { padding: 4px 6px; border-bottom: 1px solid var(--grid); color: var(--text-secondary); }
+  table.cp-table td.num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .pill.dropped { color: var(--warning); background: color-mix(in srgb, var(--warning) 18%, transparent); }
+
+  /* TAB_CSS_MARK */
+</style>
+</head>
+<body>
+<div class="viz-root wrap">
+<!-- TABBAR_START -->
+<div class="tabbar">
+  <button class="tabbtn active" onclick="showTab('summary', event)">Daily Summary</button>
+  <button class="tabbtn" onclick="showTab('tracker', event)">Price Action Tracker</button>
+</div>
+<!-- TABBAR_END -->
+<div class="tabpanel active" id="tab-summary">
+<header class="top">
+    <div style="margin-bottom:8px;"><a href="index.html" style="font-size:0.8rem; color:var(--text-muted); text-decoration:none;">&larr; All daily journals</a></div>
+    <h1>Daily Journal — India — 2026-07-29 (Wednesday)</h1>
+    <div class="sub">A green day, but one outlier was the whole story. Two experiments moved — one badly.</div>
+    <div class="badges">
+      <span class="badge"><span class="dot good"></span>Net +&#8377;1,983 (3 signals)</span>
+      <span class="badge"><span class="dot warning"></span>100% carried by 1 trade (KAYNES +&#8377;2,925)</span>
+      <span class="badge"><span class="dot critical"></span>rsi_overbought experiment cum. -&#8377;2,259</span>
+    </div>
+  </header>
+
+  <div class="tiles">
+    <div class="tile"><div class="label">ORB recommendations</div><div class="value">3</div><div class="note">2 long, 1 short</div></div>
+    <div class="tile"><div class="label">Win / Loss</div><div class="value">1 / 2</div><div class="note">the 1 win = +&#8377;2,925</div></div>
+    <div class="tile"><div class="label">Net P&amp;L</div><div class="value">+&#8377;1,983</div><div class="note">without KAYNES: <b>-&#8377;942</b></div></div>
+    <div class="tile"><div class="label">Long / Short (kept separate)</div><div class="value">+&#8377;2,328 / -&#8377;345</div><div class="note">shorts 0/1 today · 2/7 cum</div></div>
+  </div>
+
+  <section>
+    <h2>Deep read — the day was one trade</h2>
+    <p class="lede">
+      Three signals resolved: <b>KAYNES LONG +&#8377;2,925 (+7.95%)</b>, <b>BIOCON SHORT -&#8377;345</b>,
+      <b>PPLPHARMA LONG -&#8377;597</b>. Net <b>+&#8377;1,983</b> — but strip the one KAYNES outlier and the day is
+      <b>-&#8377;942</b> (0/2). This is the lumpy ORB profile the 81-week backtest flagged: the mean is carried by
+      a handful of outlier trend trades, not a broad edge. One big trailing-stop winner made the day; the base
+      rate underneath was losing.
+    </p>
+  </section>
+
+  <section>
+    <h2>Finding 1 — the trailing stop did its job (let the trend run)</h2>
+    <p class="lede">
+      KAYNES broke out and <b>trailed a +7.95% move to a stop, no fixed target</b> — exactly what the v4 design
+      (trail 1&times; opening-range width, tighten-only, no target) exists to capture. The lesson keeps repeating:
+      the P&amp;L comes from <b>not capping the winners</b>, not from hit-rate. Hit-rate today was 33%.
+    </p>
+  </section>
+
+  <section>
+    <h2>Finding 2 — the catalyst &times; RSI thesis is now clearly failing</h2>
+    <p class="lede">
+      KAYNES entered at <b>RSI 86 with NO catalyst</b> — the exact profile the <code>rsi_overbought_entry</code>
+      treatment skips. It would have <b>skipped a +&#8377;2,925 winner</b> (and PPLPHARMA at RSI 83, a small loss).
+      Net: treatment finished <b>~&#8377;2,328 worse today</b>. Cumulative delta over 3 days is now
+      <b>-&#8377;2,259</b> (day1 +899, day2 -830, day3 -2,328). The &quot;overbought + no-catalyst = skip&quot;
+      idea is <b>destroying value</b> — it keeps discarding overbought momentum winners (07-28 MARICO/NAUKRI/TVSMOTOR,
+      07-29 KAYNES). Recommend flagging it for an early drop at its decision point; do NOT commit it.
+      <a href="EXPERIMENT-rsi_overbought_entry.html">Scoreboard &rarr;</a>
+    </p>
+  </section>
+
+  <section>
+    <h2>Finding 3 — shorts keep losing; disable_shorts starts tomorrow</h2>
+    <p class="lede">
+      BIOCON SHORT (RSI 41, no catalyst) lost -&#8377;345. Shorts are now <b>2/7 (29% WR), -&#8377;790 cumulative</b>
+      vs longs <b>11/25 (44%), +&#8377;2,523</b>. The <code>disable_shorts</code> experiment begins recording
+      <b>2026-07-30</b> — today reinforces the motivation, though the 2 early short winners still keep N honest.
+      Long and short P&amp;L are now tracked separately on every DAILY page (never netted).
+    </p>
+  </section>
+
+  <section>
+    <h2>Finding 4 — volume and pending-catalyst did NOT predict winners today</h2>
+    <p class="lede">
+      Counter-signals worth noting: the winner (KAYNES) had the <b>lowest</b> volume of the three (2.2&times;), while
+      both losers had higher volume (BIOCON 6.9&times;, PPLPHARMA 4.8&times;). And PPLPHARMA had a <b>pending catalyst</b>
+      (Q1 board meeting today, call Jul 30) yet faded -1.6% — pre-result anticipation didn't hold. Small N, but a
+      reminder that no single factor (volume, RSI, catalyst) is carrying predictive weight in isolation.
+    </p>
+  </section>
+
+  <section>
+    <h2>Verdict</h2>
+    <p class="lede" style="font-size:0.88rem;">
+      Green on the tape (+&#8377;1,983) but <b>thin and outlier-driven</b> — one trend trade over a losing base.
+      The real signal today is in the experiments: <b>the catalyst&times;RSI-overbought skip is failing hard
+      (-&#8377;2,259)</b> and should be headed for rejection, while <b>shorts remain a net drag</b> (-&#8377;790) with
+      disable_shorts starting tomorrow. No live fills (observation mode + Dhan token expired). Trailing-stop design
+      validated again. No rule change — evidence recorded.
+    </p>
+  </section>
+
+  <footer>
+    Generated from <code>recommendations.jsonl</code>, <code>signal_timeline.jsonl</code>,
+    <code>catalysts.jsonl</code>, <code>pnl_split.py</code>, <code>run_experiments.py</code>, and the
+    price-tracker Yahoo-fill model. Journal path: <code>journal/reports/DAILY-YYYY-MM-DD.html</code>.
+  </footer>
+</div><!-- END_SUMMARY_PANEL -->
+<!-- TRACKER_TAB_START -->
+<div class="tabpanel" id="tab-tracker">
+
+    <div class="tiles" style="margin-bottom:20px;">
+      <div class="tile">
+        <div class="label">Net P&amp;L today (after Dhan costs)</div>
+        <div class="value" style="color:var(--good);">+₹1,983</div>
+        <div class="note">gross +₹2,103 − ₹121 costs, ₹111,402 deployed</div>
+      </div>
+      <div class="tile">
+        <div class="label">Cumulative P&amp;L (v4 trial, 2026-07-20 → 2026-07-29)</div>
+        <div class="value" style="color:var(--good);">+₹1,733</div>
+        <div class="note">net of Dhan costs, 32 trade(s) across 5 day(s) — excludes pre-trial May/June signals</div>
+      </div>
+      <div class="tile">
+        <div class="label">Win / loss</div>
+        <div class="value">1 / 2</div>
+        <div class="note">2 trailing-stop hit · 1 market-close (3 via Yahoo fill)</div>
+      </div>
+      <div class="tile"><div class="label">Long vs Short (kept separate)</div><div style="margin-top:6px;"><div style="display:flex; justify-content:space-between; gap:10px; font-size:0.82rem; padding:2px 0;"><span>LONG <span style="color:var(--text-muted);">1/2</span></span><span>today <b style="color:var(--good);">+₹2,328</b> · cum <b style="color:var(--good);">+₹2,523</b></span></div><div style="display:flex; justify-content:space-between; gap:10px; font-size:0.82rem; padding:2px 0;"><span>SHORT <span style="color:var(--text-muted);">0/1</span></span><span>today <b style="color:var(--critical);">-₹345</b> · cum <b style="color:var(--critical);">-₹790</b></span></div></div><div class="note">shorts tracked separately — do not net against longs</div></div>
+    </div>
+    <p style="color:var(--text-muted); font-size:0.76rem; margin:-8px 0 16px;">
+      Position sizing: ₹37,500 notional/recommendation (v4 trial sizing, 0.75×) — paper P&amp;L only, no real capital at risk during Observation Mode.
+      P&amp;L is net of an approximate Dhan intraday-equity round-trip cost stack (brokerage min(₹20, 0.03%)/leg, STT 0.025% on sell, exchange txn ~0.00325%, SEBI fee, stamp duty 0.003% on buy, 18% GST on brokerage+txn) — see each card's cost breakdown.
+      Execution model matches the real v4 rule exactly (journal/orb_autopsy.py's replay_v4): trailing stop 1x opening-range-width behind the best close since entry — <b>no fixed target</b>, tighten-only, flat at 15:10 IST. Every recommendation is closed: trailing-stop hit or 15:10 square-off — never left unresolved. Uses Yahoo Finance's full-day 5-min OHLC bars (not the live scanner's sparse 10-min checkpoints) so the replay is accurate regardless of when the live scanner stopped watching.
+      A handful may show "no entry data" if their real entry fell inside a known scanner-outage window — excluded from P&amp;L, not counted as a loss.
+    </p><div class="track-grid">
+    <div class="track-card">
+      <div class="track-head">
+        <div>
+          <span class="track-ticker">PPLPHARMA</span>
+          <span class="track-sub">ORB · LONG · OTHER</span>
+        </div>
+        <span class="pill loss">LOSS · -₹597 (-1.60%)</span>
+      </div>
+      <div class="track-levels">
+        <span>Entry <b>199.70</b></span>
+        <span>Initial stop <b>193.35</b> <span style="color:var(--text-muted);">(trails — no fixed target in v4)</span></span>
+        <span>Invested <b>₹37,344 (187 sh)</b></span>
+      </div>
+      <div class="track-levels">
+        <span>Gross P&amp;L <b>-₹557</b></span>
+        <span>Dhan costs <b>-₹39</b></span>
+        <span>Entered <b>09:30</b></span>
+        <span>Closed <b>15:10</b> @ <b>196.72</b></span>
+        <span>Reason <b>Closed — market close (15:10 square-off)</b></span>
+      </div>
+      <div class="track-chart"><svg viewBox="0 0 560 130" width="100%" height="130" role="img" aria-label="PPLPHARMA price path"><line x1="8" y1="20.6" x2="504" y2="20.6" stroke="var(--baseline)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="23.6" font-size="9" fill="var(--text-muted)">Entry</text><line x1="8" y1="100.3" x2="504" y2="100.3" stroke="var(--critical)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="103.3" font-size="9" fill="var(--text-muted)">Initial stop</text><path d="M 8.0 20.6 L 0.7 33.9 L 8.0 57.6 L 15.3 48.2 L 22.6 43.8 L 29.9 38.0 L 37.2 19.7 L 44.5 52.6 L 51.8 61.3 L 59.1 58.9 L 66.4 47.1 L 73.6 51.6 L 80.9 53.1 L 88.2 53.5 L 95.5 53.6 L 102.8 51.3 L 110.1 53.6 L 117.4 59.5 L 124.7 55.4 L 132.0 60.5 L 139.3 62.5 L 146.6 58.6 L 153.9 60.0 L 161.2 58.6 L 168.5 57.9 L 175.8 59.4 L 183.1 62.1 L 190.4 70.3 L 197.6 69.0 L 204.9 74.6 L 212.2 75.3 L 219.5 80.9 L 226.8 77.2 L 234.1 79.6 L 241.4 77.3 L 248.7 80.5 L 256.0 82.2 L 263.3 84.2 L 270.6 84.9 L 277.9 76.6 L 285.2 79.2 L 292.5 79.6 L 299.8 82.6 L 307.1 76.2 L 314.4 76.0 L 321.6 76.8 L 328.9 80.5 L 336.2 75.3 L 343.5 73.6 L 350.8 77.6 L 358.1 75.8 L 365.4 74.9 L 372.7 79.3 L 380.0 78.3 L 387.3 77.5 L 394.6 78.1 L 401.9 76.5 L 409.2 75.6 L 416.5 70.6 L 423.8 74.2 L 431.1 78.6 L 438.4 75.8 L 445.6 82.0 L 452.9 76.7 L 460.2 76.0 L 467.5 74.6 L 474.8 70.2 L 482.1 74.2 L 489.4 70.3 L 496.7 58.0 L 504.0 63.6" fill="none" stroke="var(--critical)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="8.0" cy="20.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:30 · 199.70 · ORB 2.89% wid | vol4.8x | RSI 83 [OB]</title></circle><circle cx="0.7" cy="33.9" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:25 · 198.64 · [Yahoo fill]</title></circle><circle cx="8.0" cy="57.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:30 · 196.75 · [Yahoo fill]</title></circle><circle cx="15.3" cy="48.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:35 · 197.50 · [Yahoo fill]</title></circle><circle cx="22.6" cy="43.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:40 · 197.85 · [Yahoo fill]</title></circle><circle cx="29.9" cy="38.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:45 · 198.31 · [Yahoo fill]</title></circle><circle cx="37.2" cy="19.7" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:50 · 199.77 · [Yahoo fill]</title></circle><circle cx="44.5" cy="52.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:55 · 197.15 · [Yahoo fill]</title></circle><circle cx="51.8" cy="61.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:00 · 196.46 · [Yahoo fill]</title></circle><circle cx="59.1" cy="58.9" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:05 · 196.65 · [Yahoo fill]</title></circle><circle cx="66.4" cy="47.1" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:10 · 197.59 · [Yahoo fill]</title></circle><circle cx="73.6" cy="51.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:15 · 197.23 · [Yahoo fill]</title></circle><circle cx="80.9" cy="53.1" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:20 · 197.11 · [Yahoo fill]</title></circle><circle cx="88.2" cy="53.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:25 · 197.08 · [Yahoo fill]</title></circle><circle cx="95.5" cy="53.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:30 · 197.07 · [Yahoo fill]</title></circle><circle cx="102.8" cy="51.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:35 · 197.25 · [Yahoo fill]</title></circle><circle cx="110.1" cy="53.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:40 · 197.07 · [Yahoo fill]</title></circle><circle cx="117.4" cy="59.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:45 · 196.60 · [Yahoo fill]</title></circle><circle cx="124.7" cy="55.4" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:50 · 196.93 · [Yahoo fill]</title></circle><circle cx="132.0" cy="60.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:55 · 196.52 · [Yahoo fill]</title></circle><circle cx="139.3" cy="62.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:00 · 196.36 · [Yahoo fill]</title></circle><circle cx="146.6" cy="58.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:05 · 196.67 · [Yahoo fill]</title></circle><circle cx="153.9" cy="60.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:10 · 196.56 · [Yahoo fill]</title></circle><circle cx="161.2" cy="58.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:15 · 196.67 · [Yahoo fill]</title></circle><circle cx="168.5" cy="57.9" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:20 · 196.73 · [Yahoo fill]</title></circle><circle cx="175.8" cy="59.4" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:25 · 196.61 · [Yahoo fill]</title></circle><circle cx="183.1" cy="62.1" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:30 · 196.39 · [Yahoo fill]</title></circle><circle cx="190.4" cy="70.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:35 · 195.74 · [Yahoo fill]</title></circle><circle cx="197.6" cy="69.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:40 · 195.84 · [Yahoo fill]</title></circle><circle cx="204.9" cy="74.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:45 · 195.40 · [Yahoo fill]</title></circle><circle cx="212.2" cy="75.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:50 · 195.34 · [Yahoo fill]</title></circle><circle cx="219.5" cy="80.9" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:55 · 194.90 · [Yahoo fill]</title></circle><circle cx="226.8" cy="77.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:00 · 195.19 · [Yahoo fill]</title></circle><circle cx="234.1" cy="79.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:05 · 195.00 · [Yahoo fill]</title></circle><circle cx="241.4" cy="77.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:10 · 195.18 · [Yahoo fill]</title></circle><circle cx="248.7" cy="80.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:15 · 194.93 · [Yahoo fill]</title></circle><circle cx="256.0" cy="82.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:20 · 194.79 · [Yahoo fill]</title></circle><circle cx="263.3" cy="84.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:25 · 194.63 · [Yahoo fill]</title></circle><circle cx="270.6" cy="84.9" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:30 · 194.58 · [Yahoo fill]</title></circle><circle cx="277.9" cy="76.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:35 · 195.24 · [Yahoo fill]</title></circle><circle cx="285.2" cy="79.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:40 · 195.03 · [Yahoo fill]</title></circle><circle cx="292.5" cy="79.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:45 · 195.00 · [Yahoo fill]</title></circle><circle cx="299.8" cy="82.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:50 · 194.76 · [Yahoo fill]</title></circle><circle cx="307.1" cy="76.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:55 · 195.27 · [Yahoo fill]</title></circle><circle cx="314.4" cy="76.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:00 · 195.29 · [Yahoo fill]</title></circle><circle cx="321.6" cy="76.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:05 · 195.22 · [Yahoo fill]</title></circle><circle cx="328.9" cy="80.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:10 · 194.93 · [Yahoo fill]</title></circle><circle cx="336.2" cy="75.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:15 · 195.34 · [Yahoo fill]</title></circle><circle cx="343.5" cy="73.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:20 · 195.48 · [Yahoo fill]</title></circle><circle cx="350.8" cy="77.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:25 · 195.16 · [Yahoo fill]</title></circle><circle cx="358.1" cy="75.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:30 · 195.30 · [Yahoo fill]</title></circle><circle cx="365.4" cy="74.9" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:35 · 195.37 · [Yahoo fill]</title></circle><circle cx="372.7" cy="79.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:40 · 195.02 · [Yahoo fill]</title></circle><circle cx="380.0" cy="78.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:45 · 195.10 · [Yahoo fill]</title></circle><circle cx="387.3" cy="77.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:50 · 195.17 · [Yahoo fill]</title></circle><circle cx="394.6" cy="78.1" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:55 · 195.12 · [Yahoo fill]</title></circle><circle cx="401.9" cy="76.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:00 · 195.25 · [Yahoo fill]</title></circle><circle cx="409.2" cy="75.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:05 · 195.32 · [Yahoo fill]</title></circle><circle cx="416.5" cy="70.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:10 · 195.72 · [Yahoo fill]</title></circle><circle cx="423.8" cy="74.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:15 · 195.43 · [Yahoo fill]</title></circle><circle cx="431.1" cy="78.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:20 · 195.08 · [Yahoo fill]</title></circle><circle cx="438.4" cy="75.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:25 · 195.30 · [Yahoo fill]</title></circle><circle cx="445.6" cy="82.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:30 · 194.81 · [Yahoo fill]</title></circle><circle cx="452.9" cy="76.7" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:35 · 195.23 · [Yahoo fill]</title></circle><circle cx="460.2" cy="76.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:40 · 195.29 · [Yahoo fill]</title></circle><circle cx="467.5" cy="74.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:45 · 195.40 · [Yahoo fill]</title></circle><circle cx="474.8" cy="70.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:50 · 195.75 · [Yahoo fill]</title></circle><circle cx="482.1" cy="74.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:55 · 195.43 · [Yahoo fill]</title></circle><circle cx="489.4" cy="70.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>15:00 · 195.74 · [Yahoo fill]</title></circle><circle cx="496.7" cy="58.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>15:05 · 196.72 · [Yahoo fill]</title></circle><circle cx="504.0" cy="63.6" r="5" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>15:10 · 196.27 · [Yahoo fill]</title></circle><text x="512.0" y="66.6" font-size="10" font-weight="600" fill="var(--text-primary)">196.27</text></svg></div>
+      <details class="track-details">
+        <summary>Full checkpoint history &amp; cost breakdown</summary>
+        <table class="cp-table" style="margin-bottom:10px;"><thead><tr><th>Dhan cost (round trip)</th><th class="num">Amount</th></tr></thead><tbody><tr><td>Brokerage</td><td class="num">₹22.24</td></tr><tr><td>STT</td><td class="num">₹9.20</td></tr><tr><td>Exchange txn charge</td><td class="num">₹2.41</td></tr><tr><td>SEBI fee</td><td class="num">₹0.07</td></tr><tr><td>Stamp duty</td><td class="num">₹1.12</td></tr><tr><td>GST</td><td class="num">₹4.44</td></tr><tr><td><b>Total</b></td><td class="num"><b>₹39.48</b></td></tr></tbody></table>
+        <table class="cp-table"><thead><tr><th>Time</th><th class="num">Price</th><th>Notes</th></tr></thead><tbody><tr><td>09:30</td><td class="num">199.70</td><td>ORB 2.89% wid | vol4.8x | RSI 83 [OB]</td></tr><tr><td>09:25</td><td class="num">198.64</td><td>[Yahoo fill]</td></tr><tr><td>09:30</td><td class="num">196.75</td><td>[Yahoo fill]</td></tr><tr><td>09:35</td><td class="num">197.50</td><td>[Yahoo fill]</td></tr><tr><td>09:40</td><td class="num">197.85</td><td>[Yahoo fill]</td></tr><tr><td>09:45</td><td class="num">198.31</td><td>[Yahoo fill]</td></tr><tr><td>09:50</td><td class="num">199.77</td><td>[Yahoo fill]</td></tr><tr><td>09:55</td><td class="num">197.15</td><td>[Yahoo fill]</td></tr><tr><td>10:00</td><td class="num">196.46</td><td>[Yahoo fill]</td></tr><tr><td>10:05</td><td class="num">196.65</td><td>[Yahoo fill]</td></tr><tr><td>10:10</td><td class="num">197.59</td><td>[Yahoo fill]</td></tr><tr><td>10:15</td><td class="num">197.23</td><td>[Yahoo fill]</td></tr><tr><td>10:20</td><td class="num">197.11</td><td>[Yahoo fill]</td></tr><tr><td>10:25</td><td class="num">197.08</td><td>[Yahoo fill]</td></tr><tr><td>10:30</td><td class="num">197.07</td><td>[Yahoo fill]</td></tr><tr><td>10:35</td><td class="num">197.25</td><td>[Yahoo fill]</td></tr><tr><td>10:40</td><td class="num">197.07</td><td>[Yahoo fill]</td></tr><tr><td>10:45</td><td class="num">196.60</td><td>[Yahoo fill]</td></tr><tr><td>10:50</td><td class="num">196.93</td><td>[Yahoo fill]</td></tr><tr><td>10:55</td><td class="num">196.52</td><td>[Yahoo fill]</td></tr><tr><td>11:00</td><td class="num">196.36</td><td>[Yahoo fill]</td></tr><tr><td>11:05</td><td class="num">196.67</td><td>[Yahoo fill]</td></tr><tr><td>11:10</td><td class="num">196.56</td><td>[Yahoo fill]</td></tr><tr><td>11:15</td><td class="num">196.67</td><td>[Yahoo fill]</td></tr><tr><td>11:20</td><td class="num">196.73</td><td>[Yahoo fill]</td></tr><tr><td>11:25</td><td class="num">196.61</td><td>[Yahoo fill]</td></tr><tr><td>11:30</td><td class="num">196.39</td><td>[Yahoo fill]</td></tr><tr><td>11:35</td><td class="num">195.74</td><td>[Yahoo fill]</td></tr><tr><td>11:40</td><td class="num">195.84</td><td>[Yahoo fill]</td></tr><tr><td>11:45</td><td class="num">195.40</td><td>[Yahoo fill]</td></tr><tr><td>11:50</td><td class="num">195.34</td><td>[Yahoo fill]</td></tr><tr><td>11:55</td><td class="num">194.90</td><td>[Yahoo fill]</td></tr><tr><td>12:00</td><td class="num">195.19</td><td>[Yahoo fill]</td></tr><tr><td>12:05</td><td class="num">195.00</td><td>[Yahoo fill]</td></tr><tr><td>12:10</td><td class="num">195.18</td><td>[Yahoo fill]</td></tr><tr><td>12:15</td><td class="num">194.93</td><td>[Yahoo fill]</td></tr><tr><td>12:20</td><td class="num">194.79</td><td>[Yahoo fill]</td></tr><tr><td>12:25</td><td class="num">194.63</td><td>[Yahoo fill]</td></tr><tr><td>12:30</td><td class="num">194.58</td><td>[Yahoo fill]</td></tr><tr><td>12:35</td><td class="num">195.24</td><td>[Yahoo fill]</td></tr><tr><td>12:40</td><td class="num">195.03</td><td>[Yahoo fill]</td></tr><tr><td>12:45</td><td class="num">195.00</td><td>[Yahoo fill]</td></tr><tr><td>12:50</td><td class="num">194.76</td><td>[Yahoo fill]</td></tr><tr><td>12:55</td><td class="num">195.27</td><td>[Yahoo fill]</td></tr><tr><td>13:00</td><td class="num">195.29</td><td>[Yahoo fill]</td></tr><tr><td>13:05</td><td class="num">195.22</td><td>[Yahoo fill]</td></tr><tr><td>13:10</td><td class="num">194.93</td><td>[Yahoo fill]</td></tr><tr><td>13:15</td><td class="num">195.34</td><td>[Yahoo fill]</td></tr><tr><td>13:20</td><td class="num">195.48</td><td>[Yahoo fill]</td></tr><tr><td>13:25</td><td class="num">195.16</td><td>[Yahoo fill]</td></tr><tr><td>13:30</td><td class="num">195.30</td><td>[Yahoo fill]</td></tr><tr><td>13:35</td><td class="num">195.37</td><td>[Yahoo fill]</td></tr><tr><td>13:40</td><td class="num">195.02</td><td>[Yahoo fill]</td></tr><tr><td>13:45</td><td class="num">195.10</td><td>[Yahoo fill]</td></tr><tr><td>13:50</td><td class="num">195.17</td><td>[Yahoo fill]</td></tr><tr><td>13:55</td><td class="num">195.12</td><td>[Yahoo fill]</td></tr><tr><td>14:00</td><td class="num">195.25</td><td>[Yahoo fill]</td></tr><tr><td>14:05</td><td class="num">195.32</td><td>[Yahoo fill]</td></tr><tr><td>14:10</td><td class="num">195.72</td><td>[Yahoo fill]</td></tr><tr><td>14:15</td><td class="num">195.43</td><td>[Yahoo fill]</td></tr><tr><td>14:20</td><td class="num">195.08</td><td>[Yahoo fill]</td></tr><tr><td>14:25</td><td class="num">195.30</td><td>[Yahoo fill]</td></tr><tr><td>14:30</td><td class="num">194.81</td><td>[Yahoo fill]</td></tr><tr><td>14:35</td><td class="num">195.23</td><td>[Yahoo fill]</td></tr><tr><td>14:40</td><td class="num">195.29</td><td>[Yahoo fill]</td></tr><tr><td>14:45</td><td class="num">195.40</td><td>[Yahoo fill]</td></tr><tr><td>14:50</td><td class="num">195.75</td><td>[Yahoo fill]</td></tr><tr><td>14:55</td><td class="num">195.43</td><td>[Yahoo fill]</td></tr><tr><td>15:00</td><td class="num">195.74</td><td>[Yahoo fill]</td></tr><tr><td>15:05</td><td class="num">196.72</td><td>[Yahoo fill]</td></tr><tr><td>15:10</td><td class="num">196.27</td><td>[Yahoo fill]</td></tr></tbody></table>
+      </details>
+    </div>
+    <div class="track-card">
+      <div class="track-head">
+        <div>
+          <span class="track-ticker">BIOCON</span>
+          <span class="track-sub">ORB · SHORT · PHARMA2</span>
+        </div>
+        <span class="pill loss">LOSS · -₹345 (-0.93%)</span>
+      </div>
+      <div class="track-levels">
+        <span>Entry <b>428.55</b></span>
+        <span>Initial stop <b>435.45</b> <span style="color:var(--text-muted);">(trails — no fixed target in v4)</span></span>
+        <span>Invested <b>₹37,284 (87 sh)</b></span>
+      </div>
+      <div class="track-levels">
+        <span>Gross P&amp;L <b>-₹305</b></span>
+        <span>Dhan costs <b>-₹40</b></span>
+        <span>Entered <b>10:30</b></span>
+        <span>Closed <b>11:10</b> @ <b>432.06</b></span>
+        <span>Reason <b>Trailing stop hit</b></span>
+      </div>
+      <div class="track-chart"><svg viewBox="0 0 560 130" width="100%" height="130" role="img" aria-label="BIOCON price path"><line x1="8" y1="100.3" x2="504" y2="100.3" stroke="var(--baseline)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="103.3" font-size="9" fill="var(--text-muted)">Entry</text><line x1="8" y1="19.7" x2="504" y2="19.7" stroke="var(--critical)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="22.7" font-size="9" fill="var(--text-muted)">Initial stop</text><path d="M 8.0 100.3 L 132.0 83.4 L 256.0 84.0 L 380.0 84.0 L -116.0 82.8 L -54.0 99.2 L 8.0 89.8 L 70.0 82.8 L 132.0 78.1 L 194.0 82.2 L 256.0 74.6 L 318.0 83.4 L 380.0 70.5 L 442.0 64.1 L 504.0 65.8" fill="none" stroke="var(--critical)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="8.0" cy="100.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:30 · 428.55 · ORB 0.84% wid | vol6.9x | RSI 41</title></circle><circle cx="132.0" cy="83.4" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:40 · 430.00 · ORB 0.84% wid | vol0.6x | RSI 49 [VWAP-]</title></circle><circle cx="256.0" cy="84.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:50 · 429.95 · ORB 0.84% wid | vol0.3x | RSI 49 [VWAP-]</title></circle><circle cx="380.0" cy="84.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:00 · 429.95 · ORB 0.84% wid | vol0.4x | RSI 48 [VWAP-]</title></circle><circle cx="-116.0" cy="82.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:20 · 430.05 · [Yahoo fill]</title></circle><circle cx="-54.0" cy="99.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:25 · 428.65 · [Yahoo fill]</title></circle><circle cx="8.0" cy="89.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:30 · 429.45 · [Yahoo fill]</title></circle><circle cx="70.0" cy="82.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:35 · 430.05 · [Yahoo fill]</title></circle><circle cx="132.0" cy="78.1" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:40 · 430.45 · [Yahoo fill]</title></circle><circle cx="194.0" cy="82.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:45 · 430.10 · [Yahoo fill]</title></circle><circle cx="256.0" cy="74.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:50 · 430.75 · [Yahoo fill]</title></circle><circle cx="318.0" cy="83.4" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:55 · 430.00 · [Yahoo fill]</title></circle><circle cx="380.0" cy="70.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:00 · 431.10 · [Yahoo fill]</title></circle><circle cx="442.0" cy="64.1" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:05 · 431.65 · [Yahoo fill]</title></circle><circle cx="504.0" cy="65.8" r="5" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:10 · 431.50 · [Yahoo fill]</title></circle><text x="512.0" y="68.8" font-size="10" font-weight="600" fill="var(--text-primary)">431.50</text></svg></div>
+      <details class="track-details">
+        <summary>Full checkpoint history &amp; cost breakdown</summary>
+        <table class="cp-table" style="margin-bottom:10px;"><thead><tr><th>Dhan cost (round trip)</th><th class="num">Amount</th></tr></thead><tbody><tr><td>Brokerage</td><td class="num">₹22.46</td></tr><tr><td>STT</td><td class="num">₹9.32</td></tr><tr><td>Exchange txn charge</td><td class="num">₹2.43</td></tr><tr><td>SEBI fee</td><td class="num">₹0.07</td></tr><tr><td>Stamp duty</td><td class="num">₹1.13</td></tr><tr><td>GST</td><td class="num">₹4.48</td></tr><tr><td><b>Total</b></td><td class="num"><b>₹39.90</b></td></tr></tbody></table>
+        <table class="cp-table"><thead><tr><th>Time</th><th class="num">Price</th><th>Notes</th></tr></thead><tbody><tr><td>10:30</td><td class="num">428.55</td><td>ORB 0.84% wid | vol6.9x | RSI 41</td></tr><tr><td>10:40</td><td class="num">430.00</td><td>ORB 0.84% wid | vol0.6x | RSI 49 [VWAP-]</td></tr><tr><td>10:50</td><td class="num">429.95</td><td>ORB 0.84% wid | vol0.3x | RSI 49 [VWAP-]</td></tr><tr><td>11:00</td><td class="num">429.95</td><td>ORB 0.84% wid | vol0.4x | RSI 48 [VWAP-]</td></tr><tr><td>10:20</td><td class="num">430.05</td><td>[Yahoo fill]</td></tr><tr><td>10:25</td><td class="num">428.65</td><td>[Yahoo fill]</td></tr><tr><td>10:30</td><td class="num">429.45</td><td>[Yahoo fill]</td></tr><tr><td>10:35</td><td class="num">430.05</td><td>[Yahoo fill]</td></tr><tr><td>10:40</td><td class="num">430.45</td><td>[Yahoo fill]</td></tr><tr><td>10:45</td><td class="num">430.10</td><td>[Yahoo fill]</td></tr><tr><td>10:50</td><td class="num">430.75</td><td>[Yahoo fill]</td></tr><tr><td>10:55</td><td class="num">430.00</td><td>[Yahoo fill]</td></tr><tr><td>11:00</td><td class="num">431.10</td><td>[Yahoo fill]</td></tr><tr><td>11:05</td><td class="num">431.65</td><td>[Yahoo fill]</td></tr><tr><td>11:10</td><td class="num">431.50</td><td>[Yahoo fill]</td></tr></tbody></table>
+      </details>
+    </div>
+    <div class="track-card">
+      <div class="track-head">
+        <div>
+          <span class="track-ticker">KAYNES</span>
+          <span class="track-sub">ORB · LONG · ELEC</span>
+        </div>
+        <span class="pill win">WIN · +₹2,925 (+7.95%)</span>
+      </div>
+      <div class="track-levels">
+        <span>Entry <b>3343.10</b></span>
+        <span>Initial stop <b>3273.70</b> <span style="color:var(--text-muted);">(trails — no fixed target in v4)</span></span>
+        <span>Invested <b>₹36,774 (11 sh)</b></span>
+      </div>
+      <div class="track-levels">
+        <span>Gross P&amp;L <b>+₹2,966</b></span>
+        <span>Dhan costs <b>-₹41</b></span>
+        <span>Entered <b>09:40</b></span>
+        <span>Closed <b>13:35</b> @ <b>3612.72</b></span>
+        <span>Reason <b>Trailing stop hit</b></span>
+      </div>
+      <div class="track-chart"><svg viewBox="0 0 560 130" width="100%" height="130" role="img" aria-label="KAYNES price path"><line x1="8" y1="85.9" x2="504" y2="85.9" stroke="var(--baseline)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="88.9" font-size="9" fill="var(--text-muted)">Entry</text><line x1="8" y1="100.3" x2="504" y2="100.3" stroke="var(--critical)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="103.3" font-size="9" fill="var(--text-muted)">Initial stop</text><path d="M 8.0 85.9 L 21.1 87.0 L 34.1 80.2 L 47.2 74.1 L 60.2 70.1 L 73.3 72.4 L 86.3 73.1 L 99.4 71.4 L 112.4 73.2 L 125.5 70.0 L 138.5 73.6 L 151.6 69.1 L 164.6 62.4 L 190.7 62.0 L 203.8 52.1 L 216.8 43.9 L 229.9 35.1 L 242.9 27.4 L 256.0 23.4 L 269.1 22.4 L 282.1 20.8 L 295.2 21.0 L 308.2 19.7 L 321.3 32.0 L 334.3 30.4 L 347.4 29.6 L 360.4 32.2 L 373.5 32.7 L 386.5 31.6 L 399.6 34.0 L 412.6 31.5 L 425.7 29.2 L 438.7 29.1 L 451.8 23.4 L 464.8 23.4 L 477.9 23.4 L 490.9 23.4 L 504.0 23.4 L 8.0 86.8 L 14.5 87.0 L 21.1 85.1 L 27.6 79.1 L 34.1 67.6 L 40.6 73.1 L 47.2 74.1 L 53.7 70.1 L 60.2 72.9 L 66.7 72.1 L 73.3 72.7 L 79.8 73.0 L 86.3 72.3 L 92.8 74.0 L 99.4 71.3 L 105.9 72.3 L 112.4 72.5 L 118.9 70.6 L 125.5 72.1 L 132.0 72.8 L 138.5 72.3 L 145.1 70.8 L 151.6 68.4 L 158.1 62.2 L 164.6 61.2 L 171.2 62.1 L 177.7 61.9 L 184.2 60.9 L 190.7 61.6 L 197.3 55.2 L 203.8 44.1 L 210.3 45.2 L 216.8 43.0 L 223.4 41.7 L 229.9 29.2 L 236.4 30.6 L 242.9 25.8 L 249.5 26.9 L 256.0 23.3 L 262.5 24.4 L 269.1 20.8 L 275.6 21.7 L 282.1 19.7 L 288.6 22.1 L 295.2 21.9 L 301.7 21.0 L 308.2 19.9 L 314.7 31.8" fill="none" stroke="var(--good)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="8.0" cy="85.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:40 · 3343.10 · ORB 1.49% wid | vol2.2x | RSI 86 [OB]</title></circle><circle cx="21.1" cy="87.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:50 · 3337.90 · ORB 1.49% wid | vol1.3x | RSI 84 [OB]</title></circle><circle cx="34.1" cy="80.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:00 · 3370.60 · ORB 1.49% wid | vol3.5x | RSI 88 [OB]</title></circle><circle cx="47.2" cy="74.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:10 · 3400.20 · ORB 1.49% wid | vol2.0x | RSI 79</title></circle><circle cx="60.2" cy="70.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:20 · 3419.70 · ORB 1.49% wid | vol1.0x | RSI 80</title></circle><circle cx="73.3" cy="72.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:30 · 3408.40 · ORB 1.49% wid | vol0.4x | RSI 75</title></circle><circle cx="86.3" cy="73.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:40 · 3405.00 · ORB 1.49% wid | vol0.3x | RSI 73</title></circle><circle cx="99.4" cy="71.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:50 · 3413.20 · ORB 1.49% wid | vol0.4x | RSI 70</title></circle><circle cx="112.4" cy="73.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:00 · 3404.50 · ORB 1.49% wid | vol0.6x | RSI 70</title></circle><circle cx="125.5" cy="70.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:10 · 3420.00 · ORB 1.49% wid | vol0.4x | RSI 71</title></circle><circle cx="138.5" cy="73.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:20 · 3402.50 · ORB 1.49% wid | vol0.1x | RSI 64</title></circle><circle cx="151.6" cy="69.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:30 · 3424.10 · ORB 1.49% wid | vol0.7x | RSI 71 [LATE&gt;11:30]</title></circle><circle cx="164.6" cy="62.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:40 · 3456.40 · ORB 1.49% wid | vol3.1x | RSI 77 [LATE&gt;11:30]</title></circle><circle cx="190.7" cy="62.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:00 · 3458.70 · ORB 1.49% wid | vol0.1x | RSI 74 [LATE&gt;11:30]</title></circle><circle cx="203.8" cy="52.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:10 · 3506.40 · ORB 1.49% wid | vol0.6x | RSI 81 [OB] [LATE&gt;11:30]</title></circle><circle cx="216.8" cy="43.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:20 · 3546.00 · ORB 1.49% wid | vol3.5x | RSI 83 [OB] [LATE&gt;11:30]</title></circle><circle cx="229.9" cy="35.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:30 · 3588.50 · ORB 1.49% wid | vol2.4x | RSI 85 [OB] [LATE&gt;11:30]</title></circle><circle cx="242.9" cy="27.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:40 · 3625.60 · ORB 1.49% wid | vol3.4x | RSI 86 [OB] [LATE&gt;11:30]</title></circle><circle cx="256.0" cy="23.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:50 · 3644.70 · ORB 1.49% wid | vol0.7x | RSI 86 [OB] [LATE&gt;11:30]</title></circle><circle cx="269.1" cy="22.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:00 · 3649.40 · ORB 1.49% wid | vol0.7x | RSI 84 [OB] [LATE&gt;11:30]</title></circle><circle cx="282.1" cy="20.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:10 · 3657.20 · ORB 1.49% wid | vol1.0x | RSI 84 [OB] [LATE&gt;11:30]</title></circle><circle cx="295.2" cy="21.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:20 · 3656.30 · ORB 1.49% wid | vol0.4x | RSI 79 [LATE&gt;11:30]</title></circle><circle cx="308.2" cy="19.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:30 · 3662.70 · ORB 1.49% wid | vol0.4x | RSI 80 [LATE&gt;11:30]</title></circle><circle cx="321.3" cy="32.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:40 · 3603.10 · ORB 1.49% wid | vol1.7x | RSI 58 [LATE&gt;11:30]</title></circle><circle cx="334.3" cy="30.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:50 · 3611.00 · ORB 1.49% wid | vol0.3x | RSI 59 [LATE&gt;11:30]</title></circle><circle cx="347.4" cy="29.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:00 · 3614.90 · ORB 1.49% wid | vol0.6x | RSI 59 [LATE&gt;11:30]</title></circle><circle cx="360.4" cy="32.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:10 · 3602.20 · ORB 1.49% wid | vol0.4x | RSI 55 [LATE&gt;11:30]</title></circle><circle cx="373.5" cy="32.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:20 · 3600.00 · ORB 1.49% wid | vol0.2x | RSI 54 [LATE&gt;11:30]</title></circle><circle cx="386.5" cy="31.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:30 · 3605.10 · ORB 1.49% wid | vol0.4x | RSI 55 [LATE&gt;11:30]</title></circle><circle cx="399.6" cy="34.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:40 · 3593.50 · ORB 1.49% wid | vol0.3x | RSI 51 [LATE&gt;11:30]</title></circle><circle cx="412.6" cy="31.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:50 · 3605.70 · ORB 1.49% wid | vol1.0x | RSI 54 [LATE&gt;11:30]</title></circle><circle cx="425.7" cy="29.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:00 · 3616.90 · ORB 1.49% wid | vol1.1x | RSI 58 [LATE&gt;11:30]</title></circle><circle cx="438.7" cy="29.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:10 · 3617.30 · ORB 1.49% wid | vol1.7x | RSI 57 [LATE&gt;11:30]</title></circle><circle cx="451.8" cy="23.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:20 · 3644.80 · ORB 1.49% wid | vol2.1x | RSI 66 [LATE&gt;11:30]</title></circle><circle cx="464.8" cy="23.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:30 · 3644.80 · ORB 1.49% wid | vol2.1x | RSI 66 [LATE&gt;11:30]</title></circle><circle cx="477.9" cy="23.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:40 · 3644.80 · ORB 1.49% wid | vol2.1x | RSI 66 [LATE&gt;11:30]</title></circle><circle cx="490.9" cy="23.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:50 · 3644.80 · ORB 1.49% wid | vol2.1x | RSI 66 [LATE&gt;11:30]</title></circle><circle cx="504.0" cy="23.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>16:00 · 3644.80 · ORB 1.49% wid | vol2.1x | RSI 66 [LATE&gt;11:30]</title></circle><circle cx="8.0" cy="86.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:40 · 3339.00 · [Yahoo fill]</title></circle><circle cx="14.5" cy="87.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:45 · 3338.00 · [Yahoo fill]</title></circle><circle cx="21.1" cy="85.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:50 · 3347.30 · [Yahoo fill]</title></circle><circle cx="27.6" cy="79.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:55 · 3376.00 · [Yahoo fill]</title></circle><circle cx="34.1" cy="67.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:00 · 3431.60 · [Yahoo fill]</title></circle><circle cx="40.6" cy="73.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:05 · 3404.90 · [Yahoo fill]</title></circle><circle cx="47.2" cy="74.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:10 · 3400.00 · [Yahoo fill]</title></circle><circle cx="53.7" cy="70.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:15 · 3419.50 · [Yahoo fill]</title></circle><circle cx="60.2" cy="72.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:20 · 3406.00 · [Yahoo fill]</title></circle><circle cx="66.7" cy="72.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:25 · 3410.00 · [Yahoo fill]</title></circle><circle cx="73.3" cy="72.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:30 · 3407.10 · [Yahoo fill]</title></circle><circle cx="79.8" cy="73.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:35 · 3405.40 · [Yahoo fill]</title></circle><circle cx="86.3" cy="72.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:40 · 3408.80 · [Yahoo fill]</title></circle><circle cx="92.8" cy="74.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:45 · 3400.80 · [Yahoo fill]</title></circle><circle cx="99.4" cy="71.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:50 · 3413.70 · [Yahoo fill]</title></circle><circle cx="105.9" cy="72.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:55 · 3409.00 · [Yahoo fill]</title></circle><circle cx="112.4" cy="72.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:00 · 3407.70 · [Yahoo fill]</title></circle><circle cx="118.9" cy="70.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:05 · 3417.00 · [Yahoo fill]</title></circle><circle cx="125.5" cy="72.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:10 · 3410.00 · [Yahoo fill]</title></circle><circle cx="132.0" cy="72.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:15 · 3406.50 · [Yahoo fill]</title></circle><circle cx="138.5" cy="72.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:20 · 3409.00 · [Yahoo fill]</title></circle><circle cx="145.1" cy="70.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:25 · 3416.30 · [Yahoo fill]</title></circle><circle cx="151.6" cy="68.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:30 · 3427.90 · [Yahoo fill]</title></circle><circle cx="158.1" cy="62.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:35 · 3457.40 · [Yahoo fill]</title></circle><circle cx="164.6" cy="61.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:40 · 3462.60 · [Yahoo fill]</title></circle><circle cx="171.2" cy="62.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:45 · 3458.30 · [Yahoo fill]</title></circle><circle cx="177.7" cy="61.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:50 · 3459.00 · [Yahoo fill]</title></circle><circle cx="184.2" cy="60.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:55 · 3464.00 · [Yahoo fill]</title></circle><circle cx="190.7" cy="61.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:00 · 3460.50 · [Yahoo fill]</title></circle><circle cx="197.3" cy="55.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:05 · 3491.20 · [Yahoo fill]</title></circle><circle cx="203.8" cy="44.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:10 · 3544.90 · [Yahoo fill]</title></circle><circle cx="210.3" cy="45.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:15 · 3539.40 · [Yahoo fill]</title></circle><circle cx="216.8" cy="43.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:20 · 3550.40 · [Yahoo fill]</title></circle><circle cx="223.4" cy="41.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:25 · 3556.70 · [Yahoo fill]</title></circle><circle cx="229.9" cy="29.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:30 · 3616.80 · [Yahoo fill]</title></circle><circle cx="236.4" cy="30.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:35 · 3610.00 · [Yahoo fill]</title></circle><circle cx="242.9" cy="25.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:40 · 3633.10 · [Yahoo fill]</title></circle><circle cx="249.5" cy="26.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:45 · 3628.00 · [Yahoo fill]</title></circle><circle cx="256.0" cy="23.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:50 · 3645.00 · [Yahoo fill]</title></circle><circle cx="262.5" cy="24.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:55 · 3640.00 · [Yahoo fill]</title></circle><circle cx="269.1" cy="20.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:00 · 3657.50 · [Yahoo fill]</title></circle><circle cx="275.6" cy="21.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:05 · 3652.80 · [Yahoo fill]</title></circle><circle cx="282.1" cy="19.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:10 · 3662.70 · [Yahoo fill]</title></circle><circle cx="288.6" cy="22.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:15 · 3651.00 · [Yahoo fill]</title></circle><circle cx="295.2" cy="21.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:20 · 3652.00 · [Yahoo fill]</title></circle><circle cx="301.7" cy="21.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:25 · 3656.50 · [Yahoo fill]</title></circle><circle cx="308.2" cy="19.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:30 · 3661.70 · [Yahoo fill]</title></circle><circle cx="314.7" cy="31.8" r="5" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:35 · 3604.00 · [Yahoo fill]</title></circle><text x="322.7" y="34.8" font-size="10" font-weight="600" fill="var(--text-primary)">3604.00</text></svg></div>
+      <details class="track-details">
+        <summary>Full checkpoint history &amp; cost breakdown</summary>
+        <table class="cp-table" style="margin-bottom:10px;"><thead><tr><th>Dhan cost (round trip)</th><th class="num">Amount</th></tr></thead><tbody><tr><td>Brokerage</td><td class="num">₹22.95</td></tr><tr><td>STT</td><td class="num">₹9.93</td></tr><tr><td>Exchange txn charge</td><td class="num">₹2.49</td></tr><tr><td>SEBI fee</td><td class="num">₹0.08</td></tr><tr><td>Stamp duty</td><td class="num">₹1.10</td></tr><tr><td>GST</td><td class="num">₹4.58</td></tr><tr><td><b>Total</b></td><td class="num"><b>₹41.13</b></td></tr></tbody></table>
+        <table class="cp-table"><thead><tr><th>Time</th><th class="num">Price</th><th>Notes</th></tr></thead><tbody><tr><td>09:40</td><td class="num">3343.10</td><td>ORB 1.49% wid | vol2.2x | RSI 86 [OB]</td></tr><tr><td>09:50</td><td class="num">3337.90</td><td>ORB 1.49% wid | vol1.3x | RSI 84 [OB]</td></tr><tr><td>10:00</td><td class="num">3370.60</td><td>ORB 1.49% wid | vol3.5x | RSI 88 [OB]</td></tr><tr><td>10:10</td><td class="num">3400.20</td><td>ORB 1.49% wid | vol2.0x | RSI 79</td></tr><tr><td>10:20</td><td class="num">3419.70</td><td>ORB 1.49% wid | vol1.0x | RSI 80</td></tr><tr><td>10:30</td><td class="num">3408.40</td><td>ORB 1.49% wid | vol0.4x | RSI 75</td></tr><tr><td>10:40</td><td class="num">3405.00</td><td>ORB 1.49% wid | vol0.3x | RSI 73</td></tr><tr><td>10:50</td><td class="num">3413.20</td><td>ORB 1.49% wid | vol0.4x | RSI 70</td></tr><tr><td>11:00</td><td class="num">3404.50</td><td>ORB 1.49% wid | vol0.6x | RSI 70</td></tr><tr><td>11:10</td><td class="num">3420.00</td><td>ORB 1.49% wid | vol0.4x | RSI 71</td></tr><tr><td>11:20</td><td class="num">3402.50</td><td>ORB 1.49% wid | vol0.1x | RSI 64</td></tr><tr><td>11:30</td><td class="num">3424.10</td><td>ORB 1.49% wid | vol0.7x | RSI 71 [LATE&gt;11:30]</td></tr><tr><td>11:40</td><td class="num">3456.40</td><td>ORB 1.49% wid | vol3.1x | RSI 77 [LATE&gt;11:30]</td></tr><tr><td>12:00</td><td class="num">3458.70</td><td>ORB 1.49% wid | vol0.1x | RSI 74 [LATE&gt;11:30]</td></tr><tr><td>12:10</td><td class="num">3506.40</td><td>ORB 1.49% wid | vol0.6x | RSI 81 [OB] [LATE&gt;11:30]</td></tr><tr><td>12:20</td><td class="num">3546.00</td><td>ORB 1.49% wid | vol3.5x | RSI 83 [OB] [LATE&gt;11:30]</td></tr><tr><td>12:30</td><td class="num">3588.50</td><td>ORB 1.49% wid | vol2.4x | RSI 85 [OB] [LATE&gt;11:30]</td></tr><tr><td>12:40</td><td class="num">3625.60</td><td>ORB 1.49% wid | vol3.4x | RSI 86 [OB] [LATE&gt;11:30]</td></tr><tr><td>12:50</td><td class="num">3644.70</td><td>ORB 1.49% wid | vol0.7x | RSI 86 [OB] [LATE&gt;11:30]</td></tr><tr><td>13:00</td><td class="num">3649.40</td><td>ORB 1.49% wid | vol0.7x | RSI 84 [OB] [LATE&gt;11:30]</td></tr><tr><td>13:10</td><td class="num">3657.20</td><td>ORB 1.49% wid | vol1.0x | RSI 84 [OB] [LATE&gt;11:30]</td></tr><tr><td>13:20</td><td class="num">3656.30</td><td>ORB 1.49% wid | vol0.4x | RSI 79 [LATE&gt;11:30]</td></tr><tr><td>13:30</td><td class="num">3662.70</td><td>ORB 1.49% wid | vol0.4x | RSI 80 [LATE&gt;11:30]</td></tr><tr><td>13:40</td><td class="num">3603.10</td><td>ORB 1.49% wid | vol1.7x | RSI 58 [LATE&gt;11:30]</td></tr><tr><td>13:50</td><td class="num">3611.00</td><td>ORB 1.49% wid | vol0.3x | RSI 59 [LATE&gt;11:30]</td></tr><tr><td>14:00</td><td class="num">3614.90</td><td>ORB 1.49% wid | vol0.6x | RSI 59 [LATE&gt;11:30]</td></tr><tr><td>14:10</td><td class="num">3602.20</td><td>ORB 1.49% wid | vol0.4x | RSI 55 [LATE&gt;11:30]</td></tr><tr><td>14:20</td><td class="num">3600.00</td><td>ORB 1.49% wid | vol0.2x | RSI 54 [LATE&gt;11:30]</td></tr><tr><td>14:30</td><td class="num">3605.10</td><td>ORB 1.49% wid | vol0.4x | RSI 55 [LATE&gt;11:30]</td></tr><tr><td>14:40</td><td class="num">3593.50</td><td>ORB 1.49% wid | vol0.3x | RSI 51 [LATE&gt;11:30]</td></tr><tr><td>14:50</td><td class="num">3605.70</td><td>ORB 1.49% wid | vol1.0x | RSI 54 [LATE&gt;11:30]</td></tr><tr><td>15:00</td><td class="num">3616.90</td><td>ORB 1.49% wid | vol1.1x | RSI 58 [LATE&gt;11:30]</td></tr><tr><td>15:10</td><td class="num">3617.30</td><td>ORB 1.49% wid | vol1.7x | RSI 57 [LATE&gt;11:30]</td></tr><tr><td>15:20</td><td class="num">3644.80</td><td>ORB 1.49% wid | vol2.1x | RSI 66 [LATE&gt;11:30]</td></tr><tr><td>15:30</td><td class="num">3644.80</td><td>ORB 1.49% wid | vol2.1x | RSI 66 [LATE&gt;11:30]</td></tr><tr><td>15:40</td><td class="num">3644.80</td><td>ORB 1.49% wid | vol2.1x | RSI 66 [LATE&gt;11:30]</td></tr><tr><td>15:50</td><td class="num">3644.80</td><td>ORB 1.49% wid | vol2.1x | RSI 66 [LATE&gt;11:30]</td></tr><tr><td>16:00</td><td class="num">3644.80</td><td>ORB 1.49% wid | vol2.1x | RSI 66 [LATE&gt;11:30]</td></tr><tr><td>09:40</td><td class="num">3339.00</td><td>[Yahoo fill]</td></tr><tr><td>09:45</td><td class="num">3338.00</td><td>[Yahoo fill]</td></tr><tr><td>09:50</td><td class="num">3347.30</td><td>[Yahoo fill]</td></tr><tr><td>09:55</td><td class="num">3376.00</td><td>[Yahoo fill]</td></tr><tr><td>10:00</td><td class="num">3431.60</td><td>[Yahoo fill]</td></tr><tr><td>10:05</td><td class="num">3404.90</td><td>[Yahoo fill]</td></tr><tr><td>10:10</td><td class="num">3400.00</td><td>[Yahoo fill]</td></tr><tr><td>10:15</td><td class="num">3419.50</td><td>[Yahoo fill]</td></tr><tr><td>10:20</td><td class="num">3406.00</td><td>[Yahoo fill]</td></tr><tr><td>10:25</td><td class="num">3410.00</td><td>[Yahoo fill]</td></tr><tr><td>10:30</td><td class="num">3407.10</td><td>[Yahoo fill]</td></tr><tr><td>10:35</td><td class="num">3405.40</td><td>[Yahoo fill]</td></tr><tr><td>10:40</td><td class="num">3408.80</td><td>[Yahoo fill]</td></tr><tr><td>10:45</td><td class="num">3400.80</td><td>[Yahoo fill]</td></tr><tr><td>10:50</td><td class="num">3413.70</td><td>[Yahoo fill]</td></tr><tr><td>10:55</td><td class="num">3409.00</td><td>[Yahoo fill]</td></tr><tr><td>11:00</td><td class="num">3407.70</td><td>[Yahoo fill]</td></tr><tr><td>11:05</td><td class="num">3417.00</td><td>[Yahoo fill]</td></tr><tr><td>11:10</td><td class="num">3410.00</td><td>[Yahoo fill]</td></tr><tr><td>11:15</td><td class="num">3406.50</td><td>[Yahoo fill]</td></tr><tr><td>11:20</td><td class="num">3409.00</td><td>[Yahoo fill]</td></tr><tr><td>11:25</td><td class="num">3416.30</td><td>[Yahoo fill]</td></tr><tr><td>11:30</td><td class="num">3427.90</td><td>[Yahoo fill]</td></tr><tr><td>11:35</td><td class="num">3457.40</td><td>[Yahoo fill]</td></tr><tr><td>11:40</td><td class="num">3462.60</td><td>[Yahoo fill]</td></tr><tr><td>11:45</td><td class="num">3458.30</td><td>[Yahoo fill]</td></tr><tr><td>11:50</td><td class="num">3459.00</td><td>[Yahoo fill]</td></tr><tr><td>11:55</td><td class="num">3464.00</td><td>[Yahoo fill]</td></tr><tr><td>12:00</td><td class="num">3460.50</td><td>[Yahoo fill]</td></tr><tr><td>12:05</td><td class="num">3491.20</td><td>[Yahoo fill]</td></tr><tr><td>12:10</td><td class="num">3544.90</td><td>[Yahoo fill]</td></tr><tr><td>12:15</td><td class="num">3539.40</td><td>[Yahoo fill]</td></tr><tr><td>12:20</td><td class="num">3550.40</td><td>[Yahoo fill]</td></tr><tr><td>12:25</td><td class="num">3556.70</td><td>[Yahoo fill]</td></tr><tr><td>12:30</td><td class="num">3616.80</td><td>[Yahoo fill]</td></tr><tr><td>12:35</td><td class="num">3610.00</td><td>[Yahoo fill]</td></tr><tr><td>12:40</td><td class="num">3633.10</td><td>[Yahoo fill]</td></tr><tr><td>12:45</td><td class="num">3628.00</td><td>[Yahoo fill]</td></tr><tr><td>12:50</td><td class="num">3645.00</td><td>[Yahoo fill]</td></tr><tr><td>12:55</td><td class="num">3640.00</td><td>[Yahoo fill]</td></tr><tr><td>13:00</td><td class="num">3657.50</td><td>[Yahoo fill]</td></tr><tr><td>13:05</td><td class="num">3652.80</td><td>[Yahoo fill]</td></tr><tr><td>13:10</td><td class="num">3662.70</td><td>[Yahoo fill]</td></tr><tr><td>13:15</td><td class="num">3651.00</td><td>[Yahoo fill]</td></tr><tr><td>13:20</td><td class="num">3652.00</td><td>[Yahoo fill]</td></tr><tr><td>13:25</td><td class="num">3656.50</td><td>[Yahoo fill]</td></tr><tr><td>13:30</td><td class="num">3661.70</td><td>[Yahoo fill]</td></tr><tr><td>13:35</td><td class="num">3604.00</td><td>[Yahoo fill]</td></tr></tbody></table>
+      </details>
+    </div></div>
+</div>
+<!-- TRACKER_TAB_END -->
+
+<script>
+function showTab(name, evt) {
+  document.querySelectorAll('.tabpanel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tabbtn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  evt.currentTarget.classList.add('active');
+}
+</script>
+
+</div>
+</body>
+</html>
