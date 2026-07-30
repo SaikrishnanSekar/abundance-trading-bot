@@ -496,3 +496,19 @@ Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this
 Evidence: scripts/pnl_split.py (long/short split, kept separate) + DAILY page "Long vs Short" tile. To graduate: the disable_shorts experiment must beat control over >=10 short-bearing trading days; a human then commits the sleeve disable to TRADING-STRATEGY.md. No autonomous change.
 
 Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.
+
+---
+
+## 2026-07-30 · Skip contra-catalyst trades — don't fight fresh news
+- dimension: skip_contra_catalyst
+- evidence_n: retrospective on 3 live days (07-27 → 07-29); this is a candidate under a controlled experiment, NOT a decision.
+- current_rule: "ORB v4 takes every signal regardless of catalyst direction."
+- proposed_rule: Skip any signal whose catalyst OPPOSES its direction — a LONG into a NEGATIVE catalyst, or a SHORT into a POSITIVE catalyst. Keep catalyst-neutral ('none') and catalyst-supportive trades. Surgical alternative to disable_shorts (which drops the whole short sleeve).
+- expected_impact: Retrospective (Yahoo-fill model): 07-27 +Rs309 (skip SAIL long into weak Q1), 07-28 +Rs791 (skip INFY+OFSS shorts into +ve catalysts — the week's 2 biggest losers), 07-29 +Rs0 (no contra; KEPT the KAYNES +Rs2,925 winner). Total +Rs1,100 over 3 days (~+2.2% of Rs50k capital) with ZERO damage to the winning day. Target: +0.5-1% to existing logic.
+- risk: (a) retrospective, N small; must accrue live evidence. (b) Depends on catalysts.jsonl being populated by the catalyst scan — days with no catalyst data are no-ops (0 delta). (c) Overlaps disable_shorts on short-into-+ve cases; the two experiments run in parallel to show surgical (this) vs blunt (disable_shorts) — whichever wins informs the commit. (d) Catalyst polarity is LLM/human-classified (subjective).
+- cooldown_until: 2026-08-13
+- status: PENDING — registered as a controlled experiment (journal/india/experiments/registry.json, engine contra_catalyst, started 2026-07-30, min_days 10). Recording begins 2026-07-30.
+
+Evidence: scripts/exp_contra_catalyst.py retrospective + the 07-27/07-28 DAILY findings. To graduate: beat control over >=10 trading days, then a human commits a contra-catalyst check into the buy-side gate. No autonomous change.
+
+Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.

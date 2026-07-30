@@ -28,5 +28,15 @@
     "status": "running",
     "min_days_before_decision": 10,
     "decision_rule": "Recording starts 2026-07-30 (started). Once >= min_days_before_decision real trading days with >=1 short in the control are recorded: if cumulative treatment (long-only) P&L > cumulative control P&L, ready for human review + a TRADING-STRATEGY.md commit that disables the short sleeve. Otherwise propose dropping (shorts stay enabled). Caveat: N=6 shorts today and 2 were the sample's best trades — do NOT disable on <10 short-bearing days of evidence."
+  },
+  "skip_contra_catalyst": {
+    "engine": "contra_catalyst",
+    "description": "Skip any signal whose catalyst OPPOSES its direction (LONG into a negative catalyst, SHORT into a positive catalyst). Keep catalyst-neutral ('none') and catalyst-supportive trades. Control = take every signal; treatment = skip contra-catalyst signals. Surgical alternative to disable_shorts.",
+    "proposal_ref": "memory/india/STRATEGY-PROPOSALS.md · 2026-07-30 · dimension skip_contra_catalyst",
+    "backtest_ref": "Retrospective on the live sample (not a decision): 07-27 +Rs309 (skip SAIL long into weak Q1), 07-28 +Rs791 (skip INFY+OFSS shorts into +ve catalysts), 07-29 +Rs0 (no contra — kept KAYNES winner). Total +Rs1,100 over 3 days, 0 damage to the winning day.",
+    "started": "2026-07-30",
+    "status": "running",
+    "min_days_before_decision": 10,
+    "decision_rule": "Recording starts 2026-07-30. Once >= min_days_before_decision real trading days are recorded: if cumulative treatment P&L > cumulative control P&L, ready for human review + a TRADING-STRATEGY.md commit adding the contra-catalyst skip to the buy-side gate. Otherwise propose dropping. Depends on catalysts.jsonl being populated (catalyst scan) — days with no catalyst data contribute 0 delta and are effectively no-ops."
   }
 }
