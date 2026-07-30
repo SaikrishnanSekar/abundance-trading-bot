@@ -6,6 +6,30 @@ Append-only. Newest at top.
 
 ---
 
+## ORB signal autopsies — 2026-07-30
+
+### 2026-07-30 · CESC · ORB LONG · LOSS -0.07% (TRAIL_HIT)
+- primary_cause: **VOLUME_COLLAPSED** (historical loss-rate for this pattern: 56.0%)
+- factors: vwap_hold=1.0 vol_decay=0.14 back_inside=False market_drift=-0.09%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
+### 2026-07-30 · PPLPHARMA · ORB LONG · LOSS -2.32% (EOD)
+- primary_cause: **FELL_BACK_IN_BOX** (historical loss-rate for this pattern: 80.0%)
+- factors: vwap_hold=0.5 vol_decay=0.75 back_inside=True market_drift=-0.10%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
+## ORB signal autopsies — 2026-07-29
+
+### 2026-07-29 · PPLPHARMA · ORB LONG · LOSS -1.49% (EOD)
+- primary_cause: **VWAP_REJECTED** (historical loss-rate for this pattern: 90.4%)
+- factors: vwap_hold=0.0 vol_decay=0.65 back_inside=True market_drift=+0.15%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
+### 2026-07-29 · BIOCON · ORB SHORT · LOSS -0.50% (TRAIL_HIT)
+- primary_cause: **UNEXPLAINED_CHOP**
+- factors: vwap_hold=0.83 vol_decay=1.04 back_inside=False market_drift=+0.16%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
 ## ORB signal autopsies — 2026-07-28
 
 ### 2026-07-28 · DABUR · ORB LONG · LOSS -0.16% (TRAIL_HIT)

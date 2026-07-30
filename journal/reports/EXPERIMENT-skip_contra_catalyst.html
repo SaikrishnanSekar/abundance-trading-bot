@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Experiment — rsi_overbought_entry</title>
+<title>Experiment — skip_contra_catalyst</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   .viz-root {
@@ -65,26 +65,26 @@
 <div class="viz-root wrap">
   <header class="top">
     <div style="margin-bottom:8px;"><a href="index.html" style="color:var(--text-muted); font-size:0.8rem;">&larr; All daily journals</a></div>
-    <h1>Experiment: rsi_overbought_entry</h1>
-    <div class="sub">Skip an ORB entry taken at extreme RSI (long &gt;= 80 / short &lt;= 20) that has NO supporting catalyst (news that backs the trade&#x27;s direction). Catalyst-aware: extreme-RSI entries WITH a supporting catalyst are kept. Control = current v4 rules (take every signal). Treatment = the catalyst-aware skip.</div>
-    <span class="badge"><span class="dot running"></span>Running — 4/10 day(s) recorded</span>
+    <h1>Experiment: skip_contra_catalyst</h1>
+    <div class="sub">Skip any signal whose catalyst OPPOSES its direction (LONG into a negative catalyst, SHORT into a positive catalyst). Keep catalyst-neutral (&#x27;none&#x27;) and catalyst-supportive trades. Control = take every signal; treatment = skip contra-catalyst signals. Surgical alternative to disable_shorts.</div>
+    <span class="badge"><span class="dot running"></span>Running — 1/10 day(s) recorded</span>
   </header>
 
   <div class="tiles">
     <div class="tile">
       <div class="label">Cumulative control P&amp;L</div>
-      <div class="value">-₹1,498</div>
-      <div class="note">current rules (no filter) — 4 day(s) recorded</div>
+      <div class="value">-₹2,502</div>
+      <div class="note">current rules (no filter) — 1 day(s) recorded</div>
     </div>
     <div class="tile">
       <div class="label">Cumulative treatment P&amp;L</div>
-      <div class="value">-₹3,688</div>
+      <div class="value">-₹2,434</div>
       <div class="note">with the proposed rule applied</div>
     </div>
     <div class="tile">
       <div class="label">Cumulative delta</div>
-      <div class="value" style="color:var(--critical);">-₹2,191</div>
-      <div class="note">6 more day(s) needed before a commit/drop decision</div>
+      <div class="value" style="color:var(--good);">+₹68</div>
+      <div class="note">9 more day(s) needed before a commit/drop decision</div>
     </div>
   </div>
 
@@ -94,10 +94,7 @@
     <table>
       <thead><tr><th>Date</th><th class="num">Trades</th><th class="num">Skipped</th><th class="num">Control P&amp;L</th><th class="num">Treatment P&amp;L</th><th class="num">Delta</th><th></th></tr></thead>
       <tbody>
-        <tr><td><a href="STRATEGY-IMPROVEMENT-rsi_overbought_entry-2026-07-27.html">2026-07-27</a></td><td class="num">11</td><td class="num">3</td><td class="num">₹-479</td><td class="num">+₹420</td><td class="num" style="color:var(--good);">+₹899</td><td><a href="STRATEGY-IMPROVEMENT-rsi_overbought_entry-2026-07-27.html">detail</a></td></tr>
-<tr><td><a href="STRATEGY-IMPROVEMENT-rsi_overbought_entry-2026-07-28.html">2026-07-28</a></td><td class="num">13</td><td class="num">4</td><td class="num">₹-499</td><td class="num">₹-1,329</td><td class="num" style="color:var(--critical);">₹-830</td><td><a href="STRATEGY-IMPROVEMENT-rsi_overbought_entry-2026-07-28.html">detail</a></td></tr>
-<tr><td><a href="STRATEGY-IMPROVEMENT-rsi_overbought_entry-2026-07-29.html">2026-07-29</a></td><td class="num">3</td><td class="num">2</td><td class="num">+₹1,983</td><td class="num">₹-345</td><td class="num" style="color:var(--critical);">₹-2,328</td><td><a href="STRATEGY-IMPROVEMENT-rsi_overbought_entry-2026-07-29.html">detail</a></td></tr>
-<tr><td><a href="STRATEGY-IMPROVEMENT-rsi_overbought_entry-2026-07-30.html">2026-07-30</a></td><td class="num">6</td><td class="num">1</td><td class="num">₹-2,502</td><td class="num">₹-2,434</td><td class="num" style="color:var(--good);">+₹68</td><td><a href="STRATEGY-IMPROVEMENT-rsi_overbought_entry-2026-07-30.html">detail</a></td></tr>
+        <tr><td><a href="STRATEGY-IMPROVEMENT-skip_contra_catalyst-2026-07-30.html">2026-07-30</a></td><td class="num">6</td><td class="num">1</td><td class="num">₹-2,502</td><td class="num">₹-2,434</td><td class="num" style="color:var(--good);">+₹68</td><td><a href="STRATEGY-IMPROVEMENT-skip_contra_catalyst-2026-07-30.html">detail</a></td></tr>
       </tbody>
     </table>
     </div>
@@ -107,12 +104,12 @@
 
   <section>
     <h2>Decision rule</h2>
-    <p class="lede">Once &gt;= min_days_before_decision real trading days are recorded: if cumulative treatment P&amp;L &gt; cumulative control P&amp;L AND the catalyst-supported vs catalyst-less split on RSI-extreme entries is directionally consistent (supported outperforms unsupported), ready for human review + TRADING-STRATEGY.md commit. Otherwise propose dropping (move to STRATEGY-PROPOSALS-REJECTED.md). Below min_days, report progress only. Higher min_days (10) than confirmation-bar because there was no offline backtest — all evidence is being gathered live.</p>
+    <p class="lede">Recording starts 2026-07-30. Once &gt;= min_days_before_decision real trading days are recorded: if cumulative treatment P&amp;L &gt; cumulative control P&amp;L, ready for human review + a TRADING-STRATEGY.md commit adding the contra-catalyst skip to the buy-side gate. Otherwise propose dropping. Depends on catalysts.jsonl being populated (catalyst scan) — days with no catalyst data contribute 0 delta and are effectively no-ops.</p>
   </section>
 
   <footer>
-    Backtest evidence: No backtest — live-only discovery from the 2026-07-27 recommendation review (journal/india/FINDINGS-2026-07-27.md, N=7-11, confounded). This experiment IS the evidence-gathering; no prior offline validation exists.<br>
-    Proposal: <code>memory/india/STRATEGY-PROPOSALS.md · 2026-07-27 · dimension rsi_overbought_entry</code><br>
+    Backtest evidence: Retrospective on the live sample (not a decision): 07-27 +Rs309 (skip SAIL long into weak Q1), 07-28 +Rs791 (skip INFY+OFSS shorts into +ve catalysts), 07-29 +Rs0 (no contra — kept KAYNES winner). Total +Rs1,100 over 3 days, 0 damage to the winning day.<br>
+    Proposal: <code>memory/india/STRATEGY-PROPOSALS.md · 2026-07-30 · dimension skip_contra_catalyst</code><br>
     Runs automatically every trading day as part of <code>run_journal_update.bat</code>
     (the same 20:30 IST routine that writes the rest of the daily journal) —
     no manual step needed. Manual re-run: <code>python scripts/run_experiments.py [YYYY-MM-DD]</code>.
