@@ -151,6 +151,16 @@ post-mortems + realized-slippage report after trade 20 before scaling to 1.0×.
   had 18.8% WR vs 50.9% for kept trades (+26.5% total P&L); concluded ready-to-commit live
   (+₹369). Rationale: eliminates instant whipsaw failures (WIPRO/HDFCBANK/INDUSTOWER all failed
   on bar+1, 2026-07-30).
+- **VWAP alignment gate (added 2026-07-30 — PROPOSED, pending `vwap_alignment` experiment
+  confirmation)**: a breakout is only actionable if price is on the **correct side of VWAP** —
+  **long only when close > VWAP, short only when close < VWAP**. A breakout against VWAP is a
+  trap lacking institutional backing (the #1 filter in pro ORB practice). VWAP was advisory-only
+  in v4; this promotes it to a gate. In the scanner a misaligned breakout shows as
+  `ENTRY-VWAP-BLOCK` (watch-only). Evidence (trial to date): VWAP-aligned entries 11/27 (41% WR)
+  +₹923; VWAP-**mis**aligned 0/4, **−₹2,089**. Retrospective per-day: 07-28 +₹748, 07-30 +₹1,341,
+  07-27/07-29 +₹0 (no misaligned — kept the KAYNES +₹2,925 winner). NOTE: enforced in
+  scan_all.py now; keep under the `vwap_alignment` experiment until it clears 10 live days, then
+  finalise here.
 - **Entry window**: 09:30–11:30 IST. **Limit orders at the breakout price ONLY** —
   backtested edge dies above ~0.10%/side slippage; never chase with market orders.
 - **Sizing (trial)**: 0.75 × 20% of effective margin = **₹37,500 notional/position**;

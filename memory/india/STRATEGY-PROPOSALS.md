@@ -512,3 +512,19 @@ Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this
 Evidence: scripts/exp_contra_catalyst.py retrospective + the 07-27/07-28 DAILY findings. To graduate: beat control over >=10 trading days, then a human commits a contra-catalyst check into the buy-side gate. No autonomous change.
 
 Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.
+
+---
+
+## 2026-07-30 · VWAP alignment gate — long above VWAP, short below only
+- dimension: vwap_alignment
+- evidence_n: 31 entries across the trial (27 aligned + 4 misaligned); registered as a controlled experiment (started 2026-07-31). Enforced in scan_all.py now, kept under experiment until it clears.
+- current_rule: "v4 treats VWAP as advisory display only; entries fire regardless of VWAP side."
+- proposed_rule: Gate on VWAP — a breakout is actionable ONLY if price is on the correct side of VWAP (long: close > VWAP; short: close < VWAP). Misaligned breakouts become ENTRY-VWAP-BLOCK (watch-only). Promotes the existing VWAP- advisory flag to a hard gate.
+- expected_impact: Trial retrospective (Yahoo-fill): VWAP-aligned 11/27 (41% WR) +Rs923; VWAP-misaligned 0/4 (0% WR) -Rs2,089. Per-day delta: 07-28 +Rs748, 07-30 +Rs1,341, 07-27/07-29 +Rs0 (no misaligned; KEPT the KAYNES +Rs2,925 winner). Total +Rs2,089 over 4 days, ZERO damage to winning days. Pro-trader consensus: #1 ORB filter (breakout against VWAP = trap lacking institutional backing). Sources: tradingsim/sahi/equiti ORB guides.
+- risk: (a) N=4 misaligned — small; must accrue live evidence via the experiment. (b) Overlaps the confirmation bar on some names (both catch HDFCBANK/WIPRO 07-30) — marginal value on top of confirmation not separately isolated. (c) Uses the scanner's own VWAP- flag (its live VWAP calc) as ground truth. (d) VWAP is intraday-evolving; the flag is taken at the first entry signal.
+- cooldown_until: 2026-08-13
+- status: PENDING — controlled experiment (engine vwap_alignment, started 2026-07-31, min_days 10) + gate enforced in scan_all.py (staged for human commit alongside the rule).
+
+Evidence: scripts/exp_vwap_alignment.py + web research (pro ORB practice). To finalise: beat control over >=10 live days, then confirm the TRADING-STRATEGY.md gate. No autonomous universe/structural change.
+
+Awaiting human approval. Commit TRADING-STRATEGY.md edit to accept, or move this block to STRATEGY-PROPOSALS-REJECTED.md to reject.

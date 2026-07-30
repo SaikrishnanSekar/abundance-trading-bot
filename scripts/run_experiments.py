@@ -38,6 +38,7 @@ from build_strategy_improvement import analyze, build as build_day_page
 import exp_rsi_overbought as _rsi_eng
 import exp_disable_shorts as _short_eng
 import exp_contra_catalyst as _contra_eng
+import exp_vwap_alignment as _vwap_eng
 
 # Per-experiment engines. Each registry entry may name an "engine"; without one
 # it defaults to "confirmation_bar" (the original, so existing entries are
@@ -49,6 +50,7 @@ ENGINES = {
     "rsi_overbought": (_rsi_eng.analyze, _rsi_eng.build, _rsi_eng.day_page_name),
     "disable_shorts": (_short_eng.analyze, _short_eng.build, _short_eng.day_page_name),
     "contra_catalyst": (_contra_eng.analyze, _contra_eng.build, _contra_eng.day_page_name),
+    "vwap_alignment": (_vwap_eng.analyze, _vwap_eng.build, _vwap_eng.day_page_name),
 }
 
 EXPERIMENTS_DIR = ROOT / "journal" / "india" / "experiments"

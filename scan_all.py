@@ -267,8 +267,15 @@ def check_orb(today_bars, bars, fd, avg_day_vol, day_fraction):
     _bo = next((i for i in range(3, len(today_bars)) if _beyond(today_bars[i]["close"])), None)
     confirmed = _bo is not None and (_bo + 1) < len(today_bars) and _beyond(today_bars[_bo + 1]["close"])
 
+    # VWAP alignment gate (proposed 2026-07-30): a breakout on the WRONG side of VWAP
+    # is a trap lacking institutional backing. Trial data: VWAP-misaligned entries 0/4
+    # (-Rs2,089); aligned 41% WR (+Rs923). #1 filter in pro ORB practice.
+    vwap_aligned = vwap_lk if direction == "LONG" else vwap_sk
+
     if gates_ok and late:
         status = "ENTRY-LATE"          # valid signal, past the 11:30 v4 window — watch only
+    elif gates_ok and not vwap_aligned:
+        status = "ENTRY-VWAP-BLOCK"    # wrong side of VWAP — skip (no institutional backing)
     elif gates_ok and not confirmed:
         status = "ENTRY-UNCONFIRMED"   # breakout fired; awaiting next-bar confirmation
     elif gates_ok:
@@ -279,7 +286,9 @@ def check_orb(today_bars, bars, fd, avg_day_vol, day_fraction):
     note = f"ORB {orb_w/mid*100:.2f}% wid | vol{vol_r:.1f}x"
     if rsi:
         note += f" | RSI {rsi:.0f}"
-    note += adv_tag + (" [LATE>11:30]" if late else "") + (" [await confirm bar]" if status == "ENTRY-UNCONFIRMED" else "")
+    note += adv_tag + (" [LATE>11:30]" if late else "") \
+        + (" [await confirm bar]" if status == "ENTRY-UNCONFIRMED" else "") \
+        + (" [VWAP block]" if status == "ENTRY-VWAP-BLOCK" else "")
     return {
         "strategy": "ORB",
         "status":   status,
@@ -646,8 +655,8 @@ def scan():
                     watching.append(row)
                 else:
                     historical.append({**row, "note_time": "post-window"})
-            elif orb["status"] in ("ENTRY-LATE", "ENTRY-UNCONFIRMED") or "FAIL" in orb["status"]:
-                watching.append(row)   # unconfirmed breakouts wait one bar before BUY NOW
+            elif orb["status"] in ("ENTRY-LATE", "ENTRY-UNCONFIRMED", "ENTRY-VWAP-BLOCK") or "FAIL" in orb["status"]:
+                watching.append(row)   # unconfirmed / VWAP-misaligned breakouts are watch-only, not BUY NOW
 
         # ── Gap Fill — collect only; route after loop with market-wide filter ──
         gf = check_gap_fill(today_bars, bars, today_str)

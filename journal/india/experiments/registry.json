@@ -40,5 +40,15 @@
     "status": "running",
     "min_days_before_decision": 10,
     "decision_rule": "Recording starts 2026-07-30. Once >= min_days_before_decision real trading days are recorded: if cumulative treatment P&L > cumulative control P&L, ready for human review + a TRADING-STRATEGY.md commit adding the contra-catalyst skip to the buy-side gate. Otherwise propose dropping. Depends on catalysts.jsonl being populated (catalyst scan) — days with no catalyst data contribute 0 delta and are effectively no-ops."
+  },
+  "vwap_alignment": {
+    "engine": "vwap_alignment",
+    "description": "Skip breakouts on the WRONG side of VWAP (long below VWAP / short above — the scanner's VWAP- advisory flag). Long above VWAP, short below only. Control = take every signal; treatment = skip VWAP-misaligned. The #1 filter in pro ORB practice (a breakout against VWAP lacks institutional backing).",
+    "proposal_ref": "memory/india/STRATEGY-PROPOSALS.md · 2026-07-30 · dimension vwap_alignment",
+    "backtest_ref": "Retrospective on the live sample: VWAP-aligned entries 11/27 (41% WR) +Rs923; VWAP-misaligned 0/4, -Rs2,089. Per-day: 07-28 +Rs748, 07-30 +Rs1,341, 07-27/07-29 +Rs0 (no misaligned; KEPT the KAYNES winner). Total +Rs2,089, 0 damage to winning days.",
+    "started": "2026-07-31",
+    "status": "running",
+    "min_days_before_decision": 10,
+    "decision_rule": "Recording starts 2026-07-31. Once >= min_days_before_decision real trading days are recorded: if cumulative treatment P&L > cumulative control P&L, ready for human review + a TRADING-STRATEGY.md commit making VWAP alignment a hard entry gate (currently advisory in v4). Otherwise propose dropping. This experiment runs in parallel with the vwap gate proposed for scan_all.py; the experiment confirms live what the retrospective + pro-consensus both say."
   }
 }

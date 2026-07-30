@@ -144,9 +144,22 @@ class ConfirmationBar(unittest.TestCase):
         try:
             S.calc_rsi = lambda *a, **k: 60.0
             S._now_hhmm = lambda: 1000
-            orb = S.check_orb(today_bars, bars, {}, 0, 0.5)
+            orb = S.check_orb(today_bars, bars, {}, 0, 0.5)  # fd={} -> VWAP from bars (aligned)
             self.assertIsNotNone(orb)
             self.assertEqual(orb["status"], "ENTRY")
+        finally:
+            S.calc_rsi, S._now_hhmm = orig_rsi, orig_hhmm
+
+    def test_confirmed_but_below_vwap_is_blocked(self):
+        today_bars, bars = self._bars(with_confirm=True)
+        orig_rsi, orig_hhmm = S.calc_rsi, S._now_hhmm
+        try:
+            S.calc_rsi = lambda *a, **k: 60.0
+            S._now_hhmm = lambda: 1000
+            # Force VWAP far ABOVE the long breakout close -> misaligned -> blocked.
+            orb = S.check_orb(today_bars, bars, {"vwap": 999.0}, 0, 0.5)
+            self.assertIsNotNone(orb)
+            self.assertEqual(orb["status"], "ENTRY-VWAP-BLOCK")
         finally:
             S.calc_rsi, S._now_hhmm = orig_rsi, orig_hhmm
 
