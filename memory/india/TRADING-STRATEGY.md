@@ -141,6 +141,16 @@ post-mortems + realized-slippage report after trade 20 before scaling to 1.0×.
 - **Long entry**: 5-min close > ORH × 1.001 AND volume ≥ 2.0× 20-bar rolling avg
 - **Short entry**: 5-min close < ORL × 0.999 AND volume ≥ 2.0× 20-bar rolling avg
   (VWAP/RSI are advisory display only in v4 — the validated backtest config does not gate on them)
+- **Confirmation bar (added 2026-07-30 — graduated from the `orb_entry_confirmation_bar`
+  experiment)**: a breakout is **NOT actionable on the breakout bar itself**. After a 5-min
+  close crosses the entry level, the **next 5-min bar must confirm** — its close still beyond
+  ORH×1.001 (long) / ORL×0.999 (short). If the next bar reverses back inside the level, **SKIP
+  the trade entirely** (never enter). The entry-price reference stays the breakout level; only
+  the *decision* waits one bar. In the scanner this shows as `ENTRY-UNCONFIRMED` (watch-only)
+  until confirmed, then `ENTRY`. Evidence: 1,046-trade backtest — the ~8% of trades this skips
+  had 18.8% WR vs 50.9% for kept trades (+26.5% total P&L); concluded ready-to-commit live
+  (+₹369). Rationale: eliminates instant whipsaw failures (WIPRO/HDFCBANK/INDUSTOWER all failed
+  on bar+1, 2026-07-30).
 - **Entry window**: 09:30–11:30 IST. **Limit orders at the breakout price ONLY** —
   backtested edge dies above ~0.10%/side slippage; never chase with market orders.
 - **Sizing (trial)**: 0.75 × 20% of effective margin = **₹37,500 notional/position**;

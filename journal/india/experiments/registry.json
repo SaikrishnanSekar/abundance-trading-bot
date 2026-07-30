@@ -4,7 +4,9 @@
     "proposal_ref": "memory/india/STRATEGY-PROPOSALS.md · 2026-07-21 · dimension orb_entry_confirmation_bar",
     "backtest_ref": "81wk/1046-trade backtest: +26.5% to total P&L, holds in both split halves (+39.7% / +18.4%)",
     "started": "2026-07-21",
-    "status": "concluded_ready_to_commit",
+    "status": "committed",
+    "committed": "2026-07-30",
+    "committed_note": "Graduated into TRADING-STRATEGY.md v4 (confirmation-bar rule) and enforced in scan_all.py check_orb (ENTRY-UNCONFIRMED until bar+1 confirms). Motivated by 2026-07-30's 4/4 first-instance failures (WIPRO/HDFCBANK/INDUSTOWER/DIXON).",
     "min_days_before_decision": 5,
     "decision_rule": "Once >= min_days_before_decision real trading days are recorded: if cumulative treatment P&L > cumulative control P&L, ready for human commit to TRADING-STRATEGY.md. If treatment P&L <= control P&L, propose dropping it (move to STRATEGY-PROPOSALS-REJECTED.md) instead of committing. Below min_days, report progress only — no decision either way."
   },

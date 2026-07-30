@@ -258,8 +258,19 @@ def check_orb(today_bars, bars, fd, avg_day_vol, day_fraction):
     t1 = close_px + orb_w * 1.5 * (1 if direction == "LONG" else -1)
     t2 = close_px + orb_w * 2.5 * (1 if direction == "LONG" else -1)
 
+    # Confirmation bar (v4, graduated 2026-07-30 from orb_entry_confirmation_bar):
+    # a breakout is actionable ONLY after the next 5-min bar confirms it still holds
+    # beyond the level. Until then it is ENTRY-UNCONFIRMED (watch-only, not a BUY NOW).
+    # Kills instant whipsaws — WIPRO/HDFCBANK/INDUSTOWER all failed on bar+1 (2026-07-30).
+    _lvl = long_entry if direction == "LONG" else short_entry
+    _beyond = (lambda c: c > _lvl) if direction == "LONG" else (lambda c: c < _lvl)
+    _bo = next((i for i in range(3, len(today_bars)) if _beyond(today_bars[i]["close"])), None)
+    confirmed = _bo is not None and (_bo + 1) < len(today_bars) and _beyond(today_bars[_bo + 1]["close"])
+
     if gates_ok and late:
         status = "ENTRY-LATE"          # valid signal, past the 11:30 v4 window — watch only
+    elif gates_ok and not confirmed:
+        status = "ENTRY-UNCONFIRMED"   # breakout fired; awaiting next-bar confirmation
     elif gates_ok:
         status = "ENTRY"
     else:
@@ -268,7 +279,7 @@ def check_orb(today_bars, bars, fd, avg_day_vol, day_fraction):
     note = f"ORB {orb_w/mid*100:.2f}% wid | vol{vol_r:.1f}x"
     if rsi:
         note += f" | RSI {rsi:.0f}"
-    note += adv_tag + (" [LATE>11:30]" if late else "")
+    note += adv_tag + (" [LATE>11:30]" if late else "") + (" [await confirm bar]" if status == "ENTRY-UNCONFIRMED" else "")
     return {
         "strategy": "ORB",
         "status":   status,
@@ -635,8 +646,8 @@ def scan():
                     watching.append(row)
                 else:
                     historical.append({**row, "note_time": "post-window"})
-            elif orb["status"] == "ENTRY-LATE" or "FAIL" in orb["status"]:
-                watching.append(row)
+            elif orb["status"] in ("ENTRY-LATE", "ENTRY-UNCONFIRMED") or "FAIL" in orb["status"]:
+                watching.append(row)   # unconfirmed breakouts wait one bar before BUY NOW
 
         # ── Gap Fill — collect only; route after loop with market-wide filter ──
         gf = check_gap_fill(today_bars, bars, today_str)

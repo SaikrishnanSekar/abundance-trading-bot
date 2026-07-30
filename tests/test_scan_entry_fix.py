@@ -104,5 +104,52 @@ class RsiOverboughtAdvisory(unittest.TestCase):
             S.calc_rsi = orig
 
 
+class ConfirmationBar(unittest.TestCase):
+    """v4 confirmation bar: a breakout is ENTRY-UNCONFIRMED until the next 5-min
+    bar confirms it still holds beyond the level; only then ENTRY."""
+
+    def _bars(self, with_confirm: bool):
+        prior = []
+        for i in range(20):
+            b = _bar(1000, 99, 100, 98.5, 99.5, 100000)
+            b["dt"] = datetime(2026, 7, 24, 10, 0, tzinfo=IST)
+            b["ts"] = b["dt"].timestamp()
+            prior.append(b)
+        # OR = first 3 bars: ORH=102, ORL=100
+        t = [
+            _bar(915, 100, 101, 100, 100.5, 100000),
+            _bar(920, 100.5, 102, 100.4, 101.8, 100000),
+            _bar(925, 101.8, 102, 101, 101.9, 100000),
+            _bar(930, 102, 103.5, 102, 103.2, 400000),   # breakout bar (close > 102.102)
+        ]
+        if with_confirm:
+            t.append(_bar(935, 103.2, 103.8, 103, 103.5, 400000))  # confirms hold
+        return t, prior + t
+
+    def test_breakout_bar_alone_is_unconfirmed(self):
+        today_bars, bars = self._bars(with_confirm=False)
+        orig_rsi, orig_hhmm = S.calc_rsi, S._now_hhmm
+        try:
+            S.calc_rsi = lambda *a, **k: 60.0
+            S._now_hhmm = lambda: 1000
+            orb = S.check_orb(today_bars, bars, {}, 0, 0.5)
+            self.assertIsNotNone(orb)
+            self.assertEqual(orb["status"], "ENTRY-UNCONFIRMED")
+        finally:
+            S.calc_rsi, S._now_hhmm = orig_rsi, orig_hhmm
+
+    def test_confirmed_next_bar_becomes_entry(self):
+        today_bars, bars = self._bars(with_confirm=True)
+        orig_rsi, orig_hhmm = S.calc_rsi, S._now_hhmm
+        try:
+            S.calc_rsi = lambda *a, **k: 60.0
+            S._now_hhmm = lambda: 1000
+            orb = S.check_orb(today_bars, bars, {}, 0, 0.5)
+            self.assertIsNotNone(orb)
+            self.assertEqual(orb["status"], "ENTRY")
+        finally:
+            S.calc_rsi, S._now_hhmm = orig_rsi, orig_hhmm
+
+
 if __name__ == "__main__":
     unittest.main()
