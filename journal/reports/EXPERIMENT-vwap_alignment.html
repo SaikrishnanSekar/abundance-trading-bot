@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Experiment — disable_shorts</title>
+<title>Experiment — vwap_alignment</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   .viz-root {
@@ -65,26 +65,26 @@
 <div class="viz-root wrap">
   <header class="top">
     <div style="margin-bottom:8px;"><a href="index.html" style="color:var(--text-muted); font-size:0.8rem;">&larr; All daily journals</a></div>
-    <h1>Experiment: disable_shorts</h1>
-    <div class="sub">Drop all SHORT ORB signals; keep longs unchanged. Control = take longs + shorts (current). Treatment = long-only. Motivated by the 2026-07-29 long/short split: shorts net -Rs445 over 6 trades (33% WR) vs longs +Rs195 over 23 (43% WR), with 07-28&#x27;s 4 shorts all losing (two into positive catalysts).</div>
-    <span class="badge"><span class="dot running"></span>Running — 4/10 day(s) recorded</span>
+    <h1>Experiment: vwap_alignment</h1>
+    <div class="sub">Skip breakouts on the WRONG side of VWAP (long below VWAP / short above — the scanner&#x27;s VWAP- advisory flag). Long above VWAP, short below only. Control = take every signal; treatment = skip VWAP-misaligned. The #1 filter in pro ORB practice (a breakout against VWAP lacks institutional backing).</div>
+    <span class="badge"><span class="dot running"></span>Running — 3/10 day(s) recorded</span>
   </header>
 
   <div class="tiles">
     <div class="tile">
       <div class="label">Cumulative control P&amp;L</div>
-      <div class="value">-₹3,274</div>
-      <div class="note">current rules (no filter) — 4 day(s) recorded</div>
+      <div class="value">-₹772</div>
+      <div class="note">current rules (no filter) — 3 day(s) recorded</div>
     </div>
     <div class="tile">
       <div class="label">Cumulative treatment P&amp;L</div>
-      <div class="value">-₹1,507</div>
+      <div class="value">-₹772</div>
       <div class="note">with the proposed rule applied</div>
     </div>
     <div class="tile">
       <div class="label">Cumulative delta</div>
-      <div class="value" style="color:var(--good);">+₹1,767</div>
-      <div class="note">6 more day(s) needed before a commit/drop decision</div>
+      <div class="value" style="color:var(--good);">+₹0</div>
+      <div class="note">7 more day(s) needed before a commit/drop decision</div>
     </div>
   </div>
 
@@ -94,10 +94,9 @@
     <table>
       <thead><tr><th>Date</th><th class="num">Trades</th><th class="num">Skipped</th><th class="num">Control P&amp;L</th><th class="num">Treatment P&amp;L</th><th class="num">Delta</th><th></th></tr></thead>
       <tbody>
-        <tr><td><a href="STRATEGY-IMPROVEMENT-disable_shorts-2026-07-30.html">2026-07-30</a></td><td class="num">6</td><td class="num">1</td><td class="num">₹-2,502</td><td class="num">₹-1,353</td><td class="num" style="color:var(--good);">+₹1,149</td><td><a href="STRATEGY-IMPROVEMENT-disable_shorts-2026-07-30.html">detail</a></td></tr>
-<tr><td><a href="STRATEGY-IMPROVEMENT-disable_shorts-2026-07-31.html">2026-07-31</a></td><td class="num">0</td><td class="num">0</td><td class="num">+₹0</td><td class="num">+₹0</td><td class="num" style="color:var(--good);">+₹0</td><td><a href="STRATEGY-IMPROVEMENT-disable_shorts-2026-07-31.html">detail</a></td></tr>
-<tr><td><a href="STRATEGY-IMPROVEMENT-disable_shorts-2026-08-03.html">2026-08-03</a></td><td class="num">12</td><td class="num">2</td><td class="num">₹-887</td><td class="num">₹-16</td><td class="num" style="color:var(--good);">+₹871</td><td><a href="STRATEGY-IMPROVEMENT-disable_shorts-2026-08-03.html">detail</a></td></tr>
-<tr><td><a href="STRATEGY-IMPROVEMENT-disable_shorts-2026-08-04.html">2026-08-04</a></td><td class="num">4</td><td class="num">3</td><td class="num">+₹116</td><td class="num">₹-137</td><td class="num" style="color:var(--critical);">₹-253</td><td><a href="STRATEGY-IMPROVEMENT-disable_shorts-2026-08-04.html">detail</a></td></tr>
+        <tr><td><a href="STRATEGY-IMPROVEMENT-vwap_alignment-2026-07-31.html">2026-07-31</a></td><td class="num">0</td><td class="num">0</td><td class="num">+₹0</td><td class="num">+₹0</td><td class="num" style="color:var(--good);">+₹0</td><td><a href="STRATEGY-IMPROVEMENT-vwap_alignment-2026-07-31.html">detail</a></td></tr>
+<tr><td><a href="STRATEGY-IMPROVEMENT-vwap_alignment-2026-08-03.html">2026-08-03</a></td><td class="num">12</td><td class="num">0</td><td class="num">₹-887</td><td class="num">₹-887</td><td class="num" style="color:var(--good);">+₹0</td><td><a href="STRATEGY-IMPROVEMENT-vwap_alignment-2026-08-03.html">detail</a></td></tr>
+<tr><td><a href="STRATEGY-IMPROVEMENT-vwap_alignment-2026-08-04.html">2026-08-04</a></td><td class="num">4</td><td class="num">0</td><td class="num">+₹116</td><td class="num">+₹116</td><td class="num" style="color:var(--good);">+₹0</td><td><a href="STRATEGY-IMPROVEMENT-vwap_alignment-2026-08-04.html">detail</a></td></tr>
       </tbody>
     </table>
     </div>
@@ -107,12 +106,12 @@
 
   <section>
     <h2>Decision rule</h2>
-    <p class="lede">Recording starts 2026-07-30 (started). Once &gt;= min_days_before_decision real trading days with &gt;=1 short in the control are recorded: if cumulative treatment (long-only) P&amp;L &gt; cumulative control P&amp;L, ready for human review + a TRADING-STRATEGY.md commit that disables the short sleeve. Otherwise propose dropping (shorts stay enabled). Caveat: N=6 shorts today and 2 were the sample&#x27;s best trades — do NOT disable on &lt;10 short-bearing days of evidence.</p>
+    <p class="lede">Recording starts 2026-07-31. Once &gt;= min_days_before_decision real trading days are recorded: if cumulative treatment P&amp;L &gt; cumulative control P&amp;L, ready for human review + a TRADING-STRATEGY.md commit making VWAP alignment a hard entry gate (currently advisory in v4). Otherwise propose dropping. This experiment runs in parallel with the vwap gate proposed for scan_all.py; the experiment confirms live what the retrospective + pro-consensus both say.</p>
   </section>
 
   <footer>
-    Backtest evidence: No backtest — live-only, motivated by the long/short split (scripts/pnl_split.py). N=6 shorts so far, tiny; this experiment IS the evidence-gathering.<br>
-    Proposal: <code>memory/india/STRATEGY-PROPOSALS.md · 2026-07-29 · dimension disable_shorts</code><br>
+    Backtest evidence: Retrospective on the live sample: VWAP-aligned entries 11/27 (41% WR) +Rs923; VWAP-misaligned 0/4, -Rs2,089. Per-day: 07-28 +Rs748, 07-30 +Rs1,341, 07-27/07-29 +Rs0 (no misaligned; KEPT the KAYNES winner). Total +Rs2,089, 0 damage to winning days.<br>
+    Proposal: <code>memory/india/STRATEGY-PROPOSALS.md · 2026-07-30 · dimension vwap_alignment</code><br>
     Runs automatically every trading day as part of <code>run_journal_update.bat</code>
     (the same 20:30 IST routine that writes the rest of the daily journal) —
     no manual step needed. Manual re-run: <code>python scripts/run_experiments.py [YYYY-MM-DD]</code>.

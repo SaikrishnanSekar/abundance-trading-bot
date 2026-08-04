@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Daily Journal — India — 2026-07-23</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="application/json" id="daily-meta">
+{
+  "date": "2026-07-23",
+  "market": "india",
+  "regime": "NEUTRAL",
+  "observation_mode": false,
+  "buy_signals": 0,
+  "live_trades": 0,
+  "orb_signals": 0,
+  "orb_failed": 0,
+  "gap_fill_signals": 0,
+  "gap_fill_failed": 0,
+  "rca_findings": 1,
+  "headline": "Near-total outage - only 1 scan cycle ran all day, 5+ hours after close. 0 real recommendations. Full-universe backtest shows 7 signals the market actually offered (+Rs597 combined w/ 07-22).",
+  "net_pnl_today": 0.0,
+  "cumulative_pnl": 728.59,
+  "cumulative_trades": 8
+}
+</script>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --serious:        #ec835a;
+    --critical:       #d03b3b;
+    --series-blue:    #2a78d6;
+    --series-violet:  #4a3aa7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --good:           #0ca30c;
+      --warning:        #fab219;
+      --serious:        #ec835a;
+      --critical:       #e66767;
+      --series-blue:    #3987e5;
+      --series-violet:  #9085e9;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --serious:        #ec835a;
+    --critical:       #e66767;
+    --series-blue:    #3987e5;
+    --series-violet:  #9085e9;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header.top { margin-bottom: 20px; }
+  header.top h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  header.top .sub { color: var(--text-secondary); font-size: 0.92rem; }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--text-secondary);
+    background: var(--surface-1);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.good { background: var(--good); }
+  .dot.warning { background: var(--warning); }
+  .dot.critical { background: var(--critical); }
+  .dot.neutral { background: var(--text-muted); }
+
+  .tiles {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin: 22px 0 30px;
+  }
+  @media (max-width: 700px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+  .tile {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .tile .label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .tile .value { font-size: 1.65rem; font-weight: 600; margin-top: 4px; font-variant-numeric: proportional-nums; }
+  .tile .note { font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px; }
+
+  section { margin-bottom: 34px; }
+  section h2 {
+    font-size: 1.02rem; margin: 0 0 4px; color: var(--text-primary);
+  }
+  section .lede { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 14px; }
+
+  .rca-list { display: flex; flex-direction: column; gap: 10px; }
+  .rca-item {
+    display: flex; gap: 12px; padding: 12px 14px;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+  }
+  .rca-item .icon { flex: none; width: 20px; text-align: center; font-size: 0.95rem; line-height: 1.4; }
+  .rca-item .body h3 { margin: 0 0 3px; font-size: 0.88rem; }
+  .rca-item .body p { margin: 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45; }
+  .rca-item .body .status { font-size: 0.74rem; font-weight: 600; margin-top: 5px; }
+  .status.resolved { color: var(--good); }
+  .status.open { color: var(--warning); }
+  .status.fixed { color: var(--good); }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.82rem;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+  thead th {
+    text-align: left; font-weight: 600; color: var(--text-muted);
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.02em;
+    padding: 8px 12px; border-bottom: 1px solid var(--grid);
+  }
+  tbody td { padding: 8px 12px; border-bottom: 1px solid var(--grid); color: var(--text-primary); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+  }
+  .pill.win    { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); }
+  .pill.loss   { color: var(--critical); background: color-mix(in srgb, var(--critical) 16%, transparent); }
+
+  footer {
+    border-top: 1px solid var(--border); margin-top: 40px; padding-top: 16px;
+    font-size: 0.76rem; color: var(--text-muted);
+  }
+  footer code { color: var(--text-secondary); }
+  .table-wrap { overflow-x: auto; }
+
+  .tabbar { display: flex; gap: 4px; margin: 18px 0 22px; border-bottom: 1px solid var(--border); }
+  .tabbtn { appearance: none; background: none; border: none; font: inherit; font-size: 0.85rem; font-weight: 600;
+            color: var(--text-muted); padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; }
+  .tabbtn.active { color: var(--text-primary); border-bottom-color: var(--series-blue); }
+  .tabpanel { display: none; }
+  .tabpanel.active { display: block; }
+  .track-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .track-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .track-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .track-ticker { font-size: 1rem; font-weight: 700; margin-right: 8px; }
+  .track-sub { font-size: 0.72rem; color: var(--text-muted); }
+  .track-levels { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 8px; }
+  .track-levels b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .track-chart { margin: 4px 0 8px; }
+  .track-details summary { cursor: pointer; font-size: 0.76rem; color: var(--series-blue); font-weight: 600; }
+  table.cp-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; margin-top: 8px; }
+  table.cp-table th { text-align: left; color: var(--text-muted); font-weight: 600; padding: 4px 6px; border-bottom: 1px solid var(--grid); }
+  table.cp-table td { padding: 4px 6px; border-bottom: 1px solid var(--grid); color: var(--text-secondary); }
+  table.cp-table td.num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .pill.dropped { color: var(--warning); background: color-mix(in srgb, var(--warning) 18%, transparent); }
+
+  /* TAB_CSS_MARK */
+</style>
+</head>
+<body>
+<div class="viz-root wrap">
+<!-- TABBAR_START -->
+<div class="tabbar">
+  <button class="tabbtn active" onclick="showTab('summary', event)">Daily Summary</button>
+  <button class="tabbtn" onclick="showTab('tracker', event)">Price Action Tracker</button>
+</div>
+<!-- TABBAR_END -->
+<div class="tabpanel active" id="tab-summary">
+<header class="top">
+    <div style="margin-bottom:8px;"><a href="index.html" style="font-size:0.8rem; color:var(--text-muted); text-decoration:none;">&larr; All daily journals</a></div>
+    <h1>Daily Journal — India — 2026-07-23 (Thursday)</h1>
+    <div class="sub">Observation Mode ended — first day live entries were scheduled to resume. ORB v4 live-trial sleeve.</div>
+    <div class="badges">
+      <span class="badge"><span class="dot neutral"></span>Regime: NEUTRAL (53% N50 &gt; 20d SMA, per evening scan)</span>
+      <span class="badge"><span class="dot critical"></span>Only 1 scan cycle all day — 20:48 IST</span>
+      <span class="badge"><span class="dot critical"></span>0 real recommendations</span>
+      <span class="badge"><span class="dot good"></span>Backfilled + backtested this evening</span>
+    </div>
+  </header>
+
+  <div class="tiles">
+    <div class="tile">
+      <div class="label">Buy-now signals</div>
+      <div class="value">0</div>
+      <div class="note">no scan ran during market hours</div>
+    </div>
+    <div class="tile">
+      <div class="label">Live orders placed</div>
+      <div class="value">0</div>
+      <div class="note">nothing was ever watching to place one</div>
+    </div>
+    <div class="tile">
+      <div class="label">Scan coverage today</div>
+      <div class="value">~0h</div>
+      <div class="note">first cycle 20:48 IST, 5h18m after close</div>
+    </div>
+    <div class="tile">
+      <div class="label">What the market actually offered</div>
+      <div class="value">7</div>
+      <div class="note">per full-universe backtest — see below</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>What happened — read this first</h2>
+    <p class="lede">
+      Compute wasn't available for essentially the entire trading session today. <code>MultiStrategyScan</code> ran
+      exactly once, at 20:48 IST — over five hours after market close (15:30) — with a second cycle at 20:58 for
+      after-hours monitoring only. <code>KotakFeed</code>, <code>PreMarket_0845</code>, and the ORB entry window
+      (09:30-11:30) all passed with nobody watching. Zero real recommendations were journaled, and — separately —
+      today was the first day live entries were scheduled to resume after 3 days of Observation Mode. With the
+      scanner down all session, that transition didn't functionally happen either way: there was nothing running to
+      propose a trade, so nothing to approve or decline.
+    </p>
+  </section>
+
+  <section>
+    <h2>Operational RCA — 1 finding today</h2>
+    <div class="rca-list">
+      <div class="rca-item">
+        <div class="icon">🔴</div>
+        <div class="body">
+          <h3>Compute unavailable for the entire trading session — worse than 2026-07-22's partial outage</h3>
+          <p>Yesterday the machine was up for the first ~2 hours of the session (09:30-11:27) before going down.
+          Today it appears to have been off from before market open until the evening — no scheduled task
+          (<code>KotakFeed</code>, <code>PreMarket_0845</code>, <code>MultiStrategyScan</code>, <code>ORB_Scan</code>,
+          <code>TelegramPoll</code>) fired during market hours at all. This is the third session in four days with a
+          meaningful compute-availability gap during market hours.</p>
+          <p class="status open">Same open item as the prior two days, now with a third data point — the
+          always-on/wake-lock question is no longer a one-off; worth a real decision rather than continuing to note
+          it as "still open."</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Backfilled: full-universe backtest for 2026-07-22 &amp; 2026-07-23</h2>
+    <p class="lede">
+      Since the live scanner caught almost nothing across these two days (1 real recommendation total), a live-data
+      tracker has nothing meaningful to show for today specifically. To see what the market actually offered, this
+      session backfilled the full 149-ticker Yahoo 5-min cache (<code>scripts/fetch_history_yahoo.py</code>, both
+      days now complete) and ran the exact same FINAL v4 config
+      (<code>backtests/orb_weekly_portfolio.py</code>) across the whole universe for just these 2 calendar days —
+      not a live trade record, a reconstruction of what a fully-working scanner would have caught.
+      <a href="BACKTEST-2026-07-22-and-2026-07-23.html">Full report here</a>.
+    </p>
+    <p class="lede">
+      Result: <b>10 trades, +₹597 total</b> (backtest cost model), 40% win rate — vs. the <b>1</b> real recommendation
+      the live pipeline actually caught across both days. That gap (9 missed signals) is the concrete cost of two
+      days of compute outages, in the terms that matter most: signals never seen, not just pages not built.
+    </p>
+  </section>
+
+  <section>
+    <h2>Verdict</h2>
+    <p class="lede" style="font-size:0.88rem;">
+      Not a strategy day — an infrastructure day. Nothing to grade for real trading (0 recommendations, correctly 0
+      orders). The backtest backfill is the honest substitute for "what happened today," and it says the ORB v4
+      edge was still there in the market; the pipeline just wasn't up to catch it. The recurring outage pattern
+      (3 of the last 4 sessions) is now the single most important open item — more consequential than any strategy
+      tweak under test.
+    </p>
+  </section>
+
+  <footer>
+    Generated from <code>logs/scan_all.log</code>, <code>journal/india/recommendations.jsonl</code>,
+    the 2026-07-22/23 full-universe backtest, and same-session RCA.
+    Journal path convention: <code>journal/reports/DAILY-YYYY-MM-DD.html</code>.
+  </footer>
+</div><!-- END_SUMMARY_PANEL -->
+<!-- TRACKER_TAB_START -->
+<div class="tabpanel" id="tab-tracker">
+<p style="color:var(--text-muted); font-size:0.85rem;">No trackable recommendations (with a real entry price) logged for this day yet.</p>
+</div>
+<!-- TRACKER_TAB_END -->
+
+<script>
+function showTab(name, evt) {
+  document.querySelectorAll('.tabpanel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tabbtn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  evt.currentTarget.classList.add('active');
+}
+</script>
+
+</div>
+</body>
+</html>

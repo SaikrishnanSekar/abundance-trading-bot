@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Strategy Improvement — orb_entry_confirmation_bar — 2026-07-21</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #898781;
+    --grid: #e1e0d9; --baseline: #c3c2b7; --border: rgba(11,11,11,0.10);
+    --good: #0ca30c; --warning: #fab219; --critical: #d03b3b;
+    --series-blue: #2a78d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+      --grid: #2c2c2a; --baseline: #383835; --border: rgba(255,255,255,0.10);
+      --good: #0ca30c; --warning: #fab219; --critical: #e66767;
+      --series-blue: #3987e5;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+    --grid: #2c2c2a; --baseline: #383835; --border: rgba(255,255,255,0.10);
+    --good: #0ca30c; --warning: #fab219; --critical: #e66767;
+    --series-blue: #3987e5;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--page); color: var(--text-primary); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+  header.top h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  header.top .sub { color: var(--text-secondary); font-size: 0.92rem; }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 22px 0 28px; }
+  @media (max-width: 700px) { .tiles { grid-template-columns: 1fr; } }
+  .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .tile .label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .tile .value { font-size: 1.55rem; font-weight: 600; margin-top: 4px; font-variant-numeric: proportional-nums; }
+  .tile .note { font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px; }
+  section { margin-bottom: 32px; }
+  section h2 { font-size: 1.02rem; margin: 0 0 4px; }
+  section .lede { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  thead th { text-align: left; font-weight: 600; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.02em; padding: 8px 10px; border-bottom: 1px solid var(--grid); }
+  tbody td { padding: 8px 10px; border-bottom: 1px solid var(--grid); color: var(--text-primary); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pill { display: inline-flex; font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .pill.win { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); }
+  .pill.loss { color: var(--critical); background: color-mix(in srgb, var(--critical) 16%, transparent); }
+  .table-wrap { overflow-x: auto; }
+  footer { border-top: 1px solid var(--border); margin-top: 30px; padding-top: 14px; font-size: 0.76rem; color: var(--text-muted); }
+  footer code { color: var(--text-secondary); }
+  a { color: var(--series-blue); }
+</style>
+</head>
+<body>
+<div class="viz-root wrap">
+  <header class="top">
+    <div style="margin-bottom:8px;"><a href="index.html" style="font-size:0.8rem; color:var(--text-muted); text-decoration:none;">&larr; All daily journals</a></div>
+    <h1>Strategy Improvement Test — orb_entry_confirmation_bar</h1>
+    <div class="sub">Applied against 2026-07-21's real recommendations — PENDING proposal, not yet approved/live</div>
+  </header>
+
+  <section>
+    <h2>What's being tested</h2>
+    <p class="lede">
+      Proposed rule (memory/india/STRATEGY-PROPOSALS.md, dimension <code>orb_entry_confirmation_bar</code>,
+      status PENDING): require one 5-min bar of follow-through after the breakout bar before taking the
+      entry. If the very next bar has already reversed back beyond the breakout level, skip the trade —
+      don't try to manage it after the fact. Backtested on 81 weeks / 1,046 trades: <b>+26.5%</b> to total
+      portfolio P&amp;L, holds independently in both halves of the sample. This page applies that exact
+      rule to today's real recommendations to see what it would have changed.
+    </p>
+  </section>
+
+  <div class="tiles">
+    <div class="tile">
+      <div class="label">Actual net P&amp;L today</div>
+      <div class="value" style="color:var(--good);">+₹397</div>
+      <div class="note">current rules — no confirmation filter</div>
+    </div>
+    <div class="tile">
+      <div class="label">With confirmation filter</div>
+      <div class="value" style="color:var(--good);">+₹492</div>
+      <div class="note">3 of 7 trade(s) would have been skipped</div>
+    </div>
+    <div class="tile">
+      <div class="label">Delta</div>
+      <div class="value" style="color:var(--good);">+₹95</div>
+      <div class="note">+23.8% of today's actual P&L</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Per-trade comparison</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Ticker</th><th>Side</th><th class="num">Entry</th><th>Entry time</th>
+        <th>Confirm bar (+5min)</th><th>Filter decision</th>
+        <th class="num">Actual P&amp;L</th><th>Actual close</th><th class="num">P&amp;L with filter</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+      <td>ULTRACEMCO</td>
+      <td>LONG</td>
+      <td class="num">12070.00</td>
+      <td>09:40</td>
+      <td>09:40 @ 12097.00</td>
+      <td><span class="pill win">Taken (confirmed)</span></td>
+      <td class="num">-₹148</td>
+      <td>TRAIL_STOP</td>
+      <td class="num">-₹148</td>
+    </tr>
+<tr>
+      <td>MANAPPURAM</td>
+      <td>LONG</td>
+      <td class="num">346.70</td>
+      <td>09:40</td>
+      <td>09:40 @ 345.80</td>
+      <td><span class="pill loss">SKIPPED (would not have been taken)</span></td>
+      <td class="num">+₹478</td>
+      <td>Market close (15:15)</td>
+      <td class="num">+₹0</td>
+    </tr>
+<tr>
+      <td>ADANIGREEN</td>
+      <td>LONG</td>
+      <td class="num">1541.00</td>
+      <td>09:50</td>
+      <td>09:55 @ 1542.60</td>
+      <td><span class="pill win">Taken (confirmed)</span></td>
+      <td class="num">-₹65</td>
+      <td>TRAIL_STOP</td>
+      <td class="num">-₹65</td>
+    </tr>
+<tr>
+      <td>BIOCON</td>
+      <td>LONG</td>
+      <td class="num">441.20</td>
+      <td>09:50</td>
+      <td>09:50 @ 441.00</td>
+      <td><span class="pill loss">SKIPPED (would not have been taken)</span></td>
+      <td class="num">-₹306</td>
+      <td>TRAIL_STOP</td>
+      <td class="num">+₹0</td>
+    </tr>
+<tr>
+      <td>BANKBARODA</td>
+      <td>SHORT</td>
+      <td class="num">250.40</td>
+      <td>10:00</td>
+      <td>10:00 @ 250.35</td>
+      <td><span class="pill win">Taken (confirmed)</span></td>
+      <td class="num">+₹760</td>
+      <td>Market close (15:15)</td>
+      <td class="num">+₹760</td>
+    </tr>
+<tr>
+      <td>HAVELLS</td>
+      <td>LONG</td>
+      <td class="num">1219.10</td>
+      <td>10:10</td>
+      <td>10:10 @ 1214.00</td>
+      <td><span class="pill loss">SKIPPED (would not have been taken)</span></td>
+      <td class="num">-₹266</td>
+      <td>TRAIL_STOP</td>
+      <td class="num">+₹0</td>
+    </tr>
+<tr>
+      <td>GODREJPROP</td>
+      <td>LONG</td>
+      <td class="num">2134.90</td>
+      <td>10:10</td>
+      <td>10:15 @ 2138.60</td>
+      <td><span class="pill win">Taken (confirmed)</span></td>
+      <td class="num">-₹55</td>
+      <td>TRAIL_STOP</td>
+      <td class="num">-₹55</td>
+    </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Reading this result</h2>
+    <p class="lede" style="font-size:0.88rem;">The filter would have skipped 3 of 7 trade(s) today and improved net P&amp;L by ₹95 — consistent with the backtested edge. Still just one day of confirming evidence; the proposal's cooldown (until 2026-08-04) and the backtest's own in-sample caveat still apply before committing to TRADING-STRATEGY.md.</p>
+  </section>
+
+  <footer>
+    Generated by <code>scripts/build_strategy_improvement.py</code> from
+    <code>journal/india/recommendations.jsonl</code> + Yahoo 5-min bars
+    (<code>data/yahoo_intraday_fill_cache/</code>). Proposal still PENDING human approval —
+    this page is evidence for that decision, not a live change. Position sizing:
+    ₹37,500 notional/recommendation, same convention as the daily tracker.
+  </footer>
+</div>
+</body>
+</html>

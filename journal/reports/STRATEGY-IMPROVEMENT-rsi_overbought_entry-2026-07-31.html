@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Strategy Improvement — rsi_overbought_entry — 2026-07-31</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  .viz-root { color-scheme: light; --surface-1:#fcfcfb; --page:#f9f9f7; --text-primary:#0b0b0b;
+    --text-secondary:#52514e; --text-muted:#898781; --grid:#e1e0d9; --border:rgba(11,11,11,0.10);
+    --good:#0ca30c; --critical:#d03b3b; --series-blue:#2a78d6; }
+  @media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme:dark; --surface-1:#1a1a19; --page:#0d0d0d; --text-primary:#fff; --text-secondary:#c3c2b7;
+    --text-muted:#898781; --grid:#2c2c2a; --border:rgba(255,255,255,0.10); --good:#0ca30c; --critical:#e66767; --series-blue:#3987e5; } }
+  :root[data-theme="dark"] .viz-root { color-scheme:dark; --surface-1:#1a1a19; --page:#0d0d0d; --text-primary:#fff;
+    --text-secondary:#c3c2b7; --text-muted:#898781; --grid:#2c2c2a; --border:rgba(255,255,255,0.10); --good:#0ca30c; --critical:#e66767; --series-blue:#3987e5; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--page); color:var(--text-primary); }
+  .wrap { max-width:1040px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:1.4rem; margin:0 0 4px; } .sub { color:var(--text-secondary); font-size:0.9rem; }
+  .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:22px 0; }
+  @media (max-width:800px) { .tiles { grid-template-columns:1fr 1fr; } }
+  .tile { background:var(--surface-1); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+  .tile .label { font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em; }
+  .tile .value { font-size:1.4rem; font-weight:600; margin-top:4px; }
+  .tile .note { font-size:0.76rem; color:var(--text-secondary); margin-top:4px; }
+  section { margin-bottom:30px; } section h2 { font-size:1rem; margin:0 0 4px; }
+  .lede { font-size:0.85rem; color:var(--text-secondary); margin:0 0 14px; }
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:0.8rem; background:var(--surface-1); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  thead th { text-align:left; font-weight:600; color:var(--text-muted); font-size:0.68rem; text-transform:uppercase; padding:8px 10px; border-bottom:1px solid var(--grid); }
+  tbody td { padding:8px 10px; border-bottom:1px solid var(--grid); }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:0.72rem; font-weight:600; }
+  .pill.win { background:color-mix(in srgb,var(--good) 16%,transparent); color:var(--good); }
+  .pill.loss { background:color-mix(in srgb,var(--critical) 16%,transparent); color:var(--critical); }
+  .pill.dropped { background:color-mix(in srgb,var(--text-muted) 16%,transparent); color:var(--text-muted); }
+  a { color:var(--series-blue); text-decoration:none; font-weight:600; }
+  footer { border-top:1px solid var(--border); margin-top:30px; padding-top:14px; font-size:0.76rem; color:var(--text-muted); }
+</style></head>
+<body><div class="viz-root wrap">
+  <div style="margin-bottom:8px;"><a href="index.html" style="color:var(--text-muted);font-size:0.8rem;">&larr; All daily journals</a>
+    &nbsp;·&nbsp; <a href="EXPERIMENT-rsi_overbought_entry.html" style="font-size:0.8rem;">Cumulative scoreboard &rarr;</a></div>
+  <h1>rsi_overbought_entry — 2026-07-31</h1>
+  <div class="sub">Skip ORB entries at extreme RSI (long &ge;80 / short &le;20) that lack a supporting catalyst. Catalyst-aware.</div>
+
+  <div class="tiles">
+    <div class="tile"><div class="label">Control P&amp;L</div><div class="value">+₹0</div><div class="note">take every signal</div></div>
+    <div class="tile"><div class="label">Treatment P&amp;L</div><div class="value">+₹0</div><div class="note">0 skipped</div></div>
+    <div class="tile"><div class="label">Delta</div><div class="value" style="color:var(--good);">+₹0</div><div class="note">treatment − control</div></div>
+    <div class="tile"><div class="label">Extreme-RSI split</div><div class="value">+₹0 / +₹0</div><div class="note">catalyst-backed / catalyst-less P&amp;L</div></div>
+  </div>
+
+  <section>
+    <h2>Catalyst point of view</h2>
+    <p class="lede">Not enough RSI-extreme entries on both sides of the catalyst split today to correlate; accumulating.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Catalyst support</th><th class="num">Trades</th><th class="num">Win rate</th><th class="num">Total P&amp;L</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--good);font-weight:600;">Supported (news backs the direction)</td><td class="num">0</td><td class="num">0%</td><td class="num">+₹0</td></tr>
+        <tr><td style="color:var(--text-muted);font-weight:600;">Unsupported (no / contrary news)</td><td class="num">0</td><td class="num">0%</td><td class="num">+₹0</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Per-recommendation detail</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Ticker</th><th>Side</th><th class="num">RSI@entry</th><th>Catalyst</th><th>News</th><th>Actual</th><th class="num">Actual P&amp;L</th><th>Under filter</th><th class="num">Filtered P&amp;L</th></tr></thead>
+      <tbody><tr><td colspan="9">No recommendations.</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <footer>Engine: <code>exp_rsi_overbought.py</code> · RSI@entry = scanner-logged (fallback recompute) ·
+    Catalyst = <code>journal/india/catalysts.jsonl</code> · P&amp;L = build_price_tracker Yahoo-fill model.<br>
+    Evidence: <code>journal/india/FINDINGS-2026-07-27.md</code>. Proposal: <code>memory/india/STRATEGY-PROPOSALS.md · rsi_overbought_entry</code>.
+  </footer>
+</div></body></html>
