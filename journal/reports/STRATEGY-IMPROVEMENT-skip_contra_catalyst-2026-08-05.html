@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Strategy Improvement — skip_contra_catalyst — 2026-08-05</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f9f9f7;color:#0b0b0b;}
+ @media (prefers-color-scheme:dark){body{background:#0d0d0d;color:#fff;} .card{background:#1a1a19!important;border-color:#2c2c2a!important;} th{color:#898781!important;}}
+ .wrap{max-width:900px;margin:0 auto;padding:24px 18px 50px;}
+ h1{font-size:1.3rem;margin:0 0 4px;} .sub{color:#666;font-size:0.9rem;}
+ .tiles{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0;}
+ .card{background:#fff;border:1px solid #e1e0d9;border-radius:10px;padding:12px 16px;min-width:150px;}
+ .label{font-size:0.7rem;color:#898781;text-transform:uppercase;} .val{font-size:1.35rem;font-weight:600;margin-top:4px;}
+ table{width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:8px;}
+ th{text-align:left;color:#898781;font-size:0.7rem;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid #ccc;}
+ td{padding:6px 8px;border-bottom:1px solid #eee;} .num{text-align:right;font-variant-numeric:tabular-nums;}
+ a{color:#2a78d6;text-decoration:none;font-weight:600;}
+</style></head><body><div class="wrap">
+ <div style="margin-bottom:8px;"><a href="index.html">&larr; All journals</a> · <a href="EXPERIMENT-skip_contra_catalyst.html">Cumulative scoreboard &rarr;</a></div>
+ <h1>skip_contra_catalyst — 2026-08-05</h1>
+ <div class="sub">Skip trades whose catalyst opposes direction (LONG+negative / SHORT+positive). Keep neutral &amp; supportive.</div>
+ <div class="tiles">
+  <div class="card"><div class="label">Control P&amp;L</div><div class="val">-&#8377;1,140</div></div>
+  <div class="card"><div class="label">Treatment</div><div class="val">-&#8377;1,034</div></div>
+  <div class="card"><div class="label">Delta</div><div class="val" style="color:#0ca30c;">+&#8377;105</div></div>
+  <div class="card"><div class="label">Contra skipped</div><div class="val">1</div></div>
+ </div>
+ <table><thead><tr><th>Ticker</th><th>Dir</th><th>Catalyst</th><th>Outcome</th><th class="num">Actual P&amp;L</th><th>Under rule</th><th class="num">Kept P&amp;L</th></tr></thead>
+ <tbody><tr><td>LICI</td><td>LONG</td><td>negative</td><td>LOSS</td><td class="num">-&#8377;105</td><td>SKIPPED (contra)</td><td class="num">+&#8377;0</td></tr><tr><td>UNIONBANK</td><td>LONG</td><td>none</td><td>LOSS</td><td class="num">-&#8377;443</td><td>kept</td><td class="num">-&#8377;443</td></tr><tr><td>INDIANB</td><td>LONG</td><td>none</td><td>LOSS</td><td class="num">-&#8377;428</td><td>kept</td><td class="num">-&#8377;428</td></tr><tr><td>HDFCLIFE</td><td>LONG</td><td>none</td><td>LOSS</td><td class="num">-&#8377;205</td><td>kept</td><td class="num">-&#8377;205</td></tr><tr><td>GAIL</td><td>SHORT</td><td>none</td><td>WIN</td><td class="num">+&#8377;42</td><td>kept</td><td class="num">+&#8377;42</td></tr></tbody></table>
+ <p style="color:#898781;font-size:0.76rem;margin-top:18px;">Engine <code>exp_contra_catalyst.py</code> · catalyst = <code>journal/india/catalysts.jsonl</code> · P&amp;L = Yahoo-fill model · Proposal: <code>memory/india/STRATEGY-PROPOSALS.md · skip_contra_catalyst</code>.</p>
+</div></body></html>

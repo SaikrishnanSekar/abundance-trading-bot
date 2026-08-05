@@ -6,6 +6,23 @@ Append-only. Newest at top.
 
 ---
 
+## ORB signal autopsies — 2026-08-05
+
+### 2026-08-05 · UNIONBANK · ORB LONG · LOSS -0.97% (TRAIL_HIT)
+- primary_cause: **UNEXPLAINED_CHOP**
+- factors: vwap_hold=0.67 vol_decay=0.48 back_inside=False market_drift=+0.02%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
+### 2026-08-05 · INDIANB · ORB LONG · LOSS -1.05% (TRAIL_HIT)
+- primary_cause: **VWAP_REJECTED** (historical loss-rate for this pattern: 90.4%)
+- factors: vwap_hold=0.0 vol_decay=0.83 back_inside=False market_drift=+0.02%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
+### 2026-08-05 · HDFCLIFE · ORB LONG · LOSS -0.45% (TRAIL_HIT)
+- primary_cause: **VOLUME_COLLAPSED** (historical loss-rate for this pattern: 56.0%)
+- factors: vwap_hold=1.0 vol_decay=0.29 back_inside=False market_drift=+0.05%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
 ## ORB signal autopsies — 2026-08-04
 
 ### 2026-08-04 · LT · ORB LONG · LOSS -0.27% (TRAIL_HIT)

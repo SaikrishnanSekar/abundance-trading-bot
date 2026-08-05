@@ -2,3 +2,4 @@
 {"date": "2026-07-31", "n_total": 0, "n_skipped": 0, "control_pnl": 0.0, "treatment_pnl": 0.0, "delta": 0.0}
 {"date": "2026-08-03", "n_total": 12, "n_skipped": 2, "control_pnl": -887.173314817317, "treatment_pnl": -627.3105162600613, "delta": 259.8627985572557}
 {"date": "2026-08-04", "n_total": 4, "n_skipped": 1, "control_pnl": 115.58677669481727, "treatment_pnl": 204.8053099908193, "delta": 89.21853329600202}
+{"date": "2026-08-05", "n_total": 5, "n_skipped": 1, "control_pnl": -1139.779154605997, "treatment_pnl": -1034.4293825326374, "delta": 105.34977207335965}

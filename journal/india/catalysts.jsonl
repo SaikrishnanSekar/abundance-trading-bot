@@ -50,3 +50,7 @@
 {"date": "2026-08-04", "ticker": "HDFCBANK", "polarity": "none", "summary": "no fresh catalyst found", "source": "", "researched_at": "2026-08-04T12:31:07.597463+05:30"}
 {"date": "2026-08-04", "ticker": "LT", "polarity": "none", "summary": "no fresh catalyst found", "source": "", "researched_at": "2026-08-04T12:01:05.389035+05:30"}
 {"date": "2026-08-04", "ticker": "UPL", "polarity": "none", "summary": "no fresh catalyst found", "source": "", "researched_at": "2026-08-04T12:11:13.337333+05:30"}
+{"date": "2026-08-05", "ticker": "GAIL", "polarity": "none", "summary": "no fresh catalyst found", "source": "", "researched_at": "2026-08-05T11:10:52.258607+05:30"}
+{"date": "2026-08-05", "ticker": "INDIANB", "polarity": "none", "summary": "no fresh catalyst found", "source": "", "researched_at": "2026-08-05T12:11:00.887623+05:30"}
+{"date": "2026-08-05", "ticker": "LICI", "polarity": "negative", "summary": "Govt OFS stake sale ~$3.3B at 10% discount, over-subscription exercised", "source": "https://www.cnbc.com/2026/08/04/india-lic-stake-sale-discount.html", "researched_at": "2026-08-05T12:11:00.887623+05:30"}
+{"date": "2026-08-05", "ticker": "UNIONBANK", "polarity": "none", "summary": "no fresh catalyst found", "source": "", "researched_at": "2026-08-05T12:11:00.887623+05:30"}
