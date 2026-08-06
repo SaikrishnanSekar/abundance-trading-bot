@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Daily Journal — India — 2026-08-06</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="application/json" id="daily-meta">
+{
+  "date": "2026-08-06",
+  "market": "india",
+  "regime": "BULLISH",
+  "observation_mode": true,
+  "buy_signals": 4,
+  "live_trades": 0,
+  "orb_signals": 4,
+  "orb_failed": 1,
+  "gap_fill_signals": 0,
+  "gap_fill_failed": 0,
+  "rca_findings": 3,
+  "headline": "First fully-instrumented session since the outages — 40/40 scan cycles, no backfill, catalyst coverage 100% (4/4) for the first time. Flat at -Rs18: LONG 1/3 -Rs138, SHORT 1/1 +Rs120. Biggest finding of the trial: ORB width predicts outcome monotonically across n=77 — width >=1.00% gives 52.0% WR / +Rs2,433 while width <1.00% gives 22.2% WR / -Rs1,384, i.e. the narrow-range signals ARE the drawdown. v4 removed that gate on 2026-07-19. Also: the catalyst layer was anti-predictive today (3 aligned longs on positive earnings went 1/3; the one contra-catalyst SHORT won), giving skip_contra_catalyst its first losing day and disable_shorts its third straight.",
+  "net_pnl_today": -17.9,
+  "cumulative_pnl": -2698.35,
+  "cumulative_trades": 63,
+  "long_pnl_today": -137.55,
+  "short_pnl_today": 119.65,
+  "long_wl_today": "1/3",
+  "short_wl_today": "1/1",
+  "long_pnl_cumulative": -302.62,
+  "short_pnl_cumulative": -2395.72
+}
+</script>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --serious:        #ec835a;
+    --critical:       #d03b3b;
+    --series-blue:    #2a78d6;
+    --series-violet:  #4a3aa7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --good:           #0ca30c;
+      --warning:        #fab219;
+      --serious:        #ec835a;
+      --critical:       #e66767;
+      --series-blue:    #3987e5;
+      --series-violet:  #9085e9;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --serious:        #ec835a;
+    --critical:       #e66767;
+    --series-blue:    #3987e5;
+    --series-violet:  #9085e9;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header.top { margin-bottom: 20px; }
+  header.top h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  header.top .sub { color: var(--text-secondary); font-size: 0.92rem; }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--text-secondary);
+    background: var(--surface-1);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.good { background: var(--good); }
+  .dot.warning { background: var(--warning); }
+  .dot.critical { background: var(--critical); }
+  .dot.neutral { background: var(--text-muted); }
+
+  .tiles {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin: 22px 0 30px;
+  }
+  @media (max-width: 700px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+  .tile {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .tile .label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .tile .value { font-size: 1.65rem; font-weight: 600; margin-top: 4px; font-variant-numeric: proportional-nums; }
+  .tile .note { font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px; }
+
+  section { margin-bottom: 34px; }
+  section h2 {
+    font-size: 1.02rem; margin: 0 0 4px; color: var(--text-primary);
+  }
+  section .lede { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 14px; line-height: 1.5; }
+
+  .rca-list { display: flex; flex-direction: column; gap: 10px; }
+  .rca-item {
+    display: flex; gap: 12px; padding: 12px 14px;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+  }
+  .rca-item .icon { flex: none; width: 20px; text-align: center; font-size: 0.95rem; line-height: 1.4; }
+  .rca-item .body h3 { margin: 0 0 3px; font-size: 0.88rem; }
+  .rca-item .body p { margin: 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45; }
+  .rca-item .body .status { font-size: 0.74rem; font-weight: 600; margin-top: 5px; }
+  .status.resolved { color: var(--good); }
+  .status.open { color: var(--warning); }
+  .status.fixed { color: var(--good); }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.82rem;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+  thead th {
+    text-align: left; font-weight: 600; color: var(--text-muted);
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.02em;
+    padding: 8px 12px; border-bottom: 1px solid var(--grid);
+  }
+  tbody td { padding: 8px 12px; border-bottom: 1px solid var(--grid); color: var(--text-primary); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+  }
+  .pill.win    { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); }
+  .pill.loss   { color: var(--critical); background: color-mix(in srgb, var(--critical) 16%, transparent); }
+
+  footer {
+    border-top: 1px solid var(--border); margin-top: 40px; padding-top: 16px;
+    font-size: 0.76rem; color: var(--text-muted);
+  }
+  footer code { color: var(--text-secondary); }
+  .table-wrap { overflow-x: auto; }
+
+  .track-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .track-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .track-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .track-ticker { font-size: 1rem; font-weight: 700; margin-right: 8px; }
+  .track-sub { font-size: 0.72rem; color: var(--text-muted); }
+  .track-levels { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 8px; }
+  .track-levels b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .track-chart { margin: 4px 0 8px; }
+  .track-details summary { cursor: pointer; font-size: 0.76rem; color: var(--series-blue); font-weight: 600; }
+  table.cp-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; margin-top: 8px; }
+  table.cp-table th { text-align: left; color: var(--text-muted); font-weight: 600; padding: 4px 6px; border-bottom: 1px solid var(--grid); }
+  table.cp-table td { padding: 4px 6px; border-bottom: 1px solid var(--grid); color: var(--text-secondary); }
+  table.cp-table td.num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .pill.dropped { color: var(--warning); background: color-mix(in srgb, var(--warning) 18%, transparent); }
+
+  .tabbar { display: flex; gap: 4px; margin: 18px 0 22px; border-bottom: 1px solid var(--border); }
+  .tabbtn { appearance: none; background: none; border: none; font: inherit; font-size: 0.85rem; font-weight: 600;
+            color: var(--text-muted); padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; }
+  .tabbtn.active { color: var(--text-primary); border-bottom-color: var(--series-blue); }
+  .tabpanel { display: none; }
+  .tabpanel.active { display: block; }
+  .track-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .track-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .track-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .track-ticker { font-size: 1rem; font-weight: 700; margin-right: 8px; }
+  .track-sub { font-size: 0.72rem; color: var(--text-muted); }
+  .track-levels { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 8px; }
+  .track-levels b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .track-chart { margin: 4px 0 8px; }
+  .track-details summary { cursor: pointer; font-size: 0.76rem; color: var(--series-blue); font-weight: 600; }
+  table.cp-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; margin-top: 8px; }
+  table.cp-table th { text-align: left; color: var(--text-muted); font-weight: 600; padding: 4px 6px; border-bottom: 1px solid var(--grid); }
+  table.cp-table td { padding: 4px 6px; border-bottom: 1px solid var(--grid); color: var(--text-secondary); }
+  table.cp-table td.num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .pill.dropped { color: var(--warning); background: color-mix(in srgb, var(--warning) 18%, transparent); }
+
+  /* TAB_CSS_MARK */
+</style>
+</head>
+<body>
+<div class="viz-root wrap">
+<!-- TABBAR_START -->
+<div class="tabbar">
+  <button class="tabbtn active" onclick="showTab('summary', event)">Daily Summary</button>
+  <button class="tabbtn" onclick="showTab('tracker', event)">Price Action Tracker</button>
+</div>
+<!-- TABBAR_END -->
+<div class="tabpanel active" id="tab-summary">
+<header class="top">
+    <div style="margin-bottom:8px;"><a href="index.html" style="font-size:0.8rem; color:var(--text-muted); text-decoration:none;">&larr; All daily journals</a></div>
+    <h1>Daily Journal — India — 2026-08-06 (Thursday)</h1>
+    <div class="sub">First clean session since the outages — and the day both anti-short experiments were proven wrong at the same time.</div>
+    <div class="badges">
+      <span class="badge"><span class="dot good"></span>40/40 scan cycles — no outage</span>
+      <span class="badge"><span class="dot neutral"></span>Net -&#8377;18 — flat</span>
+      <span class="badge"><span class="dot good"></span>Catalyst coverage 4/4 — a first</span>
+      <span class="badge"><span class="dot warning"></span>skip_contra_catalyst: first losing day</span>
+    </div>
+  </header>
+
+  <div class="tiles">
+    <div class="tile"><div class="label">ORB recommendations</div><div class="value">4</div><div class="note">3 long, 1 short · all live-captured</div></div>
+    <div class="tile"><div class="label">Win / Loss (graded)</div><div class="value">2 / 1</div><div class="note">APLAPOLLO never triggered in autopsy replay</div></div>
+    <div class="tile"><div class="label">Net P&amp;L (tracked)</div><div class="value" style="color:var(--text-secondary);">-&#8377;18</div><div class="note">smallest absolute day of the trial</div></div>
+    <div class="tile"><div class="label">Long / Short (kept separate)</div><div class="value">-&#8377;138 / +&#8377;120</div><div class="note">long 1/3 · short 1/1</div></div>
+  </div>
+
+  <section>
+    <h2>The headline — infrastructure held, and the short was the best trade again</h2>
+    <p class="lede">
+      The first fully-instrumented session in three days: <b>40 of 40 scan cycles ran</b> 09:30&rarr;16:00, the
+      ORB task ran to 11:30, the catalyst scan to 13:00, and the Kotak feed stayed up to its 15:35 auto-stop.
+      No backfill was needed. That is the direct result of this morning's fixes — the corrupt
+      <code>live_feed.json</code> (8,048 NUL bytes) was cleared and the wake-lock restarted before the open.
+      <br><br>
+      The trading day itself was a <b>flat -&#8377;18</b> — the smallest absolute result of the trial. But the
+      composition matters far more than the number: <b>the one short was the day's second-best trade</b>
+      (AUROPHARMA <b>+&#8377;120</b>) while the three longs netted <b>-&#8377;138</b>. That is now
+      <b>three sessions running</b> in which the short side either carried the day or lost the least,
+      against a cumulative short book of <b>-&#8377;2,396</b>. The "shorts are structurally broken" thesis is
+      taking sustained fire.
+    </p>
+  </section>
+
+  <section>
+    <h2>All four signals</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Ticker</th><th>Dir</th><th>Entry</th><th>Setup</th><th>Catalyst</th>
+        <th class="num">Graded</th><th class="num">P&amp;L</th><th>Exit</th><th>Autopsy</th></tr></thead>
+      <tbody>
+        <tr><td>BIOCON</td><td>LONG</td><td>09:50</td><td>1.74% wid · vol 2.8x · RSI 67</td><td style="color:var(--good);">positive</td><td class="num" style="color:var(--good);">+0.95%</td><td class="num" style="color:var(--good);">+&#8377;313</td><td>15:10 square-off</td><td><span class="pill win">WIN</span> held all day</td></tr>
+        <tr><td>AUROPHARMA</td><td>SHORT</td><td>09:40</td><td>2.34% wid · vol 3.5x · RSI 31</td><td style="color:var(--good);">positive</td><td class="num" style="color:var(--good);">+0.43%</td><td class="num" style="color:var(--good);">+&#8377;120</td><td>15:10 square-off</td><td><span class="pill win">WIN</span> <b>contra-catalyst short that worked</b></td></tr>
+        <tr><td>APLAPOLLO</td><td>LONG</td><td>10:10</td><td>0.38% wid · <b>vol 7.8x</b> · <b>RSI 81 [OB]</b></td><td style="color:var(--good);">positive</td><td class="num">—</td><td class="num" style="color:var(--critical);">-&#8377;176</td><td>10:15 trail hit</td><td>blow-off chase · dead in <b>5 minutes</b></td></tr>
+        <tr><td>TVSMOTOR</td><td>LONG</td><td>09:40</td><td>0.68% wid · vol 2.2x · RSI 52</td><td style="color:var(--good);">positive</td><td class="num" style="color:var(--critical);">-0.67%</td><td class="num" style="color:var(--critical);">-&#8377;274</td><td>10:00 trail hit</td><td>FELL_BACK_IN_BOX (prior 80.0% loss)</td></tr>
+      </tbody>
+    </table></div>
+    <p class="lede" style="margin-top:10px;">
+      Regime <b>BULLISH (76% of Nifty 50 above 20d SMA)</b>, VIX <b>12.09</b>, feed LIVE for 37 of 40 cycles
+      (the 3 STALE cycles were the pre-open warm-up). Zero BB-squeeze/ORB confluence events today — the
+      trial-wide count stays at <b>3</b>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Catalyst coverage hit 100% for the first time — and it cut against the filter</h2>
+    <p class="lede">
+      <b>All four signals were researched, and all four came back positive.</b> That has never happened before;
+      previous days ran 1-of-5 or 4-of-7 coverage with mostly <code>none</code>. The catalyst scan ran its full
+      09:30&ndash;13:00 window today, which is why.
+    </p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Ticker</th><th>Catalyst</th><th>Dir</th><th>Aligned?</th><th class="num">Result</th></tr></thead>
+      <tbody>
+        <tr><td>BIOCON</td><td>Q1FY27 net profit <b>+349% YoY</b> to &#8377;141cr, revenue +10%</td><td>LONG</td><td style="color:var(--good);">yes</td><td class="num" style="color:var(--good);">+&#8377;313</td></tr>
+        <tr><td>TVSMOTOR</td><td>July sales record 629,675 units <b>+38% YoY</b>, EV +158%</td><td>LONG</td><td style="color:var(--good);">yes</td><td class="num" style="color:var(--critical);">-&#8377;274</td></tr>
+        <tr><td>APLAPOLLO</td><td>Q1 FY27 PAT <b>+10.9%</b> to &#8377;263cr, EBITDA/ton +17.9%, stock +6.6%</td><td>LONG</td><td style="color:var(--good);">yes</td><td class="num" style="color:var(--critical);">-&#8377;176</td></tr>
+        <tr><td>AUROPHARMA</td><td>Q1 FY27 net profit <b>+32% YoY</b> to &#8377;1,032cr, revenue +16.3%</td><td>SHORT</td><td style="color:var(--critical);"><b>NO — contra</b></td><td class="num" style="color:var(--good);">+&#8377;120</td></tr>
+      </tbody>
+    </table></div>
+    <p class="lede" style="margin-top:12px;">
+      <b>Read it honestly: today the catalyst layer was anti-predictive.</b> The three <i>aligned</i> longs went
+      <b>1/3 for -&#8377;138</b>; the one <b>contra</b>-aligned short <b>won</b>. A positive earnings print told you
+      nothing about whether the 09:40 breakout would hold — TVSMOTOR had a record sales month and still fell back
+      into its opening box inside 20 minutes.
+      <br><br>
+      This is the first real counter-evidence for <b>skip_contra_catalyst</b>, which had been 2-for-2 on textbook
+      hits (DIVISLAB 08-04, LICI 08-05). Today it would have skipped the day's only winner on the short side and
+      posted <b>-&#8377;120</b>, its first losing day. Cumulative drops <b>+&#8377;523 &rarr; +&#8377;403</b>,
+      day 6 of 10. Still ahead, no longer unblemished.
+    </p>
+  </section>
+
+  <section>
+    <h2>APLAPOLLO — the carve-out that let a blow-off through</h2>
+    <p class="lede">
+      APLAPOLLO fired at <b>RSI 81</b> on <b>7.8x volume</b> with the <b>narrowest opening range of the day
+      (0.38%)</b> — the textbook profile of an exhausted chase, not a breakout. It was trail-stopped
+      <b>five minutes later</b> for <b>-&#8377;176</b>.
+      <br><br>
+      The <code>rsi_overbought_entry</code> experiment did <b>not</b> skip it, and that is by design, not a bug:
+      the rule is catalyst-aware — <i>skip a long at RSI &ge; 80 <b>only if the catalyst is not positive</b></i>.
+      APLAPOLLO's catalyst was positive (Q1 PAT +10.9%, stock already +6.6% on the day), so the carve-out
+      exempted it and the experiment logged a <b>&#8377;0 delta</b>.
+      <br><br>
+      That carve-out just cost &#8377;176 of measurable evidence. The stock being <i>up 6.6% already</i> is
+      precisely why RSI was 81 — the "supporting catalyst" and the "overbought" condition are the same fact
+      counted twice. Worth noting for the day-10 review, now one session away.
+      <br><br>
+      Second-order note: the two replay engines disagree on this trade. <code>journal.orb_autopsy</code> reports
+      "<i>signal never triggered in bars</i>" and does not grade it, while the price tracker fills it and books
+      <b>-&#8377;176</b>. Same disagreement as LICI on 08-05. The tracker's number is the one in the day's P&amp;L.
+    </p>
+  </section>
+
+  <section>
+    <h2>Experiments scoreboard</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Experiment</th><th class="num">Today</th><th class="num">Cumulative</th><th class="num">Days</th><th>Read</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><a href="EXPERIMENT-disable_shorts.html">disable_shorts</a></td>
+          <td class="num" style="color:var(--critical);">-&#8377;120</td>
+          <td class="num" style="color:var(--good);">+&#8377;1,606</td>
+          <td class="num">6 / 10</td>
+          <td>Third losing day in three sessions — the short has been the best or least-bad trade each time. Its lead was built on short-heavy <i>bad</i> tapes, and those have stopped appearing.</td>
+        </tr>
+        <tr>
+          <td><a href="EXPERIMENT-skip_contra_catalyst.html">skip_contra_catalyst</a></td>
+          <td class="num" style="color:var(--critical);">-&#8377;120</td>
+          <td class="num" style="color:var(--good);">+&#8377;403</td>
+          <td class="num">6 / 10</td>
+          <td><b>First losing day.</b> Would have skipped AUROPHARMA — a short into a +32% PAT beat that won anyway. The category still looks right; the edge is thinner than 2-for-2 suggested.</td>
+        </tr>
+        <tr>
+          <td><a href="EXPERIMENT-rsi_overbought_entry.html">rsi_overbought_entry</a></td>
+          <td class="num">&#8377;0</td>
+          <td class="num" style="color:var(--critical);">-&#8377;926</td>
+          <td class="num">9 / 10</td>
+          <td>Zero delta — its catalyst carve-out exempted APLAPOLLO (RSI 81, positive catalyst), which then lost &#8377;176. <b>Decision due next session.</b></td>
+        </tr>
+        <tr>
+          <td><a href="EXPERIMENT-vwap_alignment.html">vwap_alignment</a></td>
+          <td class="num">&#8377;0</td>
+          <td class="num">&#8377;0</td>
+          <td class="num">5 / 10</td>
+          <td>Fifth consecutive &#8377;0. Every signal has been VWAP-aligned at entry on every day it has run. The gate has never once changed an outcome.</td>
+        </tr>
+      </tbody>
+    </table></div>
+    <p class="lede" style="margin-top:12px;">
+      All four remain below <code>min_days_before_decision = 10</code> — <b>progress reporting only</b>, no commit,
+      no drop, no proposal. <code>rsi_overbought_entry</code> reaches its threshold next session and is currently
+      <b>-&#8377;926</b>, i.e. tracking toward <code>STRATEGY-PROPOSALS-REJECTED.md</code>.
+    </p>
+  </section>
+
+  <section>
+    <h2>The finding of the trial: opening-range width predicts the outcome, and v4 deleted that gate</h2>
+    <p class="lede">
+      Today's four signals ranked <b>perfectly</b> by opening-range width — the two widest won and held to the
+      15:10 square-off, the two narrowest were trail-stopped inside 20 minutes:
+      <b>AUROPHARMA 2.34% &rarr; +&#8377;120</b>, <b>BIOCON 1.74% &rarr; +&#8377;313</b>,
+      <b>TVSMOTOR 0.68% &rarr; -&#8377;274</b>, <b>APLAPOLLO 0.38% &rarr; -&#8377;176</b>.
+      That prompted a sweep of every signal with a logged width across the whole record (<b>n=77</b>),
+      and the relationship is monotonic:
+    </p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>ORB width at entry</th><th class="num">n</th><th class="num">Win rate</th><th class="num">Net P&amp;L</th><th class="num">Avg per signal</th></tr></thead>
+      <tbody>
+        <tr><td>&lt; 0.50%</td><td class="num">4</td><td class="num" style="color:var(--critical);"><b>0.0%</b></td><td class="num" style="color:var(--critical);">-&#8377;593</td><td class="num" style="color:var(--critical);">-0.41%</td></tr>
+        <tr><td>0.50 – 1.00%</td><td class="num">23</td><td class="num" style="color:var(--critical);">26.1%</td><td class="num" style="color:var(--critical);">-&#8377;791</td><td class="num" style="color:var(--critical);">-0.10%</td></tr>
+        <tr><td>1.00 – 1.50%</td><td class="num">18</td><td class="num" style="color:var(--good);">50.0%</td><td class="num" style="color:var(--good);">+&#8377;1,453</td><td class="num" style="color:var(--good);">+0.22%</td></tr>
+        <tr><td>&ge; 1.50% <span style="color:var(--text-muted);">(the old v3 gate)</span></td><td class="num">32</td><td class="num" style="color:var(--good);">53.1%</td><td class="num" style="color:var(--good);">+&#8377;980</td><td class="num" style="color:var(--good);">+0.08%</td></tr>
+      </tbody>
+    </table></div>
+    <p class="lede" style="margin-top:12px;">
+      Collapsed at the 1.00% line: <b>width &ge; 1.00% &rarr; n=50, 52.0% WR, +&#8377;2,433</b>.
+      <b>Width &lt; 1.00% &rarr; n=27, 22.2% WR, -&#8377;1,384.</b> The narrow-range signals are not merely worse —
+      they are the entire drawdown, and the wide ones are quietly profitable underneath them.
+      <br><br>
+      <b>ORB v4 removed the width gate on 2026-07-19</b> ("only degenerate ranges skipped", &lt;0.10%). v3 had
+      required &ge;1.5%. On this record that removal looks like the single largest self-inflicted wound of the
+      trial. Note the gate does not have to come back at v3's 1.5% — the data says the damage is concentrated
+      below <b>1.0%</b>, and the 1.00–1.50% band is the <i>best</i> bucket of all, which a 1.5% gate would have
+      thrown away.
+      <br><br>
+      Two supporting cuts from the same sweep:
+      <b>(1) more volume is worse, not better</b> — 2–3x is the strongest bucket (n=40, +&#8377;2,729) while
+      &ge;5x blow-off entries are negative (n=9, -&#8377;550); APLAPOLLO's 7.8x was a warning, not a
+      confirmation. <b>(2) The trail stop is doing all the work</b> — signals held to the 15:10 square-off run
+      <b>71.8% WR / +&#8377;8,407</b>, while trail-stopped signals run <b>10.5% WR / -&#8377;7,358</b>. Once the
+      trail fires, recovery essentially does not happen.
+      <br><br>
+      <b>Status: not a proposal yet.</b> n=77 clears the 20-trade structural minimum, but the width dimension
+      must go through <code>scripts/proposal-check.sh</code> for cooldown (v4's own width decision was
+      2026-07-19) and then run as a registered controlled experiment before any
+      <code>TRADING-STRATEGY.md</code> commit. Recorded here as evidence, not as a change.
+    </p>
+  </section>
+
+  <section>
+    <h2>Open system findings (carried, not fixed today)</h2>
+    <div class="rca-list">
+      <div class="rca-item">
+        <div class="icon">&#9888;</div>
+        <div class="body">
+          <h3>Watchlist gate is running ORB v3 against a v4 scanner</h3>
+          <p>
+            <code>premarket_watchlist.py</code> still emits <b>ORB v3 / STRONG-22 / width gate &ge;1.5%</b> —
+            22 tickers. <code>scan_all.py</code> scans <b>150</b> under v4 with the width gate removed. Every
+            signal today (BIOCON, AUROPHARMA, APLAPOLLO, TVSMOTOR) is <b>off-watchlist</b>, as were all of
+            yesterday's. CLAUDE.md's buy-side gate requires the ticket to be in <code>APPROVED-WATCHLIST.md</code>.
+            Harmless in Observation Mode; the moment trading unlocks the gate either blocks everything or is
+            being bypassed.
+          </p>
+          <div class="status open">OPEN — regenerate the watchlist from the v4 universe, or the gate is decorative.</div>
+        </div>
+      </div>
+      <div class="rca-item">
+        <div class="icon">&#9888;</div>
+        <div class="body">
+          <h3>Dhan and Perplexity credentials are dead; catalyst build has no fallback feed</h3>
+          <p>
+            <code>DHAN_ACCESS_TOKEN</code> returns <b>401 / DH-901</b> (expired) — no positions, funds or gate
+            checks; <code>pulse.sh india</code> returns <code>INDIA_POSITIONS_ERROR</code>.
+            <code>PERPLEXITY_API_KEY</code> returns <b>401</b>, which also kills <code>news.sh</code> (it
+            delegates to Perplexity). The catalyst build therefore runs on <b>exactly one feed</b> — Claude Code
+            headless <code>WebSearch</code> — with no fallback. Today that single feed delivered 4/4 coverage, so
+            the risk is latent, not realised.
+          </p>
+          <div class="status open">OPEN — refresh both tokens; today's 100% coverage depends on one unbacked feed.</div>
+        </div>
+      </div>
+      <div class="rca-item">
+        <div class="icon">&#9888;</div>
+        <div class="body">
+          <h3>Daily bhavcopy stale since 2026-07-17 — 69 recommendations stuck open</h3>
+          <p>
+            <code>journal.capture_outcomes</code> and <code>journal.track</code> again closed <b>nothing</b>
+            ("data through 2026-07-17"). The count has grown from 65 to <b>69</b>. Every rolling win-rate and
+            grade metric that depends on closed outcomes is frozen. The intraday autopsy and price tracker are
+            unaffected — they read the 5-min cache directly.
+          </p>
+          <div class="status open">OPEN — third day carried. This is the metric layer, not the P&amp;L layer.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Verdict</h2>
+    <p class="lede" style="font-size:0.88rem;">
+      Operationally the best day of the trial: <b>a full 40-cycle session with zero data loss</b>, and catalyst
+      coverage at <b>100%</b> for the first time. Financially a non-event at <b>-&#8377;18</b>. Analytically it
+      was the most informative day in a week, because two of the four running experiments took damage from the
+      same trade: <b>AUROPHARMA was a contra-catalyst short that won</b>, which is simultaneously a counter-example
+      for <code>skip_contra_catalyst</code> (first loss, cum <b>+&#8377;403</b>) and for
+      <code>disable_shorts</code> (third straight loss, cum <b>+&#8377;1,606</b>).
+      <br><br>
+      Cumulative v4 trial <b>-&#8377;2,698</b> over <b>63 signals / 10 days</b>, split <b>LONG -&#8377;303</b> /
+      <b>SHORT -&#8377;2,396</b>. The long book is now essentially flat-to-negative over the whole trial, which
+      removes the last reason to treat "long-only" as an obvious improvement. No live fills; Observation Mode
+      continues.
+    </p>
+  </section>
+
+  <footer>
+    Generated from <code>recommendations.jsonl</code>, <code>journal.orb_autopsy</code>,
+    <code>scripts/run_experiments.py</code>, <code>catalysts.jsonl</code>, and the price-tracker Yahoo-fill model.
+    Journal path: <code>journal/reports/DAILY-YYYY-MM-DD.html</code>.
+  </footer>
+</div><!-- END_SUMMARY_PANEL -->
+<!-- TRACKER_TAB_START -->
+<div class="tabpanel" id="tab-tracker">
+
+    <div class="tiles" style="margin-bottom:20px;">
+      <div class="tile">
+        <div class="label">Net P&amp;L today (after Dhan costs)</div>
+        <div class="value" style="color:var(--critical);">-₹18</div>
+        <div class="note">gross +₹137 − ₹155 costs, ₹145,148 deployed</div>
+      </div>
+      <div class="tile">
+        <div class="label">Cumulative P&amp;L (v4 trial, 2026-07-20 → 2026-08-06)</div>
+        <div class="value" style="color:var(--critical);">-₹2,698</div>
+        <div class="note">net of Dhan costs, 63 trade(s) across 10 day(s) — excludes pre-trial May/June signals</div>
+      </div>
+      <div class="tile">
+        <div class="label">Win / loss</div>
+        <div class="value">2 / 2</div>
+        <div class="note">2 trailing-stop hit · 2 market-close (4 via Yahoo fill)</div>
+      </div>
+      <div class="tile"><div class="label">Long vs Short (kept separate)</div><div style="margin-top:6px;"><div style="display:flex; justify-content:space-between; gap:10px; font-size:0.82rem; padding:2px 0;"><span>LONG <span style="color:var(--text-muted);">1/3</span></span><span>today <b style="color:var(--critical);">-₹138</b> · cum <b style="color:var(--critical);">-₹303</b></span></div><div style="display:flex; justify-content:space-between; gap:10px; font-size:0.82rem; padding:2px 0;"><span>SHORT <span style="color:var(--text-muted);">1/1</span></span><span>today <b style="color:var(--good);">+₹120</b> · cum <b style="color:var(--critical);">-₹2,396</b></span></div></div><div class="note">shorts tracked separately — do not net against longs</div></div>
+    </div>
+    <p style="color:var(--text-muted); font-size:0.76rem; margin:-8px 0 16px;">
+      Position sizing: ₹37,500 notional/recommendation (v4 trial sizing, 0.75×) — paper P&amp;L only, no real capital at risk during Observation Mode.
+      P&amp;L is net of an approximate Dhan intraday-equity round-trip cost stack (brokerage min(₹20, 0.03%)/leg, STT 0.025% on sell, exchange txn ~0.00325%, SEBI fee, stamp duty 0.003% on buy, 18% GST on brokerage+txn) — see each card's cost breakdown.
+      Execution model matches the real v4 rule exactly (journal/orb_autopsy.py's replay_v4): trailing stop 1x opening-range-width behind the best close since entry — <b>no fixed target</b>, tighten-only, flat at 15:10 IST. Every recommendation is closed: trailing-stop hit or 15:10 square-off — never left unresolved. Uses Yahoo Finance's full-day 5-min OHLC bars (not the live scanner's sparse 10-min checkpoints) so the replay is accurate regardless of when the live scanner stopped watching.
+      A handful may show "no entry data" if their real entry fell inside a known scanner-outage window — excluded from P&amp;L, not counted as a loss.
+    </p><div class="track-grid">
+    <div class="track-card">
+      <div class="track-head">
+        <div>
+          <span class="track-ticker">TVSMOTOR</span>
+          <span class="track-sub">ORB · LONG · AUTO2</span>
+        </div>
+        <span class="pill loss">LOSS · -₹274 (-0.77%)</span>
+      </div>
+      <div class="track-levels">
+        <span>Entry <b>4432.50</b></span>
+        <span>Initial stop <b>4393.10</b> <span style="color:var(--text-muted);">(trails — no fixed target in v4)</span></span>
+        <span>Invested <b>₹35,460 (8 sh)</b></span>
+      </div>
+      <div class="track-levels">
+        <span>Gross P&amp;L <b>-₹237</b></span>
+        <span>Dhan costs <b>-₹38</b></span>
+        <span>Entered <b>09:40</b></span>
+        <span>Closed <b>10:00</b> @ <b>4402.91</b></span>
+        <span>Reason <b>Trailing stop hit</b></span>
+      </div>
+      <div class="track-chart"><svg viewBox="0 0 560 130" width="100%" height="130" role="img" aria-label="TVSMOTOR price path"><line x1="8" y1="19.7" x2="504" y2="19.7" stroke="var(--baseline)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="22.7" font-size="9" fill="var(--text-muted)">Entry</text><line x1="8" y1="100.3" x2="504" y2="100.3" stroke="var(--critical)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="103.3" font-size="9" fill="var(--text-muted)">Initial stop</text><path d="M 8.0 19.7 L 8.0 55.1 L 132.0 61.8 L 256.0 51.6 L 380.0 74.5 L 504.0 69.6" fill="none" stroke="var(--critical)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="8.0" cy="19.7" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:40 · 4432.50 · ORB 0.68% wid | vol2.2x | RSI 52</title></circle><circle cx="8.0" cy="55.1" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:40 · 4415.20 · [Yahoo fill]</title></circle><circle cx="132.0" cy="61.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:45 · 4411.90 · [Yahoo fill]</title></circle><circle cx="256.0" cy="51.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:50 · 4416.90 · [Yahoo fill]</title></circle><circle cx="380.0" cy="74.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:55 · 4405.70 · [Yahoo fill]</title></circle><circle cx="504.0" cy="69.6" r="5" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:00 · 4408.10 · [Yahoo fill]</title></circle><text x="512.0" y="72.6" font-size="10" font-weight="600" fill="var(--text-primary)">4408.10</text></svg></div>
+      <details class="track-details">
+        <summary>Full checkpoint history &amp; cost breakdown</summary>
+        <table class="cp-table" style="margin-bottom:10px;"><thead><tr><th>Dhan cost (round trip)</th><th class="num">Amount</th></tr></thead><tbody><tr><td>Brokerage</td><td class="num">₹21.20</td></tr><tr><td>STT</td><td class="num">₹8.81</td></tr><tr><td>Exchange txn charge</td><td class="num">₹2.30</td></tr><tr><td>SEBI fee</td><td class="num">₹0.07</td></tr><tr><td>Stamp duty</td><td class="num">₹1.06</td></tr><tr><td>GST</td><td class="num">₹4.23</td></tr><tr><td><b>Total</b></td><td class="num"><b>₹37.67</b></td></tr></tbody></table>
+        <table class="cp-table"><thead><tr><th>Time</th><th class="num">Price</th><th>Notes</th></tr></thead><tbody><tr><td>09:40</td><td class="num">4432.50</td><td>ORB 0.68% wid | vol2.2x | RSI 52</td></tr><tr><td>09:40</td><td class="num">4415.20</td><td>[Yahoo fill]</td></tr><tr><td>09:45</td><td class="num">4411.90</td><td>[Yahoo fill]</td></tr><tr><td>09:50</td><td class="num">4416.90</td><td>[Yahoo fill]</td></tr><tr><td>09:55</td><td class="num">4405.70</td><td>[Yahoo fill]</td></tr><tr><td>10:00</td><td class="num">4408.10</td><td>[Yahoo fill]</td></tr></tbody></table>
+      </details>
+    </div>
+    <div class="track-card">
+      <div class="track-head">
+        <div>
+          <span class="track-ticker">APLAPOLLO</span>
+          <span class="track-sub">ORB · LONG · ELEC</span>
+        </div>
+        <span class="pill loss">LOSS · -₹176 (-0.49%)</span>
+      </div>
+      <div class="track-levels">
+        <span>Entry <b>1993.20</b></span>
+        <span>Initial stop <b>1948.50</b> <span style="color:var(--text-muted);">(trails — no fixed target in v4)</span></span>
+        <span>Invested <b>₹35,878 (18 sh)</b></span>
+      </div>
+      <div class="track-levels">
+        <span>Gross P&amp;L <b>-₹138</b></span>
+        <span>Dhan costs <b>-₹38</b></span>
+        <span>Entered <b>10:10</b></span>
+        <span>Closed <b>10:15</b> @ <b>1985.55</b></span>
+        <span>Reason <b>Trailing stop hit</b></span>
+      </div>
+      <div class="track-chart"><svg viewBox="0 0 560 130" width="100%" height="130" role="img" aria-label="APLAPOLLO price path"><line x1="8" y1="19.7" x2="504" y2="19.7" stroke="var(--baseline)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="22.7" font-size="9" fill="var(--text-muted)">Entry</text><line x1="8" y1="100.3" x2="504" y2="100.3" stroke="var(--critical)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="103.3" font-size="9" fill="var(--text-muted)">Initial stop</text><path d="M 8.0 19.7 L 25.7 32.5 L 43.4 32.8 L 61.1 35.7 L 78.9 33.6 L 96.6 33.0 L 114.3 34.5 L 132.0 32.1 L 149.7 37.0 L 167.4 38.1 L 185.1 30.7 L 202.9 26.2 L 220.6 25.5 L 238.3 35.0 L 256.0 40.2 L 273.7 44.0 L 291.4 61.9 L 309.1 65.1 L 326.9 60.1 L 344.6 54.3 L 362.3 50.7 L 380.0 45.8 L 397.7 42.0 L 415.4 43.5 L 433.1 48.2 L 468.6 81.0 L 504.0 76.7 L 8.0 21.8 L 16.9 32.7" fill="none" stroke="var(--critical)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="8.0" cy="19.7" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:10 · 1993.20 · ORB 0.38% wid | vol7.8x | RSI 81 [OB]</title></circle><circle cx="25.7" cy="32.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:20 · 1986.10 · ORB 0.38% wid | vol0.2x | RSI 71</title></circle><circle cx="43.4" cy="32.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:30 · 1985.90 · ORB 0.38% wid | vol0.2x | RSI 67</title></circle><circle cx="61.1" cy="35.7" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:40 · 1984.30 · ORB 0.38% wid | vol0.1x | RSI 66</title></circle><circle cx="78.9" cy="33.6" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:50 · 1985.50 · ORB 0.38% wid | vol0.0x | RSI 67</title></circle><circle cx="96.6" cy="33.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:00 · 1985.80 · ORB 0.38% wid | vol0.1x | RSI 59</title></circle><circle cx="114.3" cy="34.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:10 · 1985.00 · ORB 0.38% wid | vol0.0x | RSI 63</title></circle><circle cx="132.0" cy="32.1" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:20 · 1986.30 · ORB 0.38% wid | vol0.0x | RSI 59</title></circle><circle cx="149.7" cy="37.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:30 · 1983.60 · ORB 0.38% wid | vol0.2x | RSI 56 [LATE&gt;11:30]</title></circle><circle cx="167.4" cy="38.1" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:40 · 1983.00 · ORB 0.38% wid | vol0.1x | RSI 55 [LATE&gt;11:30]</title></circle><circle cx="185.1" cy="30.7" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>11:50 · 1987.10 · ORB 0.38% wid | vol0.1x | RSI 58 [LATE&gt;11:30]</title></circle><circle cx="202.9" cy="26.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:00 · 1989.60 · ORB 0.38% wid | vol0.5x | RSI 61 [LATE&gt;11:30]</title></circle><circle cx="220.6" cy="25.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:10 · 1990.00 · ORB 0.38% wid | vol0.0x | RSI 61 [LATE&gt;11:30]</title></circle><circle cx="238.3" cy="35.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:20 · 1984.70 · ORB 0.38% wid | vol0.1x | RSI 53 [LATE&gt;11:30]</title></circle><circle cx="256.0" cy="40.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:30 · 1981.80 · ORB 0.38% wid | vol0.0x | RSI 52 [VWAP-] [LATE&gt;11:30]</title></circle><circle cx="273.7" cy="44.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:40 · 1979.70 · ORB 0.38% wid | vol0.1x | RSI 50 [VWAP-] [LATE&gt;11:30]</title></circle><circle cx="291.4" cy="61.9" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>12:50 · 1969.80 · ORB 0.38% wid | vol0.4x | RSI 34 [VWAP- RSI-] [LATE&gt;11:30]</title></circle><circle cx="309.1" cy="65.1" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:00 · 1968.00 · ORB 0.38% wid | vol0.1x | RSI 36 [VWAP- RSI-] [LATE&gt;11:30]</title></circle><circle cx="326.9" cy="60.1" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:10 · 1970.80 · ORB 0.38% wid | vol0.2x | RSI 41 [VWAP- RSI-] [LATE&gt;11:30]</title></circle><circle cx="344.6" cy="54.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:20 · 1974.00 · ORB 0.38% wid | vol0.0x | RSI 44 [VWAP- RSI-] [LATE&gt;11:30]</title></circle><circle cx="362.3" cy="50.7" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:30 · 1976.00 · ORB 0.38% wid | vol0.4x | RSI 51 [VWAP-] [LATE&gt;11:30]</title></circle><circle cx="380.0" cy="45.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:40 · 1978.70 · ORB 0.38% wid | vol0.0x | RSI 52 [VWAP-] [LATE&gt;11:30]</title></circle><circle cx="397.7" cy="42.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>13:50 · 1980.80 · ORB 0.38% wid | vol0.2x | RSI 52 [VWAP-] [LATE&gt;11:30]</title></circle><circle cx="415.4" cy="43.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:00 · 1980.00 · ORB 0.38% wid | vol0.1x | RSI 52 [VWAP-] [LATE&gt;11:30]</title></circle><circle cx="433.1" cy="48.2" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:10 · 1977.40 · ORB 0.38% wid | vol0.1x | RSI 50 [VWAP-] [LATE&gt;11:30]</title></circle><circle cx="468.6" cy="81.0" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:30 · 1959.20 · ORB 0.38% wid | vol0.1x | RSI 31 [VWAP- RSI-] [LATE&gt;11:30]</title></circle><circle cx="504.0" cy="76.7" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>14:50 · 1961.60 · ORB 0.38% wid | vol0.1x | RSI 34 [VWAP- RSI-] [LATE&gt;11:30]</title></circle><circle cx="8.0" cy="21.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:10 · 1992.00 · [Yahoo fill]</title></circle><circle cx="16.9" cy="32.7" r="5" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:15 · 1986.00 · [Yahoo fill]</title></circle><text x="24.9" y="35.7" font-size="10" font-weight="600" fill="var(--text-primary)">1986.00</text></svg></div>
+      <details class="track-details">
+        <summary>Full checkpoint history &amp; cost breakdown</summary>
+        <table class="cp-table" style="margin-bottom:10px;"><thead><tr><th>Dhan cost (round trip)</th><th class="num">Amount</th></tr></thead><tbody><tr><td>Brokerage</td><td class="num">₹21.49</td></tr><tr><td>STT</td><td class="num">₹8.93</td></tr><tr><td>Exchange txn charge</td><td class="num">₹2.33</td></tr><tr><td>SEBI fee</td><td class="num">₹0.07</td></tr><tr><td>Stamp duty</td><td class="num">₹1.08</td></tr><tr><td>GST</td><td class="num">₹4.29</td></tr><tr><td><b>Total</b></td><td class="num"><b>₹38.18</b></td></tr></tbody></table>
+        <table class="cp-table"><thead><tr><th>Time</th><th class="num">Price</th><th>Notes</th></tr></thead><tbody><tr><td>10:10</td><td class="num">1993.20</td><td>ORB 0.38% wid | vol7.8x | RSI 81 [OB]</td></tr><tr><td>10:20</td><td class="num">1986.10</td><td>ORB 0.38% wid | vol0.2x | RSI 71</td></tr><tr><td>10:30</td><td class="num">1985.90</td><td>ORB 0.38% wid | vol0.2x | RSI 67</td></tr><tr><td>10:40</td><td class="num">1984.30</td><td>ORB 0.38% wid | vol0.1x | RSI 66</td></tr><tr><td>10:50</td><td class="num">1985.50</td><td>ORB 0.38% wid | vol0.0x | RSI 67</td></tr><tr><td>11:00</td><td class="num">1985.80</td><td>ORB 0.38% wid | vol0.1x | RSI 59</td></tr><tr><td>11:10</td><td class="num">1985.00</td><td>ORB 0.38% wid | vol0.0x | RSI 63</td></tr><tr><td>11:20</td><td class="num">1986.30</td><td>ORB 0.38% wid | vol0.0x | RSI 59</td></tr><tr><td>11:30</td><td class="num">1983.60</td><td>ORB 0.38% wid | vol0.2x | RSI 56 [LATE&gt;11:30]</td></tr><tr><td>11:40</td><td class="num">1983.00</td><td>ORB 0.38% wid | vol0.1x | RSI 55 [LATE&gt;11:30]</td></tr><tr><td>11:50</td><td class="num">1987.10</td><td>ORB 0.38% wid | vol0.1x | RSI 58 [LATE&gt;11:30]</td></tr><tr><td>12:00</td><td class="num">1989.60</td><td>ORB 0.38% wid | vol0.5x | RSI 61 [LATE&gt;11:30]</td></tr><tr><td>12:10</td><td class="num">1990.00</td><td>ORB 0.38% wid | vol0.0x | RSI 61 [LATE&gt;11:30]</td></tr><tr><td>12:20</td><td class="num">1984.70</td><td>ORB 0.38% wid | vol0.1x | RSI 53 [LATE&gt;11:30]</td></tr><tr><td>12:30</td><td class="num">1981.80</td><td>ORB 0.38% wid | vol0.0x | RSI 52 [VWAP-] [LATE&gt;11:30]</td></tr><tr><td>12:40</td><td class="num">1979.70</td><td>ORB 0.38% wid | vol0.1x | RSI 50 [VWAP-] [LATE&gt;11:30]</td></tr><tr><td>12:50</td><td class="num">1969.80</td><td>ORB 0.38% wid | vol0.4x | RSI 34 [VWAP- RSI-] [LATE&gt;11:30]</td></tr><tr><td>13:00</td><td class="num">1968.00</td><td>ORB 0.38% wid | vol0.1x | RSI 36 [VWAP- RSI-] [LATE&gt;11:30]</td></tr><tr><td>13:10</td><td class="num">1970.80</td><td>ORB 0.38% wid | vol0.2x | RSI 41 [VWAP- RSI-] [LATE&gt;11:30]</td></tr><tr><td>13:20</td><td class="num">1974.00</td><td>ORB 0.38% wid | vol0.0x | RSI 44 [VWAP- RSI-] [LATE&gt;11:30]</td></tr><tr><td>13:30</td><td class="num">1976.00</td><td>ORB 0.38% wid | vol0.4x | RSI 51 [VWAP-] [LATE&gt;11:30]</td></tr><tr><td>13:40</td><td class="num">1978.70</td><td>ORB 0.38% wid | vol0.0x | RSI 52 [VWAP-] [LATE&gt;11:30]</td></tr><tr><td>13:50</td><td class="num">1980.80</td><td>ORB 0.38% wid | vol0.2x | RSI 52 [VWAP-] [LATE&gt;11:30]</td></tr><tr><td>14:00</td><td class="num">1980.00</td><td>ORB 0.38% wid | vol0.1x | RSI 52 [VWAP-] [LATE&gt;11:30]</td></tr><tr><td>14:10</td><td class="num">1977.40</td><td>ORB 0.38% wid | vol0.1x | RSI 50 [VWAP-] [LATE&gt;11:30]</td></tr><tr><td>14:30</td><td class="num">1959.20</td><td>ORB 0.38% wid | vol0.1x | RSI 31 [VWAP- RSI-] [LATE&gt;11:30]</td></tr><tr><td>14:50</td><td class="num">1961.60</td><td>ORB 0.38% wid | vol0.1x | RSI 34 [VWAP- RSI-] [LATE&gt;11:30]</td></tr><tr><td>10:10</td><td class="num">1992.00</td><td>[Yahoo fill]</td></tr><tr><td>10:15</td><td class="num">1986.00</td><td>[Yahoo fill]</td></tr></tbody></table>
+      </details>
+    </div>
+    <div class="track-card">
+      <div class="track-head">
+        <div>
+          <span class="track-ticker">AUROPHARMA</span>
+          <span class="track-sub">ORB · SHORT · PHARMA2</span>
+        </div>
+        <span class="pill win">WIN · +₹120 (+0.33%)</span>
+      </div>
+      <div class="track-levels">
+        <span>Entry <b>1594.20</b></span>
+        <span>Initial stop <b>1633.90</b> <span style="color:var(--text-muted);">(trails — no fixed target in v4)</span></span>
+        <span>Invested <b>₹36,667 (23 sh)</b></span>
+      </div>
+      <div class="track-levels">
+        <span>Gross P&amp;L <b>+₹159</b></span>
+        <span>Dhan costs <b>-₹39</b></span>
+        <span>Entered <b>09:40</b></span>
+        <span>Closed <b>15:10</b> @ <b>1587.30</b></span>
+        <span>Reason <b>Closed — market close (15:10 square-off)</b></span>
+      </div>
+      <div class="track-chart"><svg viewBox="0 0 560 130" width="100%" height="130" role="img" aria-label="AUROPHARMA price path"><line x1="8" y1="87.8" x2="504" y2="87.8" stroke="var(--baseline)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="90.8" font-size="9" fill="var(--text-muted)">Entry</text><line x1="8" y1="19.7" x2="504" y2="19.7" stroke="var(--critical)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="22.7" font-size="9" fill="var(--text-muted)">Initial stop</text><path d="M 8.0 87.8 L 23.0 89.2 L 8.0 100.3 L 15.5 89.0 L 23.0 73.4 L 30.5 77.8 L 38.1 75.6 L 45.6 90.2 L 53.1 83.0 L 60.6 88.3 L 68.1 87.6 L 75.6 92.1 L 83.2 92.8 L 90.7 93.5 L 98.2 94.3 L 105.7 83.3 L 113.2 79.9 L 120.7 89.5 L 128.2 85.7 L 135.8 82.8 L 143.3 80.2 L 150.8 79.6 L 158.3 81.6 L 165.8 81.3 L 173.3 80.6 L 180.8 74.6 L 188.4 77.8 L 195.9 79.6 L 203.4 81.3 L 210.9 79.2 L 218.4 80.8 L 225.9 89.9 L 233.5 91.6 L 241.0 91.7 L 248.5 89.5 L 256.0 85.2 L 263.5 82.1 L 271.0 82.0 L 278.5 83.0 L 286.1 86.1 L 293.6 86.3 L 301.1 79.4 L 308.6 76.1 L 316.1 74.6 L 323.6 73.6 L 331.2 71.3 L 338.7 71.3 L 346.2 71.2 L 353.7 78.2 L 361.2 80.9 L 368.7 79.0 L 376.2 79.6 L 383.8 78.4 L 391.3 77.5 L 398.8 79.6 L 406.3 81.3 L 413.8 82.0 L 421.3 78.4 L 428.8 78.9 L 436.4 80.4 L 443.9 83.0 L 451.4 82.6 L 458.9 84.0 L 466.4 82.6 L 473.9 87.6 L 481.5 91.1 L 489.0 94.0 L 496.5 100.2 L 504.0 96.9" fill="none" stroke="var(--good)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="8.0" cy="87.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:40 · 1594.20 · ORB 2.34% wid | vol3.5x | RSI 31</title></circle><circle cx="23.0" cy="89.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:50 · 1593.40 · ORB 2.34% wid | vol0.7x | RSI 36</title></circle><circle cx="8.0" cy="100.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:40 · 1586.90 · [Yahoo fill]</title></circle><circle cx="15.5" cy="89.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:45 · 1593.50 · [Yahoo fill]</title></circle><circle cx="23.0" cy="73.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:50 · 1602.60 · [Yahoo fill]</title></circle><circle cx="30.5" cy="77.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:55 · 1600.00 · [Yahoo fill]</title></circle><circle cx="38.1" cy="75.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:00 · 1601.30 · [Yahoo fill]</title></circle><circle cx="45.6" cy="90.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:05 · 1592.80 · [Yahoo fill]</title></circle><circle cx="53.1" cy="83.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:10 · 1597.00 · [Yahoo fill]</title></circle><circle cx="60.6" cy="88.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:15 · 1593.90 · [Yahoo fill]</title></circle><circle cx="68.1" cy="87.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:20 · 1594.30 · [Yahoo fill]</title></circle><circle cx="75.6" cy="92.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:25 · 1591.70 · [Yahoo fill]</title></circle><circle cx="83.2" cy="92.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:30 · 1591.30 · [Yahoo fill]</title></circle><circle cx="90.7" cy="93.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:35 · 1590.90 · [Yahoo fill]</title></circle><circle cx="98.2" cy="94.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:40 · 1590.40 · [Yahoo fill]</title></circle><circle cx="105.7" cy="83.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:45 · 1596.80 · [Yahoo fill]</title></circle><circle cx="113.2" cy="79.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:50 · 1598.80 · [Yahoo fill]</title></circle><circle cx="120.7" cy="89.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:55 · 1593.20 · [Yahoo fill]</title></circle><circle cx="128.2" cy="85.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:00 · 1595.40 · [Yahoo fill]</title></circle><circle cx="135.8" cy="82.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:05 · 1597.10 · [Yahoo fill]</title></circle><circle cx="143.3" cy="80.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:10 · 1598.60 · [Yahoo fill]</title></circle><circle cx="150.8" cy="79.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:15 · 1599.00 · [Yahoo fill]</title></circle><circle cx="158.3" cy="81.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:20 · 1597.80 · [Yahoo fill]</title></circle><circle cx="165.8" cy="81.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:25 · 1598.00 · [Yahoo fill]</title></circle><circle cx="173.3" cy="80.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:30 · 1598.40 · [Yahoo fill]</title></circle><circle cx="180.8" cy="74.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:35 · 1601.90 · [Yahoo fill]</title></circle><circle cx="188.4" cy="77.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:40 · 1600.00 · [Yahoo fill]</title></circle><circle cx="195.9" cy="79.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:45 · 1599.00 · [Yahoo fill]</title></circle><circle cx="203.4" cy="81.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:50 · 1598.00 · [Yahoo fill]</title></circle><circle cx="210.9" cy="79.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:55 · 1599.20 · [Yahoo fill]</title></circle><circle cx="218.4" cy="80.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:00 · 1598.30 · [Yahoo fill]</title></circle><circle cx="225.9" cy="89.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:05 · 1593.00 · [Yahoo fill]</title></circle><circle cx="233.5" cy="91.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:10 · 1592.00 · [Yahoo fill]</title></circle><circle cx="241.0" cy="91.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:15 · 1591.90 · [Yahoo fill]</title></circle><circle cx="248.5" cy="89.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:20 · 1593.20 · [Yahoo fill]</title></circle><circle cx="256.0" cy="85.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:25 · 1595.70 · [Yahoo fill]</title></circle><circle cx="263.5" cy="82.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:30 · 1597.50 · [Yahoo fill]</title></circle><circle cx="271.0" cy="82.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:35 · 1597.60 · [Yahoo fill]</title></circle><circle cx="278.5" cy="83.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:40 · 1597.00 · [Yahoo fill]</title></circle><circle cx="286.1" cy="86.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:45 · 1595.20 · [Yahoo fill]</title></circle><circle cx="293.6" cy="86.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:50 · 1595.10 · [Yahoo fill]</title></circle><circle cx="301.1" cy="79.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:55 · 1599.10 · [Yahoo fill]</title></circle><circle cx="308.6" cy="76.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:00 · 1601.00 · [Yahoo fill]</title></circle><circle cx="316.1" cy="74.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:05 · 1601.90 · [Yahoo fill]</title></circle><circle cx="323.6" cy="73.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:10 · 1602.50 · [Yahoo fill]</title></circle><circle cx="331.2" cy="71.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:15 · 1603.80 · [Yahoo fill]</title></circle><circle cx="338.7" cy="71.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:20 · 1603.80 · [Yahoo fill]</title></circle><circle cx="346.2" cy="71.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:25 · 1603.90 · [Yahoo fill]</title></circle><circle cx="353.7" cy="78.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:30 · 1599.80 · [Yahoo fill]</title></circle><circle cx="361.2" cy="80.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:35 · 1598.20 · [Yahoo fill]</title></circle><circle cx="368.7" cy="79.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:40 · 1599.30 · [Yahoo fill]</title></circle><circle cx="376.2" cy="79.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:45 · 1599.00 · [Yahoo fill]</title></circle><circle cx="383.8" cy="78.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:50 · 1599.70 · [Yahoo fill]</title></circle><circle cx="391.3" cy="77.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:55 · 1600.20 · [Yahoo fill]</title></circle><circle cx="398.8" cy="79.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:00 · 1599.00 · [Yahoo fill]</title></circle><circle cx="406.3" cy="81.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:05 · 1598.00 · [Yahoo fill]</title></circle><circle cx="413.8" cy="82.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:10 · 1597.60 · [Yahoo fill]</title></circle><circle cx="421.3" cy="78.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:15 · 1599.70 · [Yahoo fill]</title></circle><circle cx="428.8" cy="78.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:20 · 1599.40 · [Yahoo fill]</title></circle><circle cx="436.4" cy="80.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:25 · 1598.50 · [Yahoo fill]</title></circle><circle cx="443.9" cy="83.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:30 · 1597.00 · [Yahoo fill]</title></circle><circle cx="451.4" cy="82.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:35 · 1597.20 · [Yahoo fill]</title></circle><circle cx="458.9" cy="84.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:40 · 1596.40 · [Yahoo fill]</title></circle><circle cx="466.4" cy="82.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:45 · 1597.20 · [Yahoo fill]</title></circle><circle cx="473.9" cy="87.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:50 · 1594.30 · [Yahoo fill]</title></circle><circle cx="481.5" cy="91.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:55 · 1592.30 · [Yahoo fill]</title></circle><circle cx="489.0" cy="94.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:00 · 1590.60 · [Yahoo fill]</title></circle><circle cx="496.5" cy="100.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:05 · 1587.00 · [Yahoo fill]</title></circle><circle cx="504.0" cy="96.9" r="5" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:10 · 1588.90 · [Yahoo fill]</title></circle><text x="512.0" y="99.9" font-size="10" font-weight="600" fill="var(--text-primary)">1588.90</text></svg></div>
+      <details class="track-details">
+        <summary>Full checkpoint history &amp; cost breakdown</summary>
+        <table class="cp-table" style="margin-bottom:10px;"><thead><tr><th>Dhan cost (round trip)</th><th class="num">Amount</th></tr></thead><tbody><tr><td>Brokerage</td><td class="num">₹21.95</td></tr><tr><td>STT</td><td class="num">₹9.17</td></tr><tr><td>Exchange txn charge</td><td class="num">₹2.38</td></tr><tr><td>SEBI fee</td><td class="num">₹0.07</td></tr><tr><td>Stamp duty</td><td class="num">₹1.10</td></tr><tr><td>GST</td><td class="num">₹4.38</td></tr><tr><td><b>Total</b></td><td class="num"><b>₹39.05</b></td></tr></tbody></table>
+        <table class="cp-table"><thead><tr><th>Time</th><th class="num">Price</th><th>Notes</th></tr></thead><tbody><tr><td>09:40</td><td class="num">1594.20</td><td>ORB 2.34% wid | vol3.5x | RSI 31</td></tr><tr><td>09:50</td><td class="num">1593.40</td><td>ORB 2.34% wid | vol0.7x | RSI 36</td></tr><tr><td>09:40</td><td class="num">1586.90</td><td>[Yahoo fill]</td></tr><tr><td>09:45</td><td class="num">1593.50</td><td>[Yahoo fill]</td></tr><tr><td>09:50</td><td class="num">1602.60</td><td>[Yahoo fill]</td></tr><tr><td>09:55</td><td class="num">1600.00</td><td>[Yahoo fill]</td></tr><tr><td>10:00</td><td class="num">1601.30</td><td>[Yahoo fill]</td></tr><tr><td>10:05</td><td class="num">1592.80</td><td>[Yahoo fill]</td></tr><tr><td>10:10</td><td class="num">1597.00</td><td>[Yahoo fill]</td></tr><tr><td>10:15</td><td class="num">1593.90</td><td>[Yahoo fill]</td></tr><tr><td>10:20</td><td class="num">1594.30</td><td>[Yahoo fill]</td></tr><tr><td>10:25</td><td class="num">1591.70</td><td>[Yahoo fill]</td></tr><tr><td>10:30</td><td class="num">1591.30</td><td>[Yahoo fill]</td></tr><tr><td>10:35</td><td class="num">1590.90</td><td>[Yahoo fill]</td></tr><tr><td>10:40</td><td class="num">1590.40</td><td>[Yahoo fill]</td></tr><tr><td>10:45</td><td class="num">1596.80</td><td>[Yahoo fill]</td></tr><tr><td>10:50</td><td class="num">1598.80</td><td>[Yahoo fill]</td></tr><tr><td>10:55</td><td class="num">1593.20</td><td>[Yahoo fill]</td></tr><tr><td>11:00</td><td class="num">1595.40</td><td>[Yahoo fill]</td></tr><tr><td>11:05</td><td class="num">1597.10</td><td>[Yahoo fill]</td></tr><tr><td>11:10</td><td class="num">1598.60</td><td>[Yahoo fill]</td></tr><tr><td>11:15</td><td class="num">1599.00</td><td>[Yahoo fill]</td></tr><tr><td>11:20</td><td class="num">1597.80</td><td>[Yahoo fill]</td></tr><tr><td>11:25</td><td class="num">1598.00</td><td>[Yahoo fill]</td></tr><tr><td>11:30</td><td class="num">1598.40</td><td>[Yahoo fill]</td></tr><tr><td>11:35</td><td class="num">1601.90</td><td>[Yahoo fill]</td></tr><tr><td>11:40</td><td class="num">1600.00</td><td>[Yahoo fill]</td></tr><tr><td>11:45</td><td class="num">1599.00</td><td>[Yahoo fill]</td></tr><tr><td>11:50</td><td class="num">1598.00</td><td>[Yahoo fill]</td></tr><tr><td>11:55</td><td class="num">1599.20</td><td>[Yahoo fill]</td></tr><tr><td>12:00</td><td class="num">1598.30</td><td>[Yahoo fill]</td></tr><tr><td>12:05</td><td class="num">1593.00</td><td>[Yahoo fill]</td></tr><tr><td>12:10</td><td class="num">1592.00</td><td>[Yahoo fill]</td></tr><tr><td>12:15</td><td class="num">1591.90</td><td>[Yahoo fill]</td></tr><tr><td>12:20</td><td class="num">1593.20</td><td>[Yahoo fill]</td></tr><tr><td>12:25</td><td class="num">1595.70</td><td>[Yahoo fill]</td></tr><tr><td>12:30</td><td class="num">1597.50</td><td>[Yahoo fill]</td></tr><tr><td>12:35</td><td class="num">1597.60</td><td>[Yahoo fill]</td></tr><tr><td>12:40</td><td class="num">1597.00</td><td>[Yahoo fill]</td></tr><tr><td>12:45</td><td class="num">1595.20</td><td>[Yahoo fill]</td></tr><tr><td>12:50</td><td class="num">1595.10</td><td>[Yahoo fill]</td></tr><tr><td>12:55</td><td class="num">1599.10</td><td>[Yahoo fill]</td></tr><tr><td>13:00</td><td class="num">1601.00</td><td>[Yahoo fill]</td></tr><tr><td>13:05</td><td class="num">1601.90</td><td>[Yahoo fill]</td></tr><tr><td>13:10</td><td class="num">1602.50</td><td>[Yahoo fill]</td></tr><tr><td>13:15</td><td class="num">1603.80</td><td>[Yahoo fill]</td></tr><tr><td>13:20</td><td class="num">1603.80</td><td>[Yahoo fill]</td></tr><tr><td>13:25</td><td class="num">1603.90</td><td>[Yahoo fill]</td></tr><tr><td>13:30</td><td class="num">1599.80</td><td>[Yahoo fill]</td></tr><tr><td>13:35</td><td class="num">1598.20</td><td>[Yahoo fill]</td></tr><tr><td>13:40</td><td class="num">1599.30</td><td>[Yahoo fill]</td></tr><tr><td>13:45</td><td class="num">1599.00</td><td>[Yahoo fill]</td></tr><tr><td>13:50</td><td class="num">1599.70</td><td>[Yahoo fill]</td></tr><tr><td>13:55</td><td class="num">1600.20</td><td>[Yahoo fill]</td></tr><tr><td>14:00</td><td class="num">1599.00</td><td>[Yahoo fill]</td></tr><tr><td>14:05</td><td class="num">1598.00</td><td>[Yahoo fill]</td></tr><tr><td>14:10</td><td class="num">1597.60</td><td>[Yahoo fill]</td></tr><tr><td>14:15</td><td class="num">1599.70</td><td>[Yahoo fill]</td></tr><tr><td>14:20</td><td class="num">1599.40</td><td>[Yahoo fill]</td></tr><tr><td>14:25</td><td class="num">1598.50</td><td>[Yahoo fill]</td></tr><tr><td>14:30</td><td class="num">1597.00</td><td>[Yahoo fill]</td></tr><tr><td>14:35</td><td class="num">1597.20</td><td>[Yahoo fill]</td></tr><tr><td>14:40</td><td class="num">1596.40</td><td>[Yahoo fill]</td></tr><tr><td>14:45</td><td class="num">1597.20</td><td>[Yahoo fill]</td></tr><tr><td>14:50</td><td class="num">1594.30</td><td>[Yahoo fill]</td></tr><tr><td>14:55</td><td class="num">1592.30</td><td>[Yahoo fill]</td></tr><tr><td>15:00</td><td class="num">1590.60</td><td>[Yahoo fill]</td></tr><tr><td>15:05</td><td class="num">1587.00</td><td>[Yahoo fill]</td></tr><tr><td>15:10</td><td class="num">1588.90</td><td>[Yahoo fill]</td></tr></tbody></table>
+      </details>
+    </div>
+    <div class="track-card">
+      <div class="track-head">
+        <div>
+          <span class="track-ticker">BIOCON</span>
+          <span class="track-sub">ORB · LONG · PHARMA2</span>
+        </div>
+        <span class="pill win">WIN · +₹313 (+0.84%)</span>
+      </div>
+      <div class="track-levels">
+        <span>Entry <b>431.90</b></span>
+        <span>Initial stop <b>421.50</b> <span style="color:var(--text-muted);">(trails — no fixed target in v4)</span></span>
+        <span>Invested <b>₹37,143 (86 sh)</b></span>
+      </div>
+      <div class="track-levels">
+        <span>Gross P&amp;L <b>+₹353</b></span>
+        <span>Dhan costs <b>-₹40</b></span>
+        <span>Entered <b>09:50</b></span>
+        <span>Closed <b>15:10</b> @ <b>436.00</b></span>
+        <span>Reason <b>Closed — market close (15:10 square-off)</b></span>
+      </div>
+      <div class="track-chart"><svg viewBox="0 0 560 130" width="100%" height="130" role="img" aria-label="BIOCON price path"><line x1="8" y1="59.4" x2="504" y2="59.4" stroke="var(--baseline)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="62.4" font-size="9" fill="var(--text-muted)">Entry</text><line x1="8" y1="100.3" x2="504" y2="100.3" stroke="var(--critical)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="103.3" font-size="9" fill="var(--text-muted)">Initial stop</text><path d="M 8.0 59.4 L 21.4 64.5 L 34.8 55.3 L 48.2 35.2 L 61.6 33.6 L 75.0 43.3 L 88.4 51.1 L 101.8 47.6 L 115.2 54.9 L 128.6 43.7 L 142.1 44.7 L 155.5 45.4 L 168.9 48.8 L 182.3 35.4 L 195.7 34.8 L 209.1 37.8 L 222.5 31.9 L 235.9 29.3 L 249.3 31.5 L 262.7 26.2 L 276.1 23.2 L 289.5 20.3 L 302.9 19.7 L 316.3 21.8 L 329.7 22.6 L 343.1 19.7 L 356.5 20.9 L 369.9 21.6 L 383.4 22.4 L 396.8 28.5 L 410.2 35.6 L 423.6 41.1 L 437.0 41.1 L 450.4 41.1 L 463.8 39.5 L 477.2 39.5 L 490.6 40.9 L 504.0 40.9 L 8.0 69.0 L 14.7 66.3 L 21.4 60.4 L 28.1 57.0 L 34.8 44.9 L 41.5 38.6 L 48.2 35.0 L 54.9 33.4 L 61.6 33.2 L 68.3 37.2 L 75.0 47.0 L 81.7 53.5 L 88.4 51.5 L 95.1 51.1 L 101.8 53.9 L 108.5 55.5 L 115.2 53.1 L 121.9 43.3 L 128.6 42.7 L 135.4 44.9 L 142.1 44.7 L 148.8 44.5 L 155.5 50.4 L 162.2 48.4 L 168.9 37.6 L 175.6 37.8 L 182.3 33.8 L 189.0 36.4 L 195.7 38.4 L 202.4 38.6 L 209.1 36.6 L 215.8 29.1 L 222.5 30.7 L 229.2 30.7 L 235.9 29.5 L 242.6 30.7 L 249.3 30.3 L 256.0 24.8 L 262.7 25.0 L 269.4 21.1 L 276.1 22.8 L 282.8 20.9 L 289.5 22.6 L 296.2 21.4 L 302.9 21.6 L 309.6 21.1 L 316.3 22.6 L 323.0 23.6 L 329.7 22.0 L 336.4 20.7 L 343.1 20.3 L 349.8 22.2 L 356.5 21.1 L 363.2 21.6 L 369.9 22.8 L 376.6 22.8 L 383.4 27.7 L 390.1 29.5 L 396.8 35.8 L 403.5 36.6 L 410.2 35.0 L 416.9 38.8 L 423.6 43.9 L 430.3 44.1 L 437.0 39.5" fill="none" stroke="var(--good)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="8.0" cy="59.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:50 · 431.90 · ORB 1.74% wid | vol2.8x | RSI 67</title></circle><circle cx="21.4" cy="64.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:00 · 430.60 · ORB 1.74% wid | vol1.2x | RSI 66</title></circle><circle cx="34.8" cy="55.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:10 · 432.95 · ORB 1.74% wid | vol1.9x | RSI 71</title></circle><circle cx="48.2" cy="35.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:20 · 438.05 · ORB 1.74% wid | vol0.3x | RSI 80</title></circle><circle cx="61.6" cy="33.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:30 · 438.45 · ORB 1.74% wid | vol0.1x | RSI 81 [OB]</title></circle><circle cx="75.0" cy="43.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:40 · 436.00 · ORB 1.74% wid | vol0.2x | RSI 72</title></circle><circle cx="88.4" cy="51.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:50 · 434.00 · ORB 1.74% wid | vol0.1x | RSI 59</title></circle><circle cx="101.8" cy="47.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:00 · 434.90 · ORB 1.74% wid | vol0.1x | RSI 60</title></circle><circle cx="115.2" cy="54.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:10 · 433.05 · ORB 1.74% wid | vol0.0x | RSI 56</title></circle><circle cx="128.6" cy="43.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:20 · 435.90 · ORB 1.74% wid | vol0.1x | RSI 62</title></circle><circle cx="142.1" cy="44.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:30 · 435.65 · ORB 1.74% wid | vol0.0x | RSI 61 [LATE&gt;11:30]</title></circle><circle cx="155.5" cy="45.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:40 · 435.45 · ORB 1.74% wid | vol0.0x | RSI 61 [LATE&gt;11:30]</title></circle><circle cx="168.9" cy="48.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:50 · 434.60 · ORB 1.74% wid | vol0.0x | RSI 56 [LATE&gt;11:30]</title></circle><circle cx="182.3" cy="35.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:00 · 438.00 · ORB 1.74% wid | vol0.2x | RSI 65 [LATE&gt;11:30]</title></circle><circle cx="195.7" cy="34.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:10 · 438.15 · ORB 1.74% wid | vol0.2x | RSI 65 [LATE&gt;11:30]</title></circle><circle cx="209.1" cy="37.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:20 · 437.40 · ORB 1.74% wid | vol0.1x | RSI 62 [LATE&gt;11:30]</title></circle><circle cx="222.5" cy="31.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:30 · 438.90 · ORB 1.74% wid | vol0.2x | RSI 65 [LATE&gt;11:30]</title></circle><circle cx="235.9" cy="29.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:40 · 439.55 · ORB 1.74% wid | vol0.3x | RSI 68 [LATE&gt;11:30]</title></circle><circle cx="249.3" cy="31.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:50 · 439.00 · ORB 1.74% wid | vol0.1x | RSI 65 [LATE&gt;11:30]</title></circle><circle cx="262.7" cy="26.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:00 · 440.35 · ORB 1.74% wid | vol0.1x | RSI 70 [LATE&gt;11:30]</title></circle><circle cx="276.1" cy="23.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:10 · 441.10 · ORB 1.74% wid | vol0.1x | RSI 73 [LATE&gt;11:30]</title></circle><circle cx="289.5" cy="20.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:20 · 441.85 · ORB 1.74% wid | vol0.2x | RSI 72 [LATE&gt;11:30]</title></circle><circle cx="302.9" cy="19.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:30 · 442.00 · ORB 1.74% wid | vol0.1x | RSI 69 [LATE&gt;11:30]</title></circle><circle cx="316.3" cy="21.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:40 · 441.45 · ORB 1.74% wid | vol0.1x | RSI 66 [LATE&gt;11:30]</title></circle><circle cx="329.7" cy="22.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:50 · 441.25 · ORB 1.74% wid | vol0.1x | RSI 63 [LATE&gt;11:30]</title></circle><circle cx="343.1" cy="19.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:00 · 442.00 · ORB 1.74% wid | vol0.1x | RSI 68 [LATE&gt;11:30]</title></circle><circle cx="356.5" cy="20.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:10 · 441.70 · ORB 1.74% wid | vol0.1x | RSI 65 [LATE&gt;11:30]</title></circle><circle cx="369.9" cy="21.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:20 · 441.50 · ORB 1.74% wid | vol1.1x | RSI 59 [LATE&gt;11:30]</title></circle><circle cx="383.4" cy="22.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:30 · 441.30 · ORB 1.74% wid | vol0.1x | RSI 59 [LATE&gt;11:30]</title></circle><circle cx="396.8" cy="28.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:40 · 439.75 · ORB 1.74% wid | vol0.5x | RSI 45 [RSI-] [LATE&gt;11:30]</title></circle><circle cx="410.2" cy="35.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:50 · 437.95 · ORB 1.74% wid | vol0.2x | RSI 36 [RSI-] [LATE&gt;11:30]</title></circle><circle cx="423.6" cy="41.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:00 · 436.55 · ORB 1.74% wid | vol0.3x | RSI 36 [RSI-] [LATE&gt;11:30]</title></circle><circle cx="437.0" cy="41.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:10 · 436.55 · ORB 1.74% wid | vol1.2x | RSI 31 [RSI-] [LATE&gt;11:30]</title></circle><circle cx="450.4" cy="41.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:20 · 436.55 · ORB 1.74% wid | vol2.0x | RSI 38 [RSI-] [LATE&gt;11:30]</title></circle><circle cx="463.8" cy="39.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:30 · 436.95 · ORB 1.74% wid | vol2.0x | RSI 38 [RSI-] [LATE&gt;11:30]</title></circle><circle cx="477.2" cy="39.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:40 · 436.95 · ORB 1.74% wid | vol2.0x | RSI 38 [RSI-] [LATE&gt;11:30]</title></circle><circle cx="490.6" cy="40.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:50 · 436.60 · ORB 1.74% wid | vol0.4x | RSI 36 [RSI-] [LATE&gt;11:30]</title></circle><circle cx="504.0" cy="40.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>16:00 · 436.60 · ORB 1.74% wid | vol0.4x | RSI 36 [RSI-] [LATE&gt;11:30]</title></circle><circle cx="8.0" cy="69.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:50 · 429.45 · [Yahoo fill]</title></circle><circle cx="14.7" cy="66.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>09:55 · 430.15 · [Yahoo fill]</title></circle><circle cx="21.4" cy="60.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:00 · 431.65 · [Yahoo fill]</title></circle><circle cx="28.1" cy="57.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:05 · 432.50 · [Yahoo fill]</title></circle><circle cx="34.8" cy="44.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:10 · 435.60 · [Yahoo fill]</title></circle><circle cx="41.5" cy="38.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:15 · 437.20 · [Yahoo fill]</title></circle><circle cx="48.2" cy="35.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:20 · 438.10 · [Yahoo fill]</title></circle><circle cx="54.9" cy="33.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:25 · 438.50 · [Yahoo fill]</title></circle><circle cx="61.6" cy="33.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:30 · 438.55 · [Yahoo fill]</title></circle><circle cx="68.3" cy="37.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:35 · 437.55 · [Yahoo fill]</title></circle><circle cx="75.0" cy="47.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:40 · 435.05 · [Yahoo fill]</title></circle><circle cx="81.7" cy="53.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:45 · 433.40 · [Yahoo fill]</title></circle><circle cx="88.4" cy="51.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:50 · 433.90 · [Yahoo fill]</title></circle><circle cx="95.1" cy="51.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>10:55 · 434.00 · [Yahoo fill]</title></circle><circle cx="101.8" cy="53.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:00 · 433.30 · [Yahoo fill]</title></circle><circle cx="108.5" cy="55.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:05 · 432.90 · [Yahoo fill]</title></circle><circle cx="115.2" cy="53.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:10 · 433.50 · [Yahoo fill]</title></circle><circle cx="121.9" cy="43.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:15 · 436.00 · [Yahoo fill]</title></circle><circle cx="128.6" cy="42.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:20 · 436.15 · [Yahoo fill]</title></circle><circle cx="135.4" cy="44.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:25 · 435.60 · [Yahoo fill]</title></circle><circle cx="142.1" cy="44.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:30 · 435.65 · [Yahoo fill]</title></circle><circle cx="148.8" cy="44.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:35 · 435.70 · [Yahoo fill]</title></circle><circle cx="155.5" cy="50.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:40 · 434.20 · [Yahoo fill]</title></circle><circle cx="162.2" cy="48.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:45 · 434.70 · [Yahoo fill]</title></circle><circle cx="168.9" cy="37.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:50 · 437.45 · [Yahoo fill]</title></circle><circle cx="175.6" cy="37.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>11:55 · 437.40 · [Yahoo fill]</title></circle><circle cx="182.3" cy="33.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:00 · 438.40 · [Yahoo fill]</title></circle><circle cx="189.0" cy="36.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:05 · 437.75 · [Yahoo fill]</title></circle><circle cx="195.7" cy="38.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:10 · 437.25 · [Yahoo fill]</title></circle><circle cx="202.4" cy="38.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:15 · 437.20 · [Yahoo fill]</title></circle><circle cx="209.1" cy="36.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:20 · 437.70 · [Yahoo fill]</title></circle><circle cx="215.8" cy="29.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:25 · 439.60 · [Yahoo fill]</title></circle><circle cx="222.5" cy="30.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:30 · 439.20 · [Yahoo fill]</title></circle><circle cx="229.2" cy="30.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:35 · 439.20 · [Yahoo fill]</title></circle><circle cx="235.9" cy="29.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:40 · 439.50 · [Yahoo fill]</title></circle><circle cx="242.6" cy="30.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:45 · 439.20 · [Yahoo fill]</title></circle><circle cx="249.3" cy="30.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:50 · 439.30 · [Yahoo fill]</title></circle><circle cx="256.0" cy="24.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>12:55 · 440.70 · [Yahoo fill]</title></circle><circle cx="262.7" cy="25.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:00 · 440.65 · [Yahoo fill]</title></circle><circle cx="269.4" cy="21.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:05 · 441.65 · [Yahoo fill]</title></circle><circle cx="276.1" cy="22.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:10 · 441.20 · [Yahoo fill]</title></circle><circle cx="282.8" cy="20.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:15 · 441.70 · [Yahoo fill]</title></circle><circle cx="289.5" cy="22.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:20 · 441.25 · [Yahoo fill]</title></circle><circle cx="296.2" cy="21.4" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:25 · 441.55 · [Yahoo fill]</title></circle><circle cx="302.9" cy="21.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:30 · 441.50 · [Yahoo fill]</title></circle><circle cx="309.6" cy="21.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:35 · 441.65 · [Yahoo fill]</title></circle><circle cx="316.3" cy="22.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:40 · 441.25 · [Yahoo fill]</title></circle><circle cx="323.0" cy="23.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:45 · 441.00 · [Yahoo fill]</title></circle><circle cx="329.7" cy="22.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:50 · 441.40 · [Yahoo fill]</title></circle><circle cx="336.4" cy="20.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>13:55 · 441.75 · [Yahoo fill]</title></circle><circle cx="343.1" cy="20.3" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:00 · 441.85 · [Yahoo fill]</title></circle><circle cx="349.8" cy="22.2" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:05 · 441.35 · [Yahoo fill]</title></circle><circle cx="356.5" cy="21.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:10 · 441.65 · [Yahoo fill]</title></circle><circle cx="363.2" cy="21.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:15 · 441.50 · [Yahoo fill]</title></circle><circle cx="369.9" cy="22.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:20 · 441.20 · [Yahoo fill]</title></circle><circle cx="376.6" cy="22.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:25 · 441.20 · [Yahoo fill]</title></circle><circle cx="383.4" cy="27.7" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:30 · 439.95 · [Yahoo fill]</title></circle><circle cx="390.1" cy="29.5" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:35 · 439.50 · [Yahoo fill]</title></circle><circle cx="396.8" cy="35.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:40 · 437.90 · [Yahoo fill]</title></circle><circle cx="403.5" cy="36.6" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:45 · 437.70 · [Yahoo fill]</title></circle><circle cx="410.2" cy="35.0" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:50 · 438.10 · [Yahoo fill]</title></circle><circle cx="416.9" cy="38.8" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>14:55 · 437.15 · [Yahoo fill]</title></circle><circle cx="423.6" cy="43.9" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:00 · 435.85 · [Yahoo fill]</title></circle><circle cx="430.3" cy="44.1" r="3" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:05 · 435.80 · [Yahoo fill]</title></circle><circle cx="437.0" cy="39.5" r="5" fill="var(--good)" stroke="var(--surface-1)" stroke-width="2"><title>15:10 · 436.95 · [Yahoo fill]</title></circle><text x="445.0" y="42.5" font-size="10" font-weight="600" fill="var(--text-primary)">436.95</text></svg></div>
+      <details class="track-details">
+        <summary>Full checkpoint history &amp; cost breakdown</summary>
+        <table class="cp-table" style="margin-bottom:10px;"><thead><tr><th>Dhan cost (round trip)</th><th class="num">Amount</th></tr></thead><tbody><tr><td>Brokerage</td><td class="num">₹22.39</td></tr><tr><td>STT</td><td class="num">₹9.37</td></tr><tr><td>Exchange txn charge</td><td class="num">₹2.43</td></tr><tr><td>SEBI fee</td><td class="num">₹0.07</td></tr><tr><td>Stamp duty</td><td class="num">₹1.11</td></tr><tr><td>GST</td><td class="num">₹4.47</td></tr><tr><td><b>Total</b></td><td class="num"><b>₹39.85</b></td></tr></tbody></table>
+        <table class="cp-table"><thead><tr><th>Time</th><th class="num">Price</th><th>Notes</th></tr></thead><tbody><tr><td>09:50</td><td class="num">431.90</td><td>ORB 1.74% wid | vol2.8x | RSI 67</td></tr><tr><td>10:00</td><td class="num">430.60</td><td>ORB 1.74% wid | vol1.2x | RSI 66</td></tr><tr><td>10:10</td><td class="num">432.95</td><td>ORB 1.74% wid | vol1.9x | RSI 71</td></tr><tr><td>10:20</td><td class="num">438.05</td><td>ORB 1.74% wid | vol0.3x | RSI 80</td></tr><tr><td>10:30</td><td class="num">438.45</td><td>ORB 1.74% wid | vol0.1x | RSI 81 [OB]</td></tr><tr><td>10:40</td><td class="num">436.00</td><td>ORB 1.74% wid | vol0.2x | RSI 72</td></tr><tr><td>10:50</td><td class="num">434.00</td><td>ORB 1.74% wid | vol0.1x | RSI 59</td></tr><tr><td>11:00</td><td class="num">434.90</td><td>ORB 1.74% wid | vol0.1x | RSI 60</td></tr><tr><td>11:10</td><td class="num">433.05</td><td>ORB 1.74% wid | vol0.0x | RSI 56</td></tr><tr><td>11:20</td><td class="num">435.90</td><td>ORB 1.74% wid | vol0.1x | RSI 62</td></tr><tr><td>11:30</td><td class="num">435.65</td><td>ORB 1.74% wid | vol0.0x | RSI 61 [LATE&gt;11:30]</td></tr><tr><td>11:40</td><td class="num">435.45</td><td>ORB 1.74% wid | vol0.0x | RSI 61 [LATE&gt;11:30]</td></tr><tr><td>11:50</td><td class="num">434.60</td><td>ORB 1.74% wid | vol0.0x | RSI 56 [LATE&gt;11:30]</td></tr><tr><td>12:00</td><td class="num">438.00</td><td>ORB 1.74% wid | vol0.2x | RSI 65 [LATE&gt;11:30]</td></tr><tr><td>12:10</td><td class="num">438.15</td><td>ORB 1.74% wid | vol0.2x | RSI 65 [LATE&gt;11:30]</td></tr><tr><td>12:20</td><td class="num">437.40</td><td>ORB 1.74% wid | vol0.1x | RSI 62 [LATE&gt;11:30]</td></tr><tr><td>12:30</td><td class="num">438.90</td><td>ORB 1.74% wid | vol0.2x | RSI 65 [LATE&gt;11:30]</td></tr><tr><td>12:40</td><td class="num">439.55</td><td>ORB 1.74% wid | vol0.3x | RSI 68 [LATE&gt;11:30]</td></tr><tr><td>12:50</td><td class="num">439.00</td><td>ORB 1.74% wid | vol0.1x | RSI 65 [LATE&gt;11:30]</td></tr><tr><td>13:00</td><td class="num">440.35</td><td>ORB 1.74% wid | vol0.1x | RSI 70 [LATE&gt;11:30]</td></tr><tr><td>13:10</td><td class="num">441.10</td><td>ORB 1.74% wid | vol0.1x | RSI 73 [LATE&gt;11:30]</td></tr><tr><td>13:20</td><td class="num">441.85</td><td>ORB 1.74% wid | vol0.2x | RSI 72 [LATE&gt;11:30]</td></tr><tr><td>13:30</td><td class="num">442.00</td><td>ORB 1.74% wid | vol0.1x | RSI 69 [LATE&gt;11:30]</td></tr><tr><td>13:40</td><td class="num">441.45</td><td>ORB 1.74% wid | vol0.1x | RSI 66 [LATE&gt;11:30]</td></tr><tr><td>13:50</td><td class="num">441.25</td><td>ORB 1.74% wid | vol0.1x | RSI 63 [LATE&gt;11:30]</td></tr><tr><td>14:00</td><td class="num">442.00</td><td>ORB 1.74% wid | vol0.1x | RSI 68 [LATE&gt;11:30]</td></tr><tr><td>14:10</td><td class="num">441.70</td><td>ORB 1.74% wid | vol0.1x | RSI 65 [LATE&gt;11:30]</td></tr><tr><td>14:20</td><td class="num">441.50</td><td>ORB 1.74% wid | vol1.1x | RSI 59 [LATE&gt;11:30]</td></tr><tr><td>14:30</td><td class="num">441.30</td><td>ORB 1.74% wid | vol0.1x | RSI 59 [LATE&gt;11:30]</td></tr><tr><td>14:40</td><td class="num">439.75</td><td>ORB 1.74% wid | vol0.5x | RSI 45 [RSI-] [LATE&gt;11:30]</td></tr><tr><td>14:50</td><td class="num">437.95</td><td>ORB 1.74% wid | vol0.2x | RSI 36 [RSI-] [LATE&gt;11:30]</td></tr><tr><td>15:00</td><td class="num">436.55</td><td>ORB 1.74% wid | vol0.3x | RSI 36 [RSI-] [LATE&gt;11:30]</td></tr><tr><td>15:10</td><td class="num">436.55</td><td>ORB 1.74% wid | vol1.2x | RSI 31 [RSI-] [LATE&gt;11:30]</td></tr><tr><td>15:20</td><td class="num">436.55</td><td>ORB 1.74% wid | vol2.0x | RSI 38 [RSI-] [LATE&gt;11:30]</td></tr><tr><td>15:30</td><td class="num">436.95</td><td>ORB 1.74% wid | vol2.0x | RSI 38 [RSI-] [LATE&gt;11:30]</td></tr><tr><td>15:40</td><td class="num">436.95</td><td>ORB 1.74% wid | vol2.0x | RSI 38 [RSI-] [LATE&gt;11:30]</td></tr><tr><td>15:50</td><td class="num">436.60</td><td>ORB 1.74% wid | vol0.4x | RSI 36 [RSI-] [LATE&gt;11:30]</td></tr><tr><td>16:00</td><td class="num">436.60</td><td>ORB 1.74% wid | vol0.4x | RSI 36 [RSI-] [LATE&gt;11:30]</td></tr><tr><td>09:50</td><td class="num">429.45</td><td>[Yahoo fill]</td></tr><tr><td>09:55</td><td class="num">430.15</td><td>[Yahoo fill]</td></tr><tr><td>10:00</td><td class="num">431.65</td><td>[Yahoo fill]</td></tr><tr><td>10:05</td><td class="num">432.50</td><td>[Yahoo fill]</td></tr><tr><td>10:10</td><td class="num">435.60</td><td>[Yahoo fill]</td></tr><tr><td>10:15</td><td class="num">437.20</td><td>[Yahoo fill]</td></tr><tr><td>10:20</td><td class="num">438.10</td><td>[Yahoo fill]</td></tr><tr><td>10:25</td><td class="num">438.50</td><td>[Yahoo fill]</td></tr><tr><td>10:30</td><td class="num">438.55</td><td>[Yahoo fill]</td></tr><tr><td>10:35</td><td class="num">437.55</td><td>[Yahoo fill]</td></tr><tr><td>10:40</td><td class="num">435.05</td><td>[Yahoo fill]</td></tr><tr><td>10:45</td><td class="num">433.40</td><td>[Yahoo fill]</td></tr><tr><td>10:50</td><td class="num">433.90</td><td>[Yahoo fill]</td></tr><tr><td>10:55</td><td class="num">434.00</td><td>[Yahoo fill]</td></tr><tr><td>11:00</td><td class="num">433.30</td><td>[Yahoo fill]</td></tr><tr><td>11:05</td><td class="num">432.90</td><td>[Yahoo fill]</td></tr><tr><td>11:10</td><td class="num">433.50</td><td>[Yahoo fill]</td></tr><tr><td>11:15</td><td class="num">436.00</td><td>[Yahoo fill]</td></tr><tr><td>11:20</td><td class="num">436.15</td><td>[Yahoo fill]</td></tr><tr><td>11:25</td><td class="num">435.60</td><td>[Yahoo fill]</td></tr><tr><td>11:30</td><td class="num">435.65</td><td>[Yahoo fill]</td></tr><tr><td>11:35</td><td class="num">435.70</td><td>[Yahoo fill]</td></tr><tr><td>11:40</td><td class="num">434.20</td><td>[Yahoo fill]</td></tr><tr><td>11:45</td><td class="num">434.70</td><td>[Yahoo fill]</td></tr><tr><td>11:50</td><td class="num">437.45</td><td>[Yahoo fill]</td></tr><tr><td>11:55</td><td class="num">437.40</td><td>[Yahoo fill]</td></tr><tr><td>12:00</td><td class="num">438.40</td><td>[Yahoo fill]</td></tr><tr><td>12:05</td><td class="num">437.75</td><td>[Yahoo fill]</td></tr><tr><td>12:10</td><td class="num">437.25</td><td>[Yahoo fill]</td></tr><tr><td>12:15</td><td class="num">437.20</td><td>[Yahoo fill]</td></tr><tr><td>12:20</td><td class="num">437.70</td><td>[Yahoo fill]</td></tr><tr><td>12:25</td><td class="num">439.60</td><td>[Yahoo fill]</td></tr><tr><td>12:30</td><td class="num">439.20</td><td>[Yahoo fill]</td></tr><tr><td>12:35</td><td class="num">439.20</td><td>[Yahoo fill]</td></tr><tr><td>12:40</td><td class="num">439.50</td><td>[Yahoo fill]</td></tr><tr><td>12:45</td><td class="num">439.20</td><td>[Yahoo fill]</td></tr><tr><td>12:50</td><td class="num">439.30</td><td>[Yahoo fill]</td></tr><tr><td>12:55</td><td class="num">440.70</td><td>[Yahoo fill]</td></tr><tr><td>13:00</td><td class="num">440.65</td><td>[Yahoo fill]</td></tr><tr><td>13:05</td><td class="num">441.65</td><td>[Yahoo fill]</td></tr><tr><td>13:10</td><td class="num">441.20</td><td>[Yahoo fill]</td></tr><tr><td>13:15</td><td class="num">441.70</td><td>[Yahoo fill]</td></tr><tr><td>13:20</td><td class="num">441.25</td><td>[Yahoo fill]</td></tr><tr><td>13:25</td><td class="num">441.55</td><td>[Yahoo fill]</td></tr><tr><td>13:30</td><td class="num">441.50</td><td>[Yahoo fill]</td></tr><tr><td>13:35</td><td class="num">441.65</td><td>[Yahoo fill]</td></tr><tr><td>13:40</td><td class="num">441.25</td><td>[Yahoo fill]</td></tr><tr><td>13:45</td><td class="num">441.00</td><td>[Yahoo fill]</td></tr><tr><td>13:50</td><td class="num">441.40</td><td>[Yahoo fill]</td></tr><tr><td>13:55</td><td class="num">441.75</td><td>[Yahoo fill]</td></tr><tr><td>14:00</td><td class="num">441.85</td><td>[Yahoo fill]</td></tr><tr><td>14:05</td><td class="num">441.35</td><td>[Yahoo fill]</td></tr><tr><td>14:10</td><td class="num">441.65</td><td>[Yahoo fill]</td></tr><tr><td>14:15</td><td class="num">441.50</td><td>[Yahoo fill]</td></tr><tr><td>14:20</td><td class="num">441.20</td><td>[Yahoo fill]</td></tr><tr><td>14:25</td><td class="num">441.20</td><td>[Yahoo fill]</td></tr><tr><td>14:30</td><td class="num">439.95</td><td>[Yahoo fill]</td></tr><tr><td>14:35</td><td class="num">439.50</td><td>[Yahoo fill]</td></tr><tr><td>14:40</td><td class="num">437.90</td><td>[Yahoo fill]</td></tr><tr><td>14:45</td><td class="num">437.70</td><td>[Yahoo fill]</td></tr><tr><td>14:50</td><td class="num">438.10</td><td>[Yahoo fill]</td></tr><tr><td>14:55</td><td class="num">437.15</td><td>[Yahoo fill]</td></tr><tr><td>15:00</td><td class="num">435.85</td><td>[Yahoo fill]</td></tr><tr><td>15:05</td><td class="num">435.80</td><td>[Yahoo fill]</td></tr><tr><td>15:10</td><td class="num">436.95</td><td>[Yahoo fill]</td></tr></tbody></table>
+      </details>
+    </div></div>
+</div>
+<!-- TRACKER_TAB_END -->
+
+<script>
+function showTab(name, evt) {
+  document.querySelectorAll('.tabpanel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tabbtn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  evt.currentTarget.classList.add('active');
+}
+</script>
+
+</div>
+</body>
+</html>

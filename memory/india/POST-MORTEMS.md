@@ -6,6 +6,13 @@ Append-only. Newest at top.
 
 ---
 
+## ORB signal autopsies — 2026-08-06
+
+### 2026-08-06 · TVSMOTOR · ORB LONG · LOSS -0.67% (TRAIL_HIT)
+- primary_cause: **FELL_BACK_IN_BOX** (historical loss-rate for this pattern: 80.0%)
+- factors: vwap_hold=0.67 vol_decay=0.39 back_inside=True market_drift=-0.17%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
 ## ORB signal autopsies — 2026-08-05
 
 ### 2026-08-05 · UNIONBANK · ORB LONG · LOSS -0.97% (TRAIL_HIT)
