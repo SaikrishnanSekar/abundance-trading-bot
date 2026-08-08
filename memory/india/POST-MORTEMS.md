@@ -6,6 +6,13 @@ Append-only. Newest at top.
 
 ---
 
+## ORB signal autopsies — 2026-08-07
+
+### 2026-08-07 · TECHM · ORB LONG · LOSS -1.76% (TRAIL_HIT)
+- primary_cause: **VWAP_REJECTED** (historical loss-rate for this pattern: 90.4%)
+- factors: vwap_hold=0.17 vol_decay=1.12 back_inside=False market_drift=-0.06%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
 ## ORB signal autopsies — 2026-08-06
 
 ### 2026-08-06 · TVSMOTOR · ORB LONG · LOSS -0.67% (TRAIL_HIT)

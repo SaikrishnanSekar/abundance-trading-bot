@@ -4,6 +4,63 @@ Append-only. Pre-market routine writes a dated block each day.
 
 ---
 
+## 2026-07-21 (evening) — Improvement hunt: 3 candidate rules tested against the FINAL v4 config (81wk, 1,046 trades)
+
+**Goal**: find one evidence-backed change to profit-taking, loss-cutting, or entry
+quality with real expected-value upside, using the existing 81-week Upstox backtest
+(`backtests/orb_weekly_portfolio.py` FINAL config) and the failure-signature study
+(`backtests/orb_failure_study.py`) already on file.
+
+**Two "cut losers early" ideas tested — both REJECTED, both make P&L worse:**
+1. Exit at the 30-min mark (bar+6) if VWAP was held on the favorable side for <=1/3 of
+   the first 6 post-entry bars (the failure study's strongest-looking stat: 90.4% loss
+   rate on this bucket vs 43.4% baseline, n=104). Tested as a real, causally-valid
+   management rule (only uses information available by bar+6): total portfolio P&L
+   falls from Rs106,331 to Rs89,343 (**-16.0%**). Avg P&L on the 104 affected trades
+   goes from -Rs367 to -Rs531 — forcing the exit locks in a worse outcome than letting
+   the existing trail-stop system run, because ~10% of "VWAP-rejected" trades still
+   recover to a win under current rules, and the trail stop already caps the losers'
+   downside about as well as a fixed-bar exit does.
+2. Exit at bar+2 (10 min) if price fell back inside the opening range within 2 bars
+   (n=60, 80% loss rate vs 50% baseline). Same story, smaller effect: Rs106,331 ->
+   Rs102,719 (**-3.4%**). Same mechanism — a fixed early exit is worse than the
+   existing trailing stop for this subset.
+   **Lesson**: a bucket's raw loss-RATE from a descriptive factor study does not by
+   itself imply that exiting early improves P&L — must actually simulate the rule
+   against the existing exit logic (trail/target/stop) before trusting it. Both
+   ideas looked compelling from the loss-rate stat alone and both failed simulation.
+
+**One ENTRY-side idea tested — ACCEPTED, proposed below:**
+3. Require ONE bar of follow-through confirmation before counting a breakout as a real
+   entry: if bar+1 (5 min after the breakout bar) closes back beyond the opposite side
+   of the breakout level (i.e. the "breakout" already reversed within 5 minutes), skip
+   the trade entirely rather than entering. Full sample: 85/1046 trades (8.1%) would be
+   skipped; those skipped trades have an 18.8% win rate vs 50.9% for the kept trades.
+   Total portfolio P&L: Rs106,331 -> Rs134,490 (**+26.5%**).
+   **Split-half robustness check** (not pre-registered IS/OOS — a post-hoc discovery on
+   data already used to select the FINAL config, so this is a real caveat): holds in
+   both independent halves — first half (Jan-Oct 2025, n=554) +39.7%, second half
+   (Oct 2025-Jul 2026, n=492) +18.4%. Same direction, same order of magnitude, not
+   driven by a handful of outlier weeks in one regime.
+   **Why this one works and the exit-side ones don't**: it prevents capital from ever
+   being deployed into the worst-quality setups (skip, not manage), rather than trying
+   to out-manage a bad trade that's already been entered against a trail-stop system
+   that's already reasonably good at capping losses.
+
+**Caveats (full disclosure)**: (a) entry-price approximation in the test uses the
+breakout bar's own close as a proxy for the signal's actual entry price (matches
+`execute()`'s convention closely but isn't byte-identical); (b) this is IN-SAMPLE on
+the same 81 weeks used to select/validate FINAL — the split-half check is reassuring
+but is not a true held-out OOS test; (c) delays entry by 5 min, negligible interaction
+with the 09:30-11:30 entry window and bank-the-week mechanic.
+
+**Proposal written**: `orb_entry_confirmation_bar` in STRATEGY-PROPOSALS.md — PENDING
+human approval. Test scripts not yet committed (ad-hoc, in scratchpad) — rerun via
+`backtests/orb_weekly_portfolio.py` + a 1-bar confirmation check on `entry_i+1` if this
+needs reproducing.
+
+---
+
 ## 2026-05-13 - Pre-Market ORB Candidate Scan
 
 **VIX**: 19.28 CLEAR, but close to the 20 hard gate. Keep Tier 1 unless the ORB signal is A+.

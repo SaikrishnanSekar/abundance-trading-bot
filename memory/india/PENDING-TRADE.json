@@ -1,0 +1,16 @@
+{
+  "sym": "ADANIPORTS",
+  "side": "SHORT",
+  "sec_id": "15083",
+  "entry": 1699.7,
+  "stop": 1713.9,
+  "target1": 1683.5,
+  "target2": 1672.7,
+  "qty": 14,
+  "atr": 0.0,
+  "vix": 12.02,
+  "orb_width_pct": 0.6,
+  "proposed_at": "2026-08-04T11:30:01.052734+05:30",
+  "expires_at": "2026-08-04T15:10:00+05:30",
+  "proposal_msg_id": 659
+}

@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Daily Journal — India — 2026-08-07</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="application/json" id="daily-meta">
+{
+  "date": "2026-08-07",
+  "market": "india",
+  "regime": "BULLISH",
+  "observation_mode": true,
+  "buy_signals": 1,
+  "live_trades": 0,
+  "orb_signals": 1,
+  "orb_failed": 1,
+  "gap_fill_signals": 0,
+  "gap_fill_failed": 0,
+  "rca_findings": 4,
+  "headline": "Full-session scheduler blackout: 0 of 40 scan cycles ran. Root cause closed - four market-hours tasks (PreMarket_0845, KotakFeed, ORB_Scan, MultiStrategyScan) carry DisallowStartIfOnBatteries, the box was on battery, and Windows refused them all with 0x800710E0; the only two tasks without that condition (CatalystScan, KeepAwake) ran fine. Deferred runs fired at 16:39-22:39, long after the 13:00 cutoff. Backfilled 40 cycles from the 5-min cache: 1 signal, TECHM LONG, -Rs687, VWAP_REJECTED. rsi_overbought_entry - concluded recommend-drop the day before - would have skipped it (RSI 82, no catalyst) for +Rs687, moving its cumulative to -Rs239: still negative, conclusion unchanged. TECHM is also the first clean counter-example to the width finding: 1.83% width and 2.4x volume, both favourable buckets, and it still lost.",
+  "net_pnl_today": -687.02,
+  "cumulative_pnl": -3385.37,
+  "cumulative_trades": 64,
+  "long_pnl_today": -687.02,
+  "short_pnl_today": 0.0,
+  "long_wl_today": "0/1",
+  "short_wl_today": "0/0",
+  "long_pnl_cumulative": -989.64,
+  "short_pnl_cumulative": -2395.72
+}
+</script>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --serious:        #ec835a;
+    --critical:       #d03b3b;
+    --series-blue:    #2a78d6;
+    --series-violet:  #4a3aa7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --good:           #0ca30c;
+      --warning:        #fab219;
+      --serious:        #ec835a;
+      --critical:       #e66767;
+      --series-blue:    #3987e5;
+      --series-violet:  #9085e9;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --serious:        #ec835a;
+    --critical:       #e66767;
+    --series-blue:    #3987e5;
+    --series-violet:  #9085e9;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header.top { margin-bottom: 20px; }
+  header.top h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  header.top .sub { color: var(--text-secondary); font-size: 0.92rem; }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--text-secondary);
+    background: var(--surface-1);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.good { background: var(--good); }
+  .dot.warning { background: var(--warning); }
+  .dot.critical { background: var(--critical); }
+  .dot.neutral { background: var(--text-muted); }
+
+  .tiles {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin: 22px 0 30px;
+  }
+  @media (max-width: 700px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+  .tile {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .tile .label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .tile .value { font-size: 1.65rem; font-weight: 600; margin-top: 4px; font-variant-numeric: proportional-nums; }
+  .tile .note { font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px; }
+
+  section { margin-bottom: 34px; }
+  section h2 {
+    font-size: 1.02rem; margin: 0 0 4px; color: var(--text-primary);
+  }
+  section .lede { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 14px; line-height: 1.5; }
+
+  .rca-list { display: flex; flex-direction: column; gap: 10px; }
+  .rca-item {
+    display: flex; gap: 12px; padding: 12px 14px;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+  }
+  .rca-item .icon { flex: none; width: 20px; text-align: center; font-size: 0.95rem; line-height: 1.4; }
+  .rca-item .body h3 { margin: 0 0 3px; font-size: 0.88rem; }
+  .rca-item .body p { margin: 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45; }
+  .rca-item .body .status { font-size: 0.74rem; font-weight: 600; margin-top: 5px; }
+  .status.resolved { color: var(--good); }
+  .status.open { color: var(--warning); }
+  .status.fixed { color: var(--good); }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.82rem;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+  thead th {
+    text-align: left; font-weight: 600; color: var(--text-muted);
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.02em;
+    padding: 8px 12px; border-bottom: 1px solid var(--grid);
+  }
+  tbody td { padding: 8px 12px; border-bottom: 1px solid var(--grid); color: var(--text-primary); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+  }
+  .pill.win    { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); }
+  .pill.loss   { color: var(--critical); background: color-mix(in srgb, var(--critical) 16%, transparent); }
+
+  footer {
+    border-top: 1px solid var(--border); margin-top: 40px; padding-top: 16px;
+    font-size: 0.76rem; color: var(--text-muted);
+  }
+  footer code { color: var(--text-secondary); }
+  .table-wrap { overflow-x: auto; }
+
+  .track-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .track-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .track-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .track-ticker { font-size: 1rem; font-weight: 700; margin-right: 8px; }
+  .track-sub { font-size: 0.72rem; color: var(--text-muted); }
+  .track-levels { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 8px; }
+  .track-levels b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .track-chart { margin: 4px 0 8px; }
+  .track-details summary { cursor: pointer; font-size: 0.76rem; color: var(--series-blue); font-weight: 600; }
+  table.cp-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; margin-top: 8px; }
+  table.cp-table th { text-align: left; color: var(--text-muted); font-weight: 600; padding: 4px 6px; border-bottom: 1px solid var(--grid); }
+  table.cp-table td { padding: 4px 6px; border-bottom: 1px solid var(--grid); color: var(--text-secondary); }
+  table.cp-table td.num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .pill.dropped { color: var(--warning); background: color-mix(in srgb, var(--warning) 18%, transparent); }
+
+  .tabbar { display: flex; gap: 4px; margin: 18px 0 22px; border-bottom: 1px solid var(--border); }
+  .tabbtn { appearance: none; background: none; border: none; font: inherit; font-size: 0.85rem; font-weight: 600;
+            color: var(--text-muted); padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; }
+  .tabbtn.active { color: var(--text-primary); border-bottom-color: var(--series-blue); }
+  .tabpanel { display: none; }
+  .tabpanel.active { display: block; }
+  .track-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .track-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .track-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .track-ticker { font-size: 1rem; font-weight: 700; margin-right: 8px; }
+  .track-sub { font-size: 0.72rem; color: var(--text-muted); }
+  .track-levels { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 8px; }
+  .track-levels b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .track-chart { margin: 4px 0 8px; }
+  .track-details summary { cursor: pointer; font-size: 0.76rem; color: var(--series-blue); font-weight: 600; }
+  table.cp-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; margin-top: 8px; }
+  table.cp-table th { text-align: left; color: var(--text-muted); font-weight: 600; padding: 4px 6px; border-bottom: 1px solid var(--grid); }
+  table.cp-table td { padding: 4px 6px; border-bottom: 1px solid var(--grid); color: var(--text-secondary); }
+  table.cp-table td.num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .pill.dropped { color: var(--warning); background: color-mix(in srgb, var(--warning) 18%, transparent); }
+
+  /* TAB_CSS_MARK */
+</style>
+</head>
+<body>
+<div class="viz-root wrap">
+<!-- TABBAR_START -->
+<div class="tabbar">
+  <button class="tabbtn active" onclick="showTab('summary', event)">Daily Summary</button>
+  <button class="tabbtn" onclick="showTab('tracker', event)">Price Action Tracker</button>
+</div>
+<!-- TABBAR_END -->
+<div class="tabpanel active" id="tab-summary">
+<header class="top">
+    <div style="margin-bottom:8px;"><a href="index.html" style="font-size:0.8rem; color:var(--text-muted); text-decoration:none;">&larr; All daily journals</a></div>
+    <h1>Daily Journal &middot; India &middot; 2026-08-07 (Friday)</h1>
+    <div class="sub">A total scheduler blackout &mdash; zero live scan cycles &mdash; and the root cause turned out to be a laptop power setting.</div>
+    <div class="badges">
+      <span class="badge"><span class="dot critical"></span>0/40 scan cycles &mdash; full-session outage</span>
+      <span class="badge"><span class="dot good"></span>Backfilled from 5-min cache</span>
+      <span class="badge"><span class="dot critical"></span>Net -&#8377;687 &mdash; 0/1</span>
+      <span class="badge"><span class="dot good"></span>RCA closed: battery condition on 4 tasks</span>
+    </div>
+  </header>
+
+  <div class="tiles">
+    <div class="tile"><div class="label">ORB recommendations</div><div class="value">1</div><div class="note">1 long &mdash; <b>reconstructed</b>, none live-captured</div></div>
+    <div class="tile"><div class="label">Win / Loss (graded)</div><div class="value">0 / 1</div><div class="note">TECHM trail-stopped, VWAP_REJECTED</div></div>
+    <div class="tile"><div class="label">Net P&amp;L (tracked)</div><div class="value" style="color:var(--critical);">-&#8377;687</div><div class="note">single trade carries the whole day</div></div>
+    <div class="tile"><div class="label">Cumulative (v4 trial)</div><div class="value" style="color:var(--critical);">-&#8377;3,385</div><div class="note">64 signals / 11 days</div></div>
+  </div>
+
+  <section>
+    <h2>The headline &mdash; the system did not trade because Windows refused to start it</h2>
+    <p class="lede">
+      <b>Not one live scan cycle ran during the 2026-08-07 session.</b>
+      <code>logs/scan_all.log</code> jumps straight from <code>2026-08-06 16:00 IST</code> to
+      <code>2026-08-07 16:39 IST</code> &mdash; the scanner's next heartbeat came <b>39 minutes after the close</b>,
+      and its first line reads <code>Feed: STALE | Entry window: CLOSED at 13:00 (now 16:39)</code>.
+      <code>signal_timeline.jsonl</code> and <code>recommendations.jsonl</code> both held <b>zero rows</b> for the
+      date before today's repair.
+      <br><br>
+      This was <b>not</b> a sleep/wake problem, which is what the 08-04 and 08-05 outages were. The box was
+      demonstrably awake: <code>KeepAwake</code> ran at <b>08:55</b> and <code>CatalystScan</code> completed
+      normally at <b>10:00</b>. The scanners were awake-and-refused, which is a different failure and has a
+      different fix.
+    </p>
+  </section>
+
+  <section>
+    <h2>Root cause &mdash; <code>0x800710E0</code> on exactly the four tasks that require AC power</h2>
+    <p class="lede">
+      Every market-hours task returned Task Scheduler result <b>2147946720 = <code>0x800710E0</code></b>,
+      "<i>The operator or administrator has refused the request</i>" &mdash; the code Windows returns when a task's
+      <b>conditions</b> block it, not when the task itself errors. The correlation with the power condition is
+      perfect, with no exceptions:
+    </p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Scheduled task</th><th>Scheduled</th><th class="num">Actually ran 08-07</th>
+        <th>Result</th><th class="num">AC-power required</th></tr></thead>
+      <tbody>
+        <tr><td><code>PreMarket_0845</code></td><td>08:45</td><td class="num" style="color:var(--critical);">16:39</td><td style="color:var(--critical);">0x800710E0 refused</td><td class="num" style="color:var(--critical);"><b>YES</b></td></tr>
+        <tr><td><code>KotakFeed</code></td><td>09:00</td><td class="num" style="color:var(--critical);">16:39</td><td style="color:var(--critical);">0x800710E0 refused</td><td class="num" style="color:var(--critical);"><b>YES</b></td></tr>
+        <tr><td><code>ORB_Scan</code></td><td>09:30</td><td class="num" style="color:var(--critical);">18:39</td><td style="color:var(--critical);">0x800710E0 refused</td><td class="num" style="color:var(--critical);"><b>YES</b></td></tr>
+        <tr><td><code>MultiStrategyScan</code></td><td>09:30</td><td class="num" style="color:var(--critical);">22:39</td><td style="color:var(--critical);">0x800710E0 refused</td><td class="num" style="color:var(--critical);"><b>YES</b></td></tr>
+        <tr><td><code>CatalystScan</code></td><td>10:00</td><td class="num" style="color:var(--good);">10:00</td><td style="color:var(--good);">0 &mdash; OK</td><td class="num" style="color:var(--good);">no</td></tr>
+        <tr><td><code>KeepAwake</code></td><td>08:30</td><td class="num" style="color:var(--good);">08:55</td><td style="color:var(--good);">0 &mdash; OK</td><td class="num" style="color:var(--good);">no</td></tr>
+      </tbody>
+    </table></div>
+    <p class="lede" style="margin-top:12px;">
+      <b>The two tasks that ran are precisely the two tasks without the battery condition.</b> All four trading
+      tasks carry <code>DisallowStartIfOnBatteries = True</code> <i>and</i>
+      <code>StopIfGoingOnBatteries = True</code>. The machine was on battery across the session, so Windows
+      refused to start them, then fired the deferred runs once it was back on AC &mdash; at 16:39, 18:39 and
+      22:39, all long past the 13:00 entry cutoff.
+      <br><br>
+      <code>StopIfGoingOnBatteries</code> is the more dangerous half of the pair: it means that even on a session
+      that <i>starts</i> correctly on AC, <b>unplugging the laptop mid-morning silently kills the scanner</b>.
+      That is a strong candidate for the 2026-08-05 11:00 outage, which was previously written up as an
+      unexplained mid-session stop &mdash; same signature, same four tasks.
+      <br><br>
+      <b>The fix is two flags per task and no code change:</b>
+      clear <code>DisallowStartIfOnBatteries</code> and <code>StopIfGoingOnBatteries</code> on
+      <code>PreMarket_0845</code>, <code>KotakFeed</code>, <code>ORB_Scan</code> and
+      <code>MultiStrategyScan</code>. This is a host/infrastructure change, not a strategy change, so it is
+      recorded here and left for an explicit go-ahead rather than applied silently.
+    </p>
+  </section>
+
+  <section>
+    <h2>Repair &mdash; what was reconstructed, and how faithfully</h2>
+    <p class="lede">
+      The nightly Yahoo fetch <i>did</i> run (20:06), so the 5-min history cache holds a complete
+      <b>2026-08-07</b> tape for <b>148 of 150</b> tickers. That let
+      <code>scripts/backfill_missed_cycles.py</code> replay all <b>40 missing cycles</b> (09:30&rarr;15:10)
+      through the same <code>check_orb()</code> the live scanner calls, with each cycle seeing only the bars
+      that existed at that moment &mdash; a reconstruction, not a hindsight backtest.
+    </p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Repair step</th><th class="num">Result</th></tr></thead>
+      <tbody>
+        <tr><td>Cycles replayed 09:30&ndash;15:10</td><td class="num">40 / 40</td></tr>
+        <tr><td>Ticker price coverage for the date</td><td class="num">148 / 150</td></tr>
+        <tr><td>Timeline rows written</td><td class="num">2</td></tr>
+        <tr><td>Actionable ORB signals recovered</td><td class="num">1 &mdash; TECHM LONG @ 09:40</td></tr>
+        <tr><td>Signals found after 10:50</td><td class="num">0 &mdash; tape went quiet</td></tr>
+      </tbody>
+    </table></div>
+    <p class="lede" style="margin-top:12px;">
+      Every recovered row is stamped <code>"backfilled": true</code>, so the journal can always separate replayed
+      rows from live-captured ones. Two caveats are inherent and are <i>not</i> papered over: there was no live
+      Kotak feed, so the 5-min bar close stands in for LTP/VWAP, and <b>VIX was never captured</b> for the date
+      &mdash; the recommendation record carries <code>vix: null</code>.
+    </p>
+  </section>
+
+  <section>
+    <h2>The one trade &mdash; TECHM</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Ticker</th><th>Dir</th><th>Entry</th><th>Setup</th><th>Catalyst</th>
+        <th class="num">Graded</th><th class="num">P&amp;L</th><th>Exit</th><th>Autopsy</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>TECHM</td><td>LONG</td><td>09:40 @ &#8377;1,678</td>
+          <td><b>1.83% wid</b> &middot; vol 2.4x &middot; <b>RSI 82 [OB]</b></td>
+          <td style="color:var(--text-muted);">none logged</td>
+          <td class="num" style="color:var(--critical);">-1.76%</td>
+          <td class="num" style="color:var(--critical);">-&#8377;687</td>
+          <td>trail hit</td>
+          <td><span class="pill">FAIL</span> VWAP_REJECTED <span style="color:var(--text-muted);">(90.4% prior)</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+    <p class="lede" style="margin-top:12px;">
+      Stop &#8377;1,643.70, T1 &#8377;1,723.45. The very next cycle already told the story: at <b>09:50</b> the
+      row flipped to <code>BREAKOUT-vol-FAIL</code> with volume collapsed from <b>2.4x to 0.6x</b> and RSI
+      easing 82&rarr;80. Price never held the right side of VWAP after entry, which is what
+      <code>VWAP_REJECTED</code> encodes &mdash; the highest-prior failure mode in the taxonomy at a
+      <b>90.4% historical loss rate</b>.
+      <br><br>
+      Regime was <b>BULLISH (69% of Nifty 50 above 20d SMA)</b> as measured by the post-close scan. IT was the
+      weakest sector on the board in that same scan &mdash; five IT names all printed FAILED-ORB. A long
+      breakout in the day's worst sector, at RSI 82, on no catalyst.
+    </p>
+  </section>
+
+  <section>
+    <h2>The uncomfortable part &mdash; the filter that was dropped yesterday would have caught this</h2>
+    <p class="lede">
+      <code>rsi_overbought_entry</code> was concluded <b>recommend-drop</b> at day 10 with a cumulative
+      <b>-&#8377;926</b>. Its rule: <i>skip a long taken at RSI &ge; 80 that has <b>no</b> supporting catalyst.</i>
+      TECHM entered at <b>RSI 82 with no catalyst logged</b> &mdash; a textbook match. Re-running the engine
+      against the repaired tape confirms it:
+      <b>control -&#8377;687, treatment &#8377;0, delta +&#8377;687, 1 skipped.</b>
+      <br><br>
+      <b>Worse: the outage is what triggered the conclusion.</b> The nightly
+      <code>JournalUpdate</code> ran at 20:30 on 08-07, while the tape was still empty, and logged
+      <code>(10 day(s), cumulative delta Rs-926) *** CONCLUDED ***</code>. That tenth day was the
+      <b>zero-signal outage row</b>. Without it the experiment stood at <b>9 days &mdash; still running</b>,
+      below <code>min_days_before_decision</code>. A blackout that produced no data nonetheless pushed a
+      governance decision over its threshold, and it did so on the very day whose real tape contained the one
+      trade the rule was built to catch.
+      <br><br>
+      Read honestly, this does <b>not</b> reverse the conclusion. Corrected for today, the experiment's
+      cumulative moves from <b>-&#8377;926 to -&#8377;239</b> &mdash; still negative, so
+      <b>recommend-drop still stands</b>. What it does say is that the margin is much narrower than the headline
+      number implied, and that the rule's one good day came from exactly the setup it was designed to catch.
+      Worth remembering if the dimension is ever re-proposed after its cooldown.
+      <br><br>
+      <b>Data-integrity note, stated rather than silently fixed:</b> the
+      <code>rsi_overbought_entry.jsonl</code> row for 2026-08-07 still reads
+      <code>n_total: 0, delta: 0</code>. It was written before the backfill, and because the experiment is now
+      <code>concluded_recommend_drop</code>, <code>run_experiments.py</code> deliberately skips it and will not
+      refresh it. The row is stale. Since the conclusion is unchanged either way, it has been left alone rather
+      than editing a concluded experiment's record.
+    </p>
+  </section>
+
+  <section>
+    <h2>A first counter-example to the width finding</h2>
+    <p class="lede">
+      Yesterday's headline result was that opening-range width predicts outcome monotonically across n=77, with
+      <b>width &ge; 1.00% giving 52.0% WR / +&#8377;2,433</b>. TECHM is the first clean signal to argue with it.
+      On the two dimensions that looked most protective it was <b>in the good bucket on both</b>:
+    </p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Dimension</th><th class="num">TECHM</th><th>Bucket</th><th class="num">Prior read</th><th class="num">Today</th></tr></thead>
+      <tbody>
+        <tr><td>ORB width</td><td class="num">1.83%</td><td>&ge; 1.50% &mdash; the old v3 gate</td><td class="num" style="color:var(--good);">53.1% WR</td><td class="num" style="color:var(--critical);">lost</td></tr>
+        <tr><td>Entry volume</td><td class="num">2.4x</td><td>2&ndash;3x &mdash; the strongest bucket</td><td class="num" style="color:var(--good);">+&#8377;2,729 (n=40)</td><td class="num" style="color:var(--critical);">lost</td></tr>
+        <tr><td>RSI at entry</td><td class="num">82</td><td>&ge; 80 overbought, no catalyst</td><td class="num" style="color:var(--critical);">the flagged case</td><td class="num" style="color:var(--critical);"><b>called it</b></td></tr>
+      </tbody>
+    </table></div>
+    <p class="lede" style="margin-top:12px;">
+      One trade does not overturn n=77, and nobody should treat it as such &mdash; the width record now stands at
+      <b>n=78</b>. But it is a useful corrective to how yesterday's finding was framed: width was never going to
+      be sufficient on its own, and the single dimension that flagged this trade correctly was the one the
+      trial concluded to drop the day before. The next width-gate proposal should be tested <i>jointly</i> with
+      the RSI condition rather than as a standalone gate.
+    </p>
+  </section>
+
+  <section>
+    <h2>Experiments scoreboard</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Experiment</th><th class="num">Today</th><th class="num">Cumulative</th><th class="num">Days</th><th>Read</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><a href="EXPERIMENT-disable_shorts.html">disable_shorts</a></td>
+          <td class="num">&#8377;0</td>
+          <td class="num" style="color:var(--good);">+&#8377;1,606</td>
+          <td class="num">7 / 10</td>
+          <td>No shorts fired, so no delta. Its lead is now three sessions old and untested.</td>
+        </tr>
+        <tr>
+          <td><a href="EXPERIMENT-skip_contra_catalyst.html">skip_contra_catalyst</a></td>
+          <td class="num">&#8377;0</td>
+          <td class="num" style="color:var(--good);">+&#8377;403</td>
+          <td class="num">7 / 10</td>
+          <td>Untestable today &mdash; catalyst coverage was 0/1, so there was no polarity to oppose.</td>
+        </tr>
+        <tr>
+          <td><a href="EXPERIMENT-vwap_alignment.html">vwap_alignment</a></td>
+          <td class="num">&#8377;0</td>
+          <td class="num">&#8377;0</td>
+          <td class="num">6 / 10</td>
+          <td><b>Sixth consecutive &#8377;0.</b> Note the irony: TECHM was VWAP-aligned <i>at entry</i> and then rejected by VWAP <i>after</i> it. The gate only looks at the entry bar, so it saw nothing.</td>
+        </tr>
+        <tr>
+          <td><a href="EXPERIMENT-rsi_overbought_entry.html">rsi_overbought_entry</a></td>
+          <td class="num" style="color:var(--good);">+&#8377;687</td>
+          <td class="num" style="color:var(--critical);">-&#8377;926</td>
+          <td class="num">concluded</td>
+          <td>Concluded <b>recommend-drop</b>. Today's +&#8377;687 is evidence only &mdash; corrected cumulative -&#8377;239, still negative, conclusion unchanged.</td>
+        </tr>
+      </tbody>
+    </table></div>
+    <p class="lede" style="margin-top:12px;">
+      The three running experiments all posted a &#8377;0 day. A one-signal session carries almost no
+      information for any of them, which is the second cost of the outage: not just the &#8377;687, but a
+      near-total loss of a day's evidence across the whole experiment book.
+    </p>
+  </section>
+
+  <section>
+    <h2>The cascade &mdash; one failure, four downstream casualties</h2>
+    <p class="lede">
+      Worth tracing explicitly, because the day's damage is much wider than one losing trade:
+    </p>
+    <div class="rca-list">
+      <div class="rca-item">
+        <div class="icon">&#8594;</div>
+        <div class="body">
+          <h3>Catalyst coverage fell to 0/1</h3>
+          <p>
+            <code>CatalystScan</code> ran <i>successfully</i> at 10:00 and found <b>nothing to research</b> &mdash;
+            its log reads "<i>Empty ticker list &mdash; nothing pending</i>". It reads the pending list from the
+            live scanner's journalled recommendations, and the live scanner had written none. A healthy task
+            produced a useless result because its upstream was dead. Yesterday's 4/4 coverage became today's 0/1.
+          </p>
+          <div class="status open">Consequence &mdash; TECHM was traded blind, with no catalyst check at all.</div>
+        </div>
+      </div>
+      <div class="rca-item">
+        <div class="icon">&#8594;</div>
+        <div class="body">
+          <h3>No live feed, so no VWAP/LTP truth for the day</h3>
+          <p>
+            <code>KotakFeed</code> never started; <code>data/live_feed.json</code> is still stamped
+            <code>2026-08-06T15:35</code>. Every reconstructed row uses the 5-min bar close as LTP. The autopsy's
+            <code>VWAP_REJECTED</code> verdict is computed from bars, which is sound, but the day has no
+            tick-level record and never will.
+          </p>
+          <div class="status open">Consequence &mdash; 08-07 is permanently a lower-fidelity day in the record.</div>
+        </div>
+      </div>
+      <div class="rca-item">
+        <div class="icon">&#8594;</div>
+        <div class="body">
+          <h3>Three experiments lost a day of evidence &mdash; and a fourth was concluded by the gap</h3>
+          <p>
+            A single signal means <code>disable_shorts</code>, <code>skip_contra_catalyst</code> and
+            <code>vwap_alignment</code> all logged &#8377;0 deltas. They advance a day toward
+            <code>min_days_before_decision = 10</code> while learning essentially nothing.
+            <b>And <code>rsi_overbought_entry</code> was pushed over its 10-day threshold by the empty row
+            itself</b> &mdash; the nightly run counted the blackout as day 10 and concluded it.
+          </p>
+          <div class="status open">Consequence &mdash; an empty day counts as a day. The day-count gate should require a day to contain at least one signal.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Open system findings</h2>
+    <div class="rca-list">
+      <div class="rca-item">
+        <div class="icon">&#9888;</div>
+        <div class="body">
+          <h3>NEW &mdash; price cache has two permanent holes: JBCHEPHARM and TATAMOTORS</h3>
+          <p>
+            <code>JBCHEPHARM_5min_v8.json</code> has been stale since <b>2026-07-16</b>. A targeted refetch today
+            returned <b>"+0 new"</b> &mdash; Yahoo is serving no bars past that date for the symbol, so this is
+            not the usual "stale on one pass, fix it with a retry" case and repeated passes will not clear it.
+            Separately, <b>TATAMOTORS</b> is in the 150-ticker universe but has <b>no cache file at all</b>.
+            Effective coverage is <b>148/150</b>, silently.
+          </p>
+          <div class="status open">OPEN &mdash; likely a symbol change (Yahoo suffix / demerger). Needs a ticker-map fix, not a refetch.</div>
+        </div>
+      </div>
+      <div class="rca-item">
+        <div class="icon">&#9888;</div>
+        <div class="body">
+          <h3>Daily bhavcopy stale since 2026-07-17 &mdash; now 70 recommendations stuck open</h3>
+          <p>
+            <code>journal.capture_outcomes</code> again closed <b>nothing</b> ("data through 2026-07-17"). The
+            backlog grew <b>69 &rarr; 70</b> with today's TECHM. Every rolling win-rate and A&ndash;F grade that
+            depends on closed outcomes remains frozen. The intraday autopsy and price tracker are unaffected &mdash;
+            they read the 5-min cache directly.
+          </p>
+          <div class="status open">OPEN &mdash; fourth day carried. Metric layer only, not the P&amp;L layer.</div>
+        </div>
+      </div>
+      <div class="rca-item">
+        <div class="icon">&#9888;</div>
+        <div class="body">
+          <h3>Watchlist gate still runs ORB v3 against a v4 scanner</h3>
+          <p>
+            <code>premarket_watchlist.py</code> still emits <b>ORB v3 / STRONG-22</b> with a &ge;1.5% width proxy,
+            while <code>scan_all.py</code> scans <b>150</b> under v4. TECHM is <b>off-watchlist</b>, as was every
+            signal this week. Harmless in Observation Mode; the moment trading unlocks, the CLAUDE.md buy-side
+            gate either blocks everything or is being bypassed.
+          </p>
+          <div class="status open">OPEN &mdash; carried. Regenerate from the v4 universe or the gate is decorative.</div>
+        </div>
+      </div>
+      <div class="rca-item">
+        <div class="icon">&#9888;</div>
+        <div class="body">
+          <h3>Dhan and Perplexity credentials still 401</h3>
+          <p>
+            <code>DHAN_ACCESS_TOKEN</code> (401 / DH-901) and <code>PERPLEXITY_API_KEY</code> (401) both remain
+            dead, so <code>pulse.sh india</code> and <code>news.sh</code> are down and the catalyst build runs on
+            a single unbacked feed. Today that feed had nothing to do anyway.
+          </p>
+          <div class="status open">OPEN &mdash; carried.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Verdict</h2>
+    <p class="lede" style="font-size:0.88rem;">
+      <b>The worst operational day of the trial, and the most cleanly diagnosed.</b> Zero of forty scan cycles
+      ran, and for once the cause is neither mysterious nor a code defect: four scheduled tasks carry an
+      AC-power condition, the machine was on battery, and Windows refused them with
+      <code>0x800710E0</code>. The two tasks lacking that condition ran perfectly &mdash; a clean natural
+      experiment. Two flags per task fixes it, and the same flags plausibly explain the 08-05 mid-session stop.
+      <br><br>
+      Financially the day cost <b>-&#8377;687</b> on a single reconstructed trade, TECHM, which was rejected by
+      VWAP within ten minutes of entry. Cumulative v4 trial now <b>-&#8377;3,385</b> over
+      <b>64 signals / 11 days</b>, split <b>LONG -&#8377;990</b> (17/49) / <b>SHORT -&#8377;2,396</b> (6/15).
+      <br><br>
+      The analytical sting is that <code>rsi_overbought_entry</code> &mdash; concluded recommend-drop the day
+      before &mdash; would have skipped this exact trade for <b>+&#8377;687</b>. Its cumulative stays negative at
+      <b>-&#8377;239</b>, so the conclusion holds, but the margin is far thinner than it looked. Meanwhile
+      TECHM is the first clean counter-example to yesterday's width finding: wide range, ideal volume, and it
+      still lost, with RSI 82 the only dimension that called it. No live fills; Observation Mode continues.
+    </p>
+  </section>
+
+  <footer>
+    Generated from <code>recommendations.jsonl</code>, <code>journal.orb_autopsy</code>,
+    <code>scripts/run_experiments.py</code>, <code>catalysts.jsonl</code>, the price-action tracker, and
+    Windows Task Scheduler task state. Signals for this date were <b>reconstructed</b> by
+    <code>scripts/backfill_missed_cycles.py</code> after a full-session scheduler outage and are stamped
+    <code>backfilled: true</code>.
+  </footer>
+</div><!-- END_SUMMARY_PANEL -->
+<!-- TRACKER_TAB_START -->
+<div class="tabpanel" id="tab-tracker">
+
+    <div class="tiles" style="margin-bottom:20px;">
+      <div class="tile">
+        <div class="label">Net P&amp;L today (after Dhan costs)</div>
+        <div class="value" style="color:var(--critical);">-₹687</div>
+        <div class="note">gross -₹648 − ₹39 costs, ₹36,916 deployed</div>
+      </div>
+      <div class="tile">
+        <div class="label">Cumulative P&amp;L (v4 trial, 2026-07-20 → 2026-08-07)</div>
+        <div class="value" style="color:var(--critical);">-₹3,385</div>
+        <div class="note">net of Dhan costs, 64 trade(s) across 11 day(s) — excludes pre-trial May/June signals</div>
+      </div>
+      <div class="tile">
+        <div class="label">Win / loss</div>
+        <div class="value">0 / 1</div>
+        <div class="note">1 trailing-stop hit · 0 market-close (1 via Yahoo fill)</div>
+      </div>
+      <div class="tile"><div class="label">Long vs Short (kept separate)</div><div style="margin-top:6px;"><div style="display:flex; justify-content:space-between; gap:10px; font-size:0.82rem; padding:2px 0;"><span>LONG <span style="color:var(--text-muted);">0/1</span></span><span>today <b style="color:var(--critical);">-₹687</b> · cum <b style="color:var(--critical);">-₹990</b></span></div><div style="display:flex; justify-content:space-between; gap:10px; font-size:0.82rem; padding:2px 0;"><span>SHORT <span style="color:var(--text-muted);">0/0</span></span><span>today <b style="color:var(--good);">+₹0</b> · cum <b style="color:var(--critical);">-₹2,396</b></span></div></div><div class="note">shorts tracked separately — do not net against longs</div></div>
+    </div>
+    <p style="color:var(--text-muted); font-size:0.76rem; margin:-8px 0 16px;">
+      Position sizing: ₹37,500 notional/recommendation (v4 trial sizing, 0.75×) — paper P&amp;L only, no real capital at risk during Observation Mode.
+      P&amp;L is net of an approximate Dhan intraday-equity round-trip cost stack (brokerage min(₹20, 0.03%)/leg, STT 0.025% on sell, exchange txn ~0.00325%, SEBI fee, stamp duty 0.003% on buy, 18% GST on brokerage+txn) — see each card's cost breakdown.
+      Execution model matches the real v4 rule exactly (journal/orb_autopsy.py's replay_v4): trailing stop 1x opening-range-width behind the best close since entry — <b>no fixed target</b>, tighten-only, flat at 15:10 IST. Every recommendation is closed: trailing-stop hit or 15:10 square-off — never left unresolved. Uses Yahoo Finance's full-day 5-min OHLC bars (not the live scanner's sparse 10-min checkpoints) so the replay is accurate regardless of when the live scanner stopped watching.
+      A handful may show "no entry data" if their real entry fell inside a known scanner-outage window — excluded from P&amp;L, not counted as a loss.
+    </p><div class="track-grid">
+    <div class="track-card">
+      <div class="track-head">
+        <div>
+          <span class="track-ticker">TECHM</span>
+          <span class="track-sub">ORB · LONG · IT</span>
+        </div>
+        <span class="pill loss">LOSS · -₹687 (-1.86%)</span>
+      </div>
+      <div class="track-levels">
+        <span>Entry <b>1678.00</b></span>
+        <span>Initial stop <b>1643.70</b> <span style="color:var(--text-muted);">(trails — no fixed target in v4)</span></span>
+        <span>Invested <b>₹36,916 (22 sh)</b></span>
+      </div>
+      <div class="track-levels">
+        <span>Gross P&amp;L <b>-₹648</b></span>
+        <span>Dhan costs <b>-₹39</b></span>
+        <span>Entered <b>09:40</b></span>
+        <span>Closed <b>10:35</b> @ <b>1648.54</b></span>
+        <span>Reason <b>Trailing stop hit</b></span>
+      </div>
+      <div class="track-chart"><svg viewBox="0 0 560 130" width="100%" height="130" role="img" aria-label="TECHM price path"><line x1="8" y1="22.4" x2="504" y2="22.4" stroke="var(--baseline)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="25.4" font-size="9" fill="var(--text-muted)">Entry</text><line x1="8" y1="100.3" x2="504" y2="100.3" stroke="var(--critical)" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/><text x="508" y="103.3" font-size="9" fill="var(--text-muted)">Initial stop</text><path d="M 8.0 22.4 L 98.2 23.3 L 53.1 19.7 L 98.2 23.3 L 143.3 51.9 L 188.4 51.5 L 233.5 58.3 L 278.5 55.8 L 323.6 65.3 L 368.7 72.4 L 413.8 76.7 L 458.9 86.7 L 504.0 88.3" fill="none" stroke="var(--critical)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="8.0" cy="22.4" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:40 · 1678.00 · ORB 1.83% wid | vol2.4x | RSI 82 [OB]</title></circle><circle cx="98.2" cy="23.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:50 · 1677.60 · ORB 1.83% wid | vol0.6x | RSI 80</title></circle><circle cx="53.1" cy="19.7" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:45 · 1679.20 · [Yahoo fill]</title></circle><circle cx="98.2" cy="23.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:50 · 1677.60 · [Yahoo fill]</title></circle><circle cx="143.3" cy="51.9" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>09:55 · 1665.00 · [Yahoo fill]</title></circle><circle cx="188.4" cy="51.5" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:00 · 1665.20 · [Yahoo fill]</title></circle><circle cx="233.5" cy="58.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:05 · 1662.20 · [Yahoo fill]</title></circle><circle cx="278.5" cy="55.8" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:10 · 1663.30 · [Yahoo fill]</title></circle><circle cx="323.6" cy="65.3" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:15 · 1659.10 · [Yahoo fill]</title></circle><circle cx="368.7" cy="72.4" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:20 · 1656.00 · [Yahoo fill]</title></circle><circle cx="413.8" cy="76.7" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:25 · 1654.10 · [Yahoo fill]</title></circle><circle cx="458.9" cy="86.7" r="3" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:30 · 1649.70 · [Yahoo fill]</title></circle><circle cx="504.0" cy="88.3" r="5" fill="var(--critical)" stroke="var(--surface-1)" stroke-width="2"><title>10:35 · 1649.00 · [Yahoo fill]</title></circle><text x="512.0" y="91.3" font-size="10" font-weight="600" fill="var(--text-primary)">1649.00</text></svg></div>
+      <details class="track-details">
+        <summary>Full checkpoint history &amp; cost breakdown</summary>
+        <table class="cp-table" style="margin-bottom:10px;"><thead><tr><th>Dhan cost (round trip)</th><th class="num">Amount</th></tr></thead><tbody><tr><td>Brokerage</td><td class="num">₹21.96</td></tr><tr><td>STT</td><td class="num">₹9.07</td></tr><tr><td>Exchange txn charge</td><td class="num">₹2.38</td></tr><tr><td>SEBI fee</td><td class="num">₹0.07</td></tr><tr><td>Stamp duty</td><td class="num">₹1.11</td></tr><tr><td>GST</td><td class="num">₹4.38</td></tr><tr><td><b>Total</b></td><td class="num"><b>₹38.96</b></td></tr></tbody></table>
+        <table class="cp-table"><thead><tr><th>Time</th><th class="num">Price</th><th>Notes</th></tr></thead><tbody><tr><td>09:40</td><td class="num">1678.00</td><td>ORB 1.83% wid | vol2.4x | RSI 82 [OB]</td></tr><tr><td>09:50</td><td class="num">1677.60</td><td>ORB 1.83% wid | vol0.6x | RSI 80</td></tr><tr><td>09:45</td><td class="num">1679.20</td><td>[Yahoo fill]</td></tr><tr><td>09:50</td><td class="num">1677.60</td><td>[Yahoo fill]</td></tr><tr><td>09:55</td><td class="num">1665.00</td><td>[Yahoo fill]</td></tr><tr><td>10:00</td><td class="num">1665.20</td><td>[Yahoo fill]</td></tr><tr><td>10:05</td><td class="num">1662.20</td><td>[Yahoo fill]</td></tr><tr><td>10:10</td><td class="num">1663.30</td><td>[Yahoo fill]</td></tr><tr><td>10:15</td><td class="num">1659.10</td><td>[Yahoo fill]</td></tr><tr><td>10:20</td><td class="num">1656.00</td><td>[Yahoo fill]</td></tr><tr><td>10:25</td><td class="num">1654.10</td><td>[Yahoo fill]</td></tr><tr><td>10:30</td><td class="num">1649.70</td><td>[Yahoo fill]</td></tr><tr><td>10:35</td><td class="num">1649.00</td><td>[Yahoo fill]</td></tr></tbody></table>
+      </details>
+    </div></div>
+</div>
+<!-- TRACKER_TAB_END -->
+
+<script>
+function showTab(name, evt) {
+  document.querySelectorAll('.tabpanel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tabbtn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  evt.currentTarget.classList.add('active');
+}
+</script>
+
+</div>
+</body>
+</html>
