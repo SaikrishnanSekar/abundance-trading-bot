@@ -6,6 +6,18 @@ Append-only. Newest at top.
 
 ---
 
+## ORB signal autopsies — 2026-08-11
+
+### 2026-08-11 · KAYNES · ORB LONG · LOSS -1.25% (TRAIL_HIT)
+- primary_cause: **VWAP_REJECTED** (historical loss-rate for this pattern: 90.4%)
+- factors: vwap_hold=0.17 vol_decay=0.37 back_inside=False market_drift=-0.03%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
+### 2026-08-11 · FEDERALBNK · ORB SHORT · LOSS -0.73% (TRAIL_HIT)
+- primary_cause: **UNEXPLAINED_CHOP**
+- factors: vwap_hold=1.0 vol_decay=0.87 back_inside=False market_drift=-0.03%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
 ## ORB signal autopsies — 2026-08-10
 
 ### 2026-08-10 · SAIL · ORB LONG · LOSS -1.05% (TRAIL_HIT)
