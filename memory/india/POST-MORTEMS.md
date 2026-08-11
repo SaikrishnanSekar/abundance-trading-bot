@@ -6,6 +6,38 @@ Append-only. Newest at top.
 
 ---
 
+## ORB signal autopsies — 2026-08-10
+
+### 2026-08-10 · SAIL · ORB LONG · LOSS -1.05% (TRAIL_HIT)
+- primary_cause: **UNEXPLAINED_CHOP**
+- factors: vwap_hold=0.83 vol_decay=0.41 back_inside=False market_drift=+0.24%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
+### 2026-08-10 · PPLPHARMA · ORB LONG · LOSS -0.67% (TRAIL_HIT)
+- primary_cause: **UNEXPLAINED_CHOP**
+- factors: vwap_hold=1.0 vol_decay=0.47 back_inside=False market_drift=+0.24%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
+### 2026-08-10 · ABFRL · ORB SHORT · LOSS -2.79% (TRAIL_HIT)
+- primary_cause: **UNEXPLAINED_CHOP**
+- factors: vwap_hold=1.0 vol_decay=0.49 back_inside=False market_drift=+0.24%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
+### 2026-08-10 · KAYNES · ORB LONG · LOSS -1.97% (EOD)
+- primary_cause: **VOLUME_COLLAPSED** (historical loss-rate for this pattern: 56.0%)
+- factors: vwap_hold=1.0 vol_decay=0.29 back_inside=False market_drift=+0.00%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
+### 2026-08-10 · INDHOTEL · ORB SHORT · LOSS -0.02% (TRAIL_HIT)
+- primary_cause: **VWAP_REJECTED** (historical loss-rate for this pattern: 90.4%)
+- factors: vwap_hold=0.17 vol_decay=0.25 back_inside=False market_drift=+0.24%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
+### 2026-08-10 · BHARATFORG · ORB LONG · LOSS -0.64% (TRAIL_HIT)
+- primary_cause: **FELL_BACK_IN_BOX** (historical loss-rate for this pattern: 80.0%)
+- factors: vwap_hold=1.0 vol_decay=1.11 back_inside=True market_drift=+0.00%
+- entry condition was VALID when taken — the cause above is what changed AFTER entry. Counts toward N>=30 evidence for any management-rule proposal (e.g. early exit on VWAP rejection).
+
 ## ORB signal autopsies — 2026-08-07
 
 ### 2026-08-07 · TECHM · ORB LONG · LOSS -1.76% (TRAIL_HIT)
